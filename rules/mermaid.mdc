@@ -33,7 +33,7 @@ Description: Mermaid Diagram Syntax and Best Practices
   - **Stability:** It's a newer (beta) type. While powerful for showing service relationships, its syntax (especially for icons and edges out of groups) might be less stable or consistently supported across all renderers compared to standard Flowcharts (`graph TD/LR`).
   - **Validation:** Use the Mermaid Live Editor to validate the syntax, but be aware that rendering might still differ in other environments. If errors occur or rendering is inconsistent, consider reverting to a standard Flowchart (`graph TD/LR`).
 - **Validation & Debugging:**
-  - **Mermaid Live Editor:** [https://mermaid.live](mdc:https:/mermaid.live) is the **primary tool** for validating standard Mermaid syntax. Paste your code there first to check for basic errors.
+  - **Mermaid Live Editor:** [https://mermaid.live](https://mermaid.live) is the **primary tool** for validating standard Mermaid syntax. Paste your code there first to check for basic errors.
   - **Extension-Specific Features:** Be mindful that features working in a specific editor extension (like VS Code's preview) might not be standard Mermaid and won't work elsewhere. Test in the Live Editor or target environment (e.g., GitHub) to confirm.
   - **Simplify:** If errors occur, simplify the diagram. Remove icons, complex labels, or specific features one by one to isolate the problem. Start with basic nodes and edges.
-- **Official Docs:** Refer to the official [Mermaid documentation](mdc:https:/mermaid.js.org) for the latest standard syntax and features.
+- **Official Docs:** Refer to the official [Mermaid documentation](https://mermaid.js.org) for the latest standard syntax and features.

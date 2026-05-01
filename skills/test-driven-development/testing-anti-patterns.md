@@ -12,7 +12,7 @@ Tests must verify real behavior, not mock behavior. Mocks are a means to isolate
 
 ## The Iron Laws
 
-```
+```text
 1. NEVER test mock behavior
 2. NEVER add test-only methods to production classes
 3. NEVER mock without understanding dependencies
@@ -53,7 +53,7 @@ test("renders sidebar", () => {
 
 ### Gate Function
 
-```
+```text
 BEFORE asserting on any mock element:
   Ask: "Am I testing real component behavior or just mock existence?"
 
@@ -108,7 +108,7 @@ afterEach(() => cleanupSession(session))
 
 ### Gate Function
 
-```
+```text
 BEFORE adding any method to production class:
   Ask: "Is this only used by tests?"
 
@@ -160,7 +160,7 @@ test("detects duplicate server", () => {
 
 ### Gate Function
 
-```
+```text
 BEFORE mocking any method:
   STOP - Don't mock yet
 
@@ -222,7 +222,7 @@ const mockResponse = {
 
 ### Gate Function
 
-```
+```text
 BEFORE creating mock responses:
   Check: "What fields does the real API response contain?"
 
@@ -242,7 +242,7 @@ BEFORE creating mock responses:
 
 **The violation:**
 
-```
+```text
 ✅ Implementation complete
 ❌ No tests written
 "Ready for testing"
@@ -256,7 +256,7 @@ BEFORE creating mock responses:
 
 **The fix:**
 
-```
+```text
 TDD cycle:
 1. Write failing test
 2. Implement to pass

@@ -7,7 +7,10 @@
     "format": "bunx prettier --write .",
     "format:check": "bunx prettier --check .",
     "lint": "bunx eslint .",
-    "check": "bun run lint && bun run format:check"
+    "bash:format": "shfmt -w scripts skills",
+    "bash:format:check": "shfmt -d scripts skills",
+    "bash:lint": "find scripts skills -type f -name '*.sh' -exec shellcheck {} +",
+    "check": "bun run lint && bun run format:check && bun run bash:lint && bun run bash:format:check"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",

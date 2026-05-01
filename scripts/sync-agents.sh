@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  cat <<'EOF'
+	cat <<'EOF'
 sync-agents.sh --target <dir> [--delete]
 
 Sync this repo's commands/rules/skills into <dir>/.agents.
@@ -20,31 +20,36 @@ TARGET=""
 DELETE=false
 
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --target)
-      TARGET="${2:-}"
-      shift 2
-      ;;
-    --delete)
-      DELETE=true
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "Unknown argument: $1" >&2
-      usage >&2
-      exit 2
-      ;;
-  esac
+	case "$1" in
+	--target)
+		if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == -* ]]; then
+			echo "ERROR: --target requires a value" >&2
+			usage >&2
+			exit 1
+		fi
+		TARGET="$2"
+		shift 2
+		;;
+	--delete)
+		DELETE=true
+		shift
+		;;
+	-h | --help)
+		usage
+		exit 0
+		;;
+	*)
+		echo "Unknown argument: $1" >&2
+		usage >&2
+		exit 2
+		;;
+	esac
 done
 
 if [[ -z "${TARGET}" ]]; then
-  echo "ERROR: --target is required" >&2
-  usage >&2
-  exit 2
+	echo "ERROR: --target is required" >&2
+	usage >&2
+	exit 2
 fi
 
 TARGET="$(cd -- "${TARGET}" && pwd)"
@@ -54,17 +59,17 @@ mkdir -p "${DEST}"/{commands,rules,skills}
 
 RSYNC_DELETE=()
 if [[ "${DELETE}" == "true" ]]; then
-  RSYNC_DELETE=(--delete)
+	RSYNC_DELETE=(--delete)
 fi
 
 sync_dir() {
-  local src="$1"
-  local dst="$2"
-  if [[ ! -d "${src}" ]]; then
-    echo "ERROR: missing source dir: ${src}" >&2
-    exit 1
-  fi
-  rsync -a --checksum "${RSYNC_DELETE[@]}" -- "${src}/" "${dst}/"
+	local src="$1"
+	local dst="$2"
+	if [[ ! -d "${src}" ]]; then
+		echo "ERROR: missing source dir: ${src}" >&2
+		exit 1
+	fi
+	rsync -a --checksum "${RSYNC_DELETE[@]}" -- "${src}/" "${dst}/"
 }
 
 sync_dir "${REPO_ROOT}/commands" "${DEST}/commands"

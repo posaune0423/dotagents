@@ -128,7 +128,7 @@ After a successful merge, check if we're in a git worktree:
 
 1. Identify the appropriate test locations in the repo
 2. Add test cases covering the new functionality
-3. Run the project's test command (e.g. `pnpm test` or `bun test`) to verify
+3. Run the project's test command when defined (e.g. `bun test`) to verify
 
 ### "Update types"
 
@@ -138,7 +138,7 @@ After a successful merge, check if we're in a git worktree:
 
 ### "Fix lint issues"
 
-Run the repo's format/lint commands (e.g. `pnpm format` / `pnpm lint` or `bun run lint`).
+Run the repo's format/lint commands (e.g. `bun run format` / `bun run lint`, and `bun run check` when a single gate is preferred).
 
 ### "Update snapshots"
 

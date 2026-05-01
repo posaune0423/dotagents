@@ -23,8 +23,9 @@ Do exactly this, non-interactively, from repo root.
      - ${summary} = 1-line imperative (<=72 chars)
      - ${body} = 1–3 bullets (optional)
    - Commands:
-     - git add -A -- -- ${file1} ${file2} ${fileN}
-     - git commit --no-verify --no-gpg-sign -m "${emoji} ${type}(${scope}): ${summary}" -m "${body}"
+     - git add -A -- ${file1} ${file2} ${fileN}
+     - git commit -m "${emoji} ${type}(${scope}): ${summary}" -m "${body}"
+     - （フックや署名を意図的に外す場合のみ）`SKIP_HOOKS=1` など明示フラグを付けた手順に切り替え、`--no-verify` / `--no-gpg-sign` はそのときだけ付与する
 
 4. Commit order: chore → docs → style → refactor → perf → feat → fix → test
 
@@ -36,5 +37,5 @@ Title: "${emoji} ${type}(${scope}): ${summary}"
 Body: "- ${changes}\n- ${reasonImpact}"
 
 Example:
-git add -A -- -- routes/admin.php app/Http/Controllers/Admin/UserController.php
-git commit --no-verify --no-gpg-sign -m "✨ feat(routes): 管理画面ユーザー一覧を追加" -m "- 新規ルートとindex実装\n- 権限チェックを追加"
+git add -A -- routes/admin.php app/Http/Controllers/Admin/UserController.php
+git commit -m "✨ feat(routes): 管理画面ユーザー一覧を追加" -m "- 新規ルートとindex実装\n- 権限チェックを追加"

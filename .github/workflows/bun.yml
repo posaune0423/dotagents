@@ -8,7 +8,7 @@ on:
       - main
   workflow_dispatch:
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 jobs:
   bun-lint:
@@ -16,16 +16,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
       - name: Setup Bun
         uses: shunkakinoki/actions/.github/actions/setup-bun@156beb8dbd9b84135a994da9ea77398d91e33df6
       - name: Prepare
-        run: bun run prepare
+        run: nix develop -c bun run prepare
       - name: Check
-        run: bun run check
+        run: nix develop -c bun run check
       - name: Format
-        run: bun run format
+        run: nix develop -c bun run format
       - name: Lint
-        run: bun run lint
+        run: nix develop -c bun run lint
   bun-check:
     if: always()
     needs:

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  cat <<'EOF'
+	cat <<'EOF'
 link-dotagents.sh --home [--all]
 
 Create symlinks from this repo (SSoT) into:
@@ -26,67 +26,77 @@ DO_HOME=false
 HOME_ALL=false
 
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --home) DO_HOME=true; shift ;;
-    --all) HOME_ALL=true; shift ;;
-    -h|--help) usage; exit 0 ;;
-    *)
-      echo "Unknown argument: $1" >&2
-      usage >&2
-      exit 2
-      ;;
-  esac
+	case "$1" in
+	--home)
+		DO_HOME=true
+		shift
+		;;
+	--all)
+		HOME_ALL=true
+		shift
+		;;
+	-h | --help)
+		usage
+		exit 0
+		;;
+	*)
+		echo "Unknown argument: $1" >&2
+		usage >&2
+		exit 2
+		;;
+	esac
 done
 
 timestamp() { date +"%Y%m%d-%H%M%S"; }
 
 ensure_parent_dir() {
-  local path="$1"
-  mkdir -p "$(dirname -- "${path}")"
+	local path="$1"
+	mkdir -p "$(dirname -- "${path}")"
 }
 
 safe_link() {
-  local src="$1"
-  local dst="$2"
+	local src="$1"
+	local dst="$2"
 
-  if [[ ! -e "${src}" ]]; then
-    echo "ERROR: source missing: ${src}" >&2
-    exit 1
-  fi
+	if [[ ! -e "${src}" ]]; then
+		echo "ERROR: source missing: ${src}" >&2
+		exit 1
+	fi
 
-  ensure_parent_dir "${dst}"
+	ensure_parent_dir "${dst}"
 
-  if [[ -L "${dst}" ]]; then
-    rm -f -- "${dst}"
-  elif [[ -e "${dst}" ]]; then
-    local backup="${dst}.bak.$(timestamp)"
-    mv -- "${dst}" "${backup}"
-    echo "Moved existing path to backup: ${backup}"
-  fi
+	if [[ -L "${dst}" ]]; then
+		rm -f -- "${dst}"
+	elif [[ -e "${dst}" ]]; then
+		local backup
+		backup="${dst}.bak.$(timestamp)"
+		mv -- "${dst}" "${backup}"
+		echo "Moved existing path to backup: ${backup}"
+	fi
 
-  ln -s -- "${src}" "${dst}"
-  echo "Linked: ${dst} -> ${src}"
+	ln -s -- "${src}" "${dst}"
+	echo "Linked: ${dst} -> ${src}"
 }
 
 link_home() {
-  local base="${HOME}/.agents"
-  mkdir -p "${base}"
+	local base="${HOME}/.agents"
+	mkdir -p "${base}"
 
-  safe_link "${REPO_ROOT}/skills" "${base}/skills"
-  if [[ "${HOME_ALL}" == "true" ]]; then
-    safe_link "${REPO_ROOT}/commands" "${base}/commands"
-    safe_link "${REPO_ROOT}/rules" "${base}/rules"
-  fi
+	safe_link "${REPO_ROOT}/skills" "${base}/skills"
+	if [[ "${HOME_ALL}" == "true" ]]; then
+		safe_link "${REPO_ROOT}/commands" "${base}/commands"
+		safe_link "${REPO_ROOT}/rules" "${base}/rules"
+	fi
 }
 
 did_something=false
 
 if [[ "${DO_HOME}" == "true" ]]; then
-  link_home
-  did_something=true
+	link_home
+	did_something=true
 fi
 
 if [[ "${did_something}" == "false" ]]; then
-  usage >&2
-  exit 2
+	usage >&2
+	exit 2
 fi

@@ -32,10 +32,11 @@ type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 
 準備（健康チェック）
 
-- 型: bun run typecheck
-- Lint: bun run lint
-- テスト: bun run test --coverage
-- デッドコード（任意）: bunx ts-prune -p tsconfig.json
+このリポジトリで実行できる検証に合わせる:
+
+- 一式: `bun run check`（lint / Prettier / Bash の shellcheck・shfmt）
+- 追加で型・テストがあるプロジェクトでは、それぞれ `bun run typecheck` や `bun test` など **package.json に定義されたスクリプト** を使う（未定義ならスキップ）
+- デッドコード検出は、プロジェクトに `tsconfig.json` と `ts-prune` 等がある場合のみ任意で実行
 
 ---
 
@@ -78,7 +79,7 @@ serena 検索で該当箇所と呼び出し元を列挙し、影響範囲を固�
 公開 API に触れる場合は 移行シム（旧署名 → 新署名） と非推奨注記を同時に設計。 3. 編集（最小差分）
 serena で該当ファイルを開き、co-location を保ちつつ抽出/統合。過度な新規ファイルは作らない。 4. 検証（即時）
 
-bun run typecheck && bun run lint && bun run test --coverage
+bun run check（型・テストスクリプトがある場合はそれらも続けて実行）
 
 失敗時は差分最小で手戻りし再実行。 5. サマリ出力（下記フォーマットに厳密準拠）。
 
@@ -90,15 +91,15 @@ bun run typecheck && bun run lint && bun run test --coverage
 【検出指標】similarity=<%> / lines=<n> / priority=<score>
 【方針】抽出/統合/汎用化の要点（1〜3 行）
 【編集内容】影響ファイルと主要変更点（関数名, 引数, 戻り値, 例外/Result, ログ）
-【検証結果】tsc/eslint/test のステータス要約
+【検証結果】check / lint / test など実行した検証のステータス要約
 【フォローアップ】残タスク/次候補/移行ガイド（旧 API→ 新 API）
 
 ---
 
 改善フェーズ（継続的リファクタ）
 
-- サイクルごとに bun run typecheck && bun run lint && bun run test --coverage を回す。
-- デッドコード削除（任意）: bunx ts-prune -p tsconfig.json
+- サイクルごとに `bun run check` を最低限回す。型・テストがあるコードベースでは `bun run typecheck` / `bun test` も併用。
+- デッドコード削除はプロジェクトにツールがある場合のみ任意で実行（例: `ts-prune` + `tsconfig.json`）。
 - 値オブジェクト化・ドメイン語彙の型化を継続。過度な抽象化は避け、複雑性に応じて調整。
 
 ---

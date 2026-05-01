@@ -114,21 +114,26 @@ git stash pop 2>/dev/null
 **Case C: Patch-based migration (fallback when Case B conflicts)**
 
 ```bash
+set -euo pipefail
+PATCH_FILE="$(mktemp "${TMPDIR:-/tmp}/worktree-pr.patch.XXXXXX")"
+UNTAR_FILE="$(mktemp "${TMPDIR:-/tmp}/worktree-pr-untracked.XXXXXX.tar.gz")"
+cleanup() {
+  rm -f -- "${PATCH_FILE}" "${UNTAR_FILE}"
+}
+trap cleanup EXIT
+
 # Create patch of all diffs against origin/${base_branch}
-git diff origin/${base_branch} > /tmp/worktree-pr.patch
+git diff origin/${base_branch} >"${PATCH_FILE}"
 
 # Archive untracked files
-git ls-files --others --exclude-standard -z | xargs -0 --no-run-if-empty tar czf /tmp/worktree-pr-untracked.tar.gz 2>/dev/null
+git ls-files --others --exclude-standard -z | xargs -0 --no-run-if-empty tar czf "${UNTAR_FILE}" 2>/dev/null
 
 # Create new branch
 git checkout -b ${branch_name} origin/${base_branch}
 
 # Apply patch
-git apply /tmp/worktree-pr.patch
-tar xzf /tmp/worktree-pr-untracked.tar.gz 2>/dev/null
-
-# Cleanup
-rm -f /tmp/worktree-pr.patch /tmp/worktree-pr-untracked.tar.gz
+git apply "${PATCH_FILE}"
+tar xzf "${UNTAR_FILE}" 2>/dev/null
 ```
 
 ### 4. Commit in Logical Groups

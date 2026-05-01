@@ -9,3 +9,7 @@ node_modules/
 .codex/
 .claude/
 
+# nix-build / nix flake build
+result
+result-*
+

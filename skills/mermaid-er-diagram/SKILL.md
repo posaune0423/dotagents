@@ -40,7 +40,7 @@ Use standard SQL-like types for clarity:
 
 ### Attribute Format
 
-```
+```text
 type column_name [PK|FK|UK] ["comment"]
 ```
 
