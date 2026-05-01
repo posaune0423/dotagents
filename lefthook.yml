@@ -1,0 +1,32 @@
+# EXAMPLE USAGE:
+#
+#   Refer for explanation to following link:
+#   https://lefthook.dev/configuration/
+#
+
+# Pre-commit: Prettier (JS/MD/CSS/JSON), ESLint, and shell format/lint on staged files
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "**/*.{js,jsx,ts,tsx,json,css,md}"
+      run: bun run format
+    lint:
+      glob: "**/*.{js,jsx,ts,tsx}"
+      run: bun run lint
+    bash-format:
+      glob: "**/*.sh"
+      run: shfmt -w {staged_files}
+    bash-lint:
+      glob: "**/*.sh"
+      run: shellcheck {staged_files}
+
+# Pre-push: full-tree ESLint and Bash checks (redundant with CI but catches local slips)
+pre-push:
+  parallel: true
+  commands:
+    lint:
+      glob: "**/*.{js,jsx,ts,tsx}"
+      run: bun run lint
+    bash-check:
+      run: bun run bash:lint && bun run bash:format:check
