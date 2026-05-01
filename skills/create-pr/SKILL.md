@@ -1,6 +1,9 @@
 ---
 name: create-pr
-description: Create or update a PR from current branch to main, watch CI, and address feedback
+description: >-
+  Create or update a PR from current branch to main, watch CI, and address
+  feedback. Use skills/resolve-review-comments/SKILL.md for review comments;
+  fix failing checks separately (logs, CI config).
 ---
 
 The user likes the state of the code.
@@ -49,6 +52,8 @@ The PR description should summarize ALL commits in the PR, not just the latest c
 
 ## Phase 3: Monitor CI and Address Issues
 
+**Review comments vs CI:** Failing checks and review feedback are **two tracks**. For **inline reviews, bot suggestions, and reviewer requests**, always open and follow **`skills/resolve-review-comments/SKILL.md`** (collect → triage → implement → push → optional reply). Do not treat “green CI” as sufficient if open review threads remain. Run that workflow whenever `poll-pr` / `triage-pr` surfaces new comments, not only when CI fails.
+
 Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN` or `GITHUB_TOKEN` is set in CI.
 
 11. Watch CI status and feedback using the polling script (instead of running `gh` in a loop):
@@ -70,11 +75,7 @@ Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN
 
 - If you need a full snapshot, run `./.agents/skills/create-pr/scripts/triage-pr.sh` once.
 - If you need full context after the script reports a new item, fetch details once with `gh pr view --comments` or `gh api ...`.
-- **Address feedback**:
-  - For bot reviews, read the review body and any inline comments carefully
-  - Address comments that are clearly actionable (bug fixes, typos, simple improvements)
-  - Skip comments that require design decisions or user input
-  - For addressed feedback, commit fixes with a message referencing the review/comment
+- **Address review feedback** using **`skills/resolve-review-comments/SKILL.md`** end-to-end (not ad-hoc bullets here). Re-run that skill on each new batch of comments after you push.
 
 ## Phase 4: Merge and Cleanup
 

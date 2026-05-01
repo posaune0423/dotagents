@@ -1,6 +1,9 @@
 ---
 name: update-pr
-description: Update an existing pull request with new changes or respond to review feedback. Use when addressing PR comments, making requested changes, or updating a PR after review.
+description: >-
+  Update an existing PR or respond to review feedback. For review threads, follow
+  skills/resolve-review-comments/SKILL.md; for failing CI, follow the CI/poll
+  steps below.
 ---
 
 # Update Pull Request
@@ -10,6 +13,8 @@ The current branch is $`git branch --show-current`.
 **Existing PR:** $`gh pr view --json number,title,url --jq '"#\(.number): \(.title) - \(.url)"' 2>/dev/null || echo "None"`
 
 Follow these steps (CI monitoring matches `create-pr`).
+
+**Review comments:** Use **`skills/resolve-review-comments/SKILL.md`** as the dedicated playbook for triaging and implementing reviewer/bot feedback. Use **Phase 3** below mainly for **CI failures, merge conflicts, and polling**—do not collapse “update PR” into CI-only fixes.
 
 ## Phase 1: Identify the PR
 
@@ -23,32 +28,20 @@ gh pr view <PR_NUMBER>
 
 ## Phase 2: Fetch context & address feedback
 
-```bash
-# View PR reviews and comments
-gh pr view <PR_NUMBER> --comments
+1. Open **`skills/resolve-review-comments/SKILL.md`** and run **Phases 1–5** there (collect comments, triage, implement, quality gate, push, optional replies).
 
-# View the PR diff to understand context
+2. Quick context (still useful before or during that skill):
+
+```bash
+gh pr view <PR_NUMBER> --comments
 gh pr diff <PR_NUMBER>
 ```
 
-For each review comment:
-
-1. Read and understand the feedback
-2. Make the necessary code changes
-3. Stage and commit with a descriptive message
+3. Stage/commit conventions are defined in the resolve-review-comments skill; typical flow:
 
 ```bash
-# Stage changes
 git add -u
-
-# Commit with reference to what was addressed
 git commit -m "address review: <brief description>"
-```
-
-### Push updates
-
-```bash
-# Push to the same branch (PR updates automatically)
 git push
 ```
 
@@ -100,13 +93,8 @@ Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN
 3. Use the polling script output to notice new reviews and comments (avoid direct polling via `gh`):
 
 - If you need a full snapshot, run `./.agents/skills/create-pr/scripts/triage-pr.sh` once.
-- If you need full context after the script reports a new item, fetch details once with `gh pr view --comments` or `gh api ...`.
-- **Address feedback**:
-  - For bot reviews, read the review body and any inline comments carefully
-  - Address comments that are clearly actionable (bug fixes, typos, simple improvements)
-  - Skip comments that require design decisions or user input
-  - For addressed feedback, commit fixes with a message referencing the review/comment
-  - Return to Phase 2 (push) and Phase 3 (poll) until CI is green
+- When new review items appear, return to **Phase 2** and **`skills/resolve-review-comments/SKILL.md`** before assuming the PR is done.
+- Alternate **resolve-review-comments** passes with CI polling until checks are green **and** actionable review threads are cleared (or explicitly deferred with the user).
 
 ## Phase 4: Merge and cleanup (if the user wants to merge)
 
@@ -174,17 +162,13 @@ If any step fails in a way you cannot resolve, ask the user for help.
 ## Example workflow
 
 ```bash
-# 1. Fetch latest review comments
-gh pr view 42 --comments
+# 1. Follow skills/resolve-review-comments/SKILL.md (includes fetching comments + implementing)
 
-# 2. Make changes based on feedback
-# ... edit files ...
-
-# 3. Commit and push
+# 2. Commit and push
 git add -u
 git commit -m "address review: add error handling for edge case"
 git push
 
-# 4. Watch CI and triage (same as create-pr)
+# 3. Watch CI and triage (same as create-pr); if new comments appear, re-run resolve-review-comments
 ./.agents/skills/create-pr/scripts/poll-pr.sh --triage-on-change --exit-when-green
 ```
