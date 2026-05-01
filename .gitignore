@@ -1,0 +1,11 @@
+.DS_Store
+node_modules/
+.env
+.env.*
+
+# Local agent dirs (not part of this repo's SSoT output)
+.agents/
+.cursor/
+.codex/
+.claude/
+
