@@ -5,9 +5,13 @@ description: Update an existing pull request with new changes or respond to revi
 
 # Update Pull Request
 
-## Steps
+The current branch is $`git branch --show-current`.
 
-### 1. Identify the PR
+**Existing PR:** $`gh pr view --json number,title,url --jq '"#\(.number): \(.title) - \(.url)"' 2>/dev/null || echo "None"`
+
+Follow these steps (CI monitoring matches `create-pr`).
+
+## Phase 1: Identify the PR
 
 ```bash
 # List open PRs for current branch
@@ -17,7 +21,7 @@ gh pr list --head $(git branch --show-current)
 gh pr view <PR_NUMBER>
 ```
 
-### 2. Fetch Review Comments
+## Phase 2: Fetch context & address feedback
 
 ```bash
 # View PR reviews and comments
@@ -26,8 +30,6 @@ gh pr view <PR_NUMBER> --comments
 # View the PR diff to understand context
 gh pr diff <PR_NUMBER>
 ```
-
-### 3. Address Feedback
 
 For each review comment:
 
@@ -43,14 +45,14 @@ git add -u
 git commit -m "address review: <brief description>"
 ```
 
-### 4. Push Updates
+### Push updates
 
 ```bash
 # Push to the same branch (PR updates automatically)
 git push
 ```
 
-### 5. Respond to Review Comments (Optional)
+### Optional: reply or re-request review
 
 If you need to reply to specific comments:
 
@@ -62,43 +64,87 @@ gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments/<COMMENT_ID>/replies \
 
 Or use the GitHub web interface for complex discussions.
 
-### 6. Re-request Review (if needed)
-
 ```bash
 # Re-request review from specific reviewers
 gh pr edit <PR_NUMBER> --add-reviewer <username>
 ```
 
-## Handling Common Review Requests
+### Optional: keep assignees/labels in sync with create-pr defaults
+
+After pushing, if the PR should match `./.agents/skills/create-pr/pr-defaults.env`:
+
+```bash
+./.agents/skills/create-pr/scripts/pr-meta-sync.sh
+```
+
+## Phase 3: Monitor CI and address issues
+
+Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN` or `GITHUB_TOKEN` is set in CI.
+
+1. Watch CI status and feedback using the polling script (instead of running `gh` in a loop):
+
+- Run `./.agents/skills/create-pr/scripts/poll-pr.sh --triage-on-change --exit-when-green` (polls every 15s for 10 mins).
+- If checks fail, use `gh pr checks` or `gh run list` to find the failing run id, then:
+  - Fetch the failed check logs using `gh run view <run-id> --log-failed`
+  - Analyze the failure and fix the issue
+  - Commit and push the fix
+  - Continue polling until all checks pass
+
+2. Check for merge conflicts:
+
+- Run `git fetch origin main && git merge origin/main`
+- If conflicts exist, resolve them sensibly
+- Commit the merge resolution and push
+- Re-run the polling step above if CI re-ran
+
+3. Use the polling script output to notice new reviews and comments (avoid direct polling via `gh`):
+
+- If you need a full snapshot, run `./.agents/skills/create-pr/scripts/triage-pr.sh` once.
+- If you need full context after the script reports a new item, fetch details once with `gh pr view --comments` or `gh api ...`.
+- **Address feedback**:
+  - For bot reviews, read the review body and any inline comments carefully
+  - Address comments that are clearly actionable (bug fixes, typos, simple improvements)
+  - Skip comments that require design decisions or user input
+  - For addressed feedback, commit fixes with a message referencing the review/comment
+  - Return to Phase 2 (push) and Phase 3 (poll) until CI is green
+
+## Phase 4: Merge and cleanup (if the user wants to merge)
+
+Once CI passes and the PR is approved (or the user asks to merge), confirm with the user, then:
+
+```bash
+gh pr merge --squash --delete-branch
+```
+
+After a successful merge, check if we're in a git worktree:
+
+- Run: `[ "$(git rev-parse --git-common-dir)" != "$(git rev-parse --git-dir)" ]`
+- **If in a worktree**: Ask the user if they want to clean up the worktree. If yes, run `git worktree remove --force` to remove the worktree and local branch, then switch back to the main worktree.
+- **If not in a worktree**: Switch back to main with `git checkout main && git pull`
+
+## Handling common review requests
 
 ### "Please add tests"
 
-1. Identify the appropriate test file in `packages/*/src/__tests__/`
+1. Identify the appropriate test locations in the repo
 2. Add test cases covering the new functionality
-3. Run `pnpm test` to verify
+3. Run the project's test command (e.g. `pnpm test` or `bun test`) to verify
 
 ### "Update types"
 
-1. Check TypeScript errors with `pnpm build`
+1. Run the project's typecheck/build command
 2. Update type definitions as needed
 3. Ensure no type errors remain
 
 ### "Fix lint issues"
 
-```bash
-pnpm format  # Auto-fix formatting
-pnpm lint    # Check and fix lint issues
-```
+Run the repo's format/lint commands (e.g. `pnpm format` / `pnpm lint` or `bun run lint`).
 
 ### "Update snapshots"
 
-```bash
-pnpm test:storybook:update
-git add packages/*/__image_snapshots__/
-git commit -m "chore: update storybook snapshots"
-```
+Follow the project's snapshot update workflow and commit updated artifacts.
 
-## Squashing Commits (if requested)
+## Squashing commits (if requested)
 
 If the reviewer asks to squash commits:
 
@@ -113,7 +159,19 @@ git rebase -i origin/main
 git push --force-with-lease
 ```
 
-## Example Workflow
+## Completion
+
+Report to the user:
+
+- PR URL
+- CI status (passed / still failing / merged)
+- Assignees and labels if you ran `pr-meta-sync.sh`
+- Any unresolved review comments that need user attention
+- Cleanup status (worktree removed or branch switched) if you merged
+
+If any step fails in a way you cannot resolve, ask the user for help.
+
+## Example workflow
 
 ```bash
 # 1. Fetch latest review comments
@@ -127,6 +185,6 @@ git add -u
 git commit -m "address review: add error handling for edge case"
 git push
 
-# 4. Notify reviewer
-echo "Updated PR #42 - addressed all review comments"
+# 4. Watch CI and triage (same as create-pr)
+./.agents/skills/create-pr/scripts/poll-pr.sh --triage-on-change --exit-when-green
 ```

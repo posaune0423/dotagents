@@ -38,7 +38,12 @@ Follow these exact steps:
   - Update the PR body using the non-deprecated script:
     - `./.agents/skills/create-pr/scripts/pr-body-update.sh --file /tmp/pr-body.txt`
   - Re-fetch the body with `gh pr view --json body --jq .body` to confirm it changed.
-- **If no PR exists**: Use `gh pr create --base main` to create a new PR. Keep the title under 80 characters and the description under five sentences.
+  - Apply assignees and labels from `./.agents/skills/create-pr/pr-defaults.env` (override with env vars if needed). Labels: use `CREATE_PR_LABELS` when set; otherwise infer one label from the branch prefix using GitHub's stock defaults (`scripts/infer-github-default-label.sh`); set `CREATE_PR_NO_LABEL=1` to skip labels.
+    - `./.agents/skills/create-pr/scripts/pr-meta-sync.sh`
+- **If no PR exists**: Create the PR with assignees and labels using the wrapper (reads the same `pr-defaults.env`):
+  - `./.agents/skills/create-pr/scripts/gh-pr-create-with-meta.sh --base main ...` (pass `--title`, `--body` or `--body-file`, etc., as you would to `gh pr create`).
+  - Defaults: assignee `@me` when `CREATE_PR_ASSIGNEES` is unset; comma-separated logins when set; empty string skips assignees. Labels follow the same rule as above (infer `bug` / `documentation` / `enhancement` / `question` / etc. from the branch prefix, or override with `CREATE_PR_LABELS`). Stock labels must exist on the repo (GitHub adds them by default on new repositories).
+  - Keep the title under 80 characters and the description under five sentences.
 
 The PR description should summarize ALL commits in the PR, not just the latest changes.
 
@@ -88,6 +93,7 @@ Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN
 Report the final PR status to the user, including:
 
 - PR URL
+- Assignees and labels applied (from `pr-defaults.env` or overrides)
 - CI status (passed/merged)
 - Any unresolved review comments that need user attention
 - Cleanup status (worktree removed or branch switched)
