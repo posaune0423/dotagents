@@ -32,8 +32,8 @@ gh pr view "$PR" --comments
 `owner/name` は `gh repo view --json nameWithOwner --jq .nameWithOwner` で確認する。
 
 ```bash
-OWNER=ango-ya
-NAME=crescent-uniswapx-quoter
+OWNER=posaune0423
+NAME=dotagents
 PR=171
 
 gh api graphql -f query='
@@ -94,8 +94,8 @@ gh api graphql -f query='mutation($thread:ID!){
 ### 6) 未解決 thread が 0 件になったことを確認する
 
 ```bash
-OWNER=ango-ya
-NAME=crescent-uniswapx-quoter
+OWNER=posaune0423
+NAME=dotagents
 PR=171
 
 gh api graphql -f query='
