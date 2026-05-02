@@ -91,7 +91,7 @@ dotenvx run -f .env.development -f .env.local -- npm run dev
 
 ## Key Rotation
 
-Procedure for when a private key is suspected of being leaked, or for periodic rotation. As of 2026/04 there is no dedicated `dotenvx rotate` command, so explicitly do decrypt → encrypt with a new key.
+Procedure for when a private key is suspected of being leaked, or for periodic rotation. Use `dotenvx rotate` to generate a new keypair and re-encrypt the file in one step.
 
 **Order is critical**: update the CI secret to the new key **first**, then merge the new ciphertext. If reversed, prod will fail trying to decrypt the new ciphertext with the old key.
 
@@ -101,12 +101,10 @@ git switch -c chore/rotate-prod-dotenv-key
 set +o history
 OLD_PRIV="$DOTENV_PRIVATE_KEY_PRODUCTION"
 
-# 2. Decrypt with the old key (back to plaintext)
-DOTENV_PRIVATE_KEY_PRODUCTION="$OLD_PRIV" dotenvx decrypt -f .env.production
+# 2. Rotate keypair and re-encrypt with the new public key
+DOTENV_PRIVATE_KEY_PRODUCTION="$OLD_PRIV" dotenvx rotate -f .env.production
 
-# 3. Remove the existing PUBLIC_KEY, then re-encrypt (a new key pair is generated)
-sed -i.bak '/^DOTENV_PUBLIC_KEY_PRODUCTION=/d' .env.production
-dotenvx encrypt -f .env.production
+# 3. Read the newly generated private key
 NEW_PRIV=$(dotenvx get DOTENV_PRIVATE_KEY_PRODUCTION -f .env.keys)
 
 # 4. Update CI secret to the new key (before the merge)
@@ -118,7 +116,6 @@ git push && gh pr create --fill && gh pr merge --squash --auto
 
 # 6. Cleanup
 unset OLD_PRIV; set -o history
-rm .env.production.bak
 ```
 
 **Additional steps on a leak**:
@@ -136,6 +133,14 @@ Install via curl. See `assets/gh_action_example.yml` for a complete example.
 ```yaml
 steps:
   - uses: actions/checkout@v4
+
+  - uses: actions/setup-node@v4
+    with:
+      node-version: 24
+      cache: npm
+
+  - name: Install dependencies
+    run: npm ci
 
   - name: Install dotenvx
     run: curl -sfS https://dotenvx.sh | sh

@@ -91,7 +91,7 @@ dotenvx run -f .env.development -f .env.local -- npm run dev
 
 ## Key ローテーション
 
-private key が漏洩疑いになったとき、または定期的な rotation 時の手順。`dotenvx rotate` 専用コマンドは 2026/04 時点で存在しないため、decrypt → 新 key で encrypt を明示的に行う。
+private key が漏洩疑いになったとき、または定期的な rotation 時の手順。`dotenvx rotate` で新しい keypair を生成し、対象ファイルを再暗号化する。
 
 **順序が最重要**: CI secret を **先に** 新 key に更新してから、新暗号文を merge する。逆だと旧 key で新暗号文を復号しようとして prod が落ちる。
 
@@ -101,12 +101,10 @@ git switch -c chore/rotate-prod-dotenv-key
 set +o history
 OLD_PRIV="$DOTENV_PRIVATE_KEY_PRODUCTION"
 
-# 2. 旧 key で復号（平文に戻す）
-DOTENV_PRIVATE_KEY_PRODUCTION="$OLD_PRIV" dotenvx decrypt -f .env.production
+# 2. keypair を rotation し、新 public key で再暗号化する
+DOTENV_PRIVATE_KEY_PRODUCTION="$OLD_PRIV" dotenvx rotate -f .env.production
 
-# 3. 既存 PUBLIC_KEY を削除してから再 encrypt（新 key ペアが生成される）
-sed -i.bak '/^DOTENV_PUBLIC_KEY_PRODUCTION=/d' .env.production
-dotenvx encrypt -f .env.production
+# 3. 新しく生成された private key を取得する
 NEW_PRIV=$(dotenvx get DOTENV_PRIVATE_KEY_PRODUCTION -f .env.keys)
 
 # 4. CI secret を新 key に更新（merge より先）
@@ -118,7 +116,6 @@ git push && gh pr create --fill && gh pr merge --squash --auto
 
 # 6. クリーンアップ
 unset OLD_PRIV; set -o history
-rm .env.production.bak
 ```
 
 **漏洩時の追加対応**:
@@ -136,6 +133,14 @@ curl でインストール。完全な例は `assets/gh_action_example.yml` を�
 ```yaml
 steps:
   - uses: actions/checkout@v4
+
+  - uses: actions/setup-node@v4
+    with:
+      node-version: 24
+      cache: npm
+
+  - name: Install dependencies
+    run: npm ci
 
   - name: Install dotenvx
     run: curl -sfS https://dotenvx.sh | sh

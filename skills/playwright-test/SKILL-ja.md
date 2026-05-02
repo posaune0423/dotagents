@@ -298,7 +298,7 @@ jq '.suites[].specs[] | select(.tests[].results | length > 1 and .[-1].status ==
   test-results/results.json
 ```
 
-GitHub Actions で artifact 保存し、別ジョブで集計 → 過去 N 回分の傾向を track する運用が定番。`@playwright/test` 1.40+ なら `expect.configure({ flaky: true })` 等の組込み support も利用可。
+GitHub Actions で artifact 保存し、別ジョブで集計 → 過去 N 回分の傾向を track する運用が定番。厳格な CI では Playwright config に `failOnFlakyTests: !!process.env.CI` を設定するか、CLI で `--fail-on-flaky-tests` を渡す。
 
 ### 鉄則: 固定 wait を使わない
 

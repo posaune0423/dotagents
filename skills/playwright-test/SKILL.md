@@ -298,7 +298,7 @@ jq '.suites[].specs[] | select(.tests[].results | length > 1 and .[-1].status ==
   test-results/results.json
 ```
 
-The usual pattern is to upload as an artifact on GitHub Actions and aggregate in a separate job -> track trends over the past N runs. With `@playwright/test` 1.40+, built-in support like `expect.configure({ flaky: true })` is also available.
+The usual pattern is to upload as an artifact on GitHub Actions and aggregate in a separate job -> track trends over the past N runs. For strict CI, enable `failOnFlakyTests: !!process.env.CI` in Playwright config or pass `--fail-on-flaky-tests` on the CLI.
 
 ### Rule: Do Not Use Fixed Waits
 
