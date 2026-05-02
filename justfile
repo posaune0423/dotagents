@@ -4,7 +4,7 @@ set shell := ["bash", "-cu"]
 default:
     @just --list
 
-# Symlink dotagents -> ~/.agents (global); ~/.claude/CLAUDE.md and ~/.gemini/GEMINI.md only
+# Symlink dotagents -> ~/.agents (global); ~/.claude/{CLAUDE.md,settings.json} and ~/.gemini/GEMINI.md
 link-global:
     ./scripts/link-dotagents.sh --home --all --tool-configs
 

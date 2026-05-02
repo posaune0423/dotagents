@@ -7,12 +7,12 @@ link-dotagents.sh --home [--all] [--tool-configs]
 
 Create symlinks from this repo (SSoT) into:
   - ~/.agents (global agent config)
-  - optionally only the instruction files ~/.claude/CLAUDE.md and ~/.gemini/GEMINI.md
+  - optionally ~/.claude/CLAUDE.md, ~/.claude/settings.json, and ~/.gemini/GEMINI.md
 
 Options:
   --home           Link repo skills into ~/.agents/skills
   --all            Also link commands and rules into ~/.agents (use with --home)
-  --tool-configs   Symlink ~/.claude/CLAUDE.md and ~/.gemini/GEMINI.md to this repo's copies
+  --tool-configs   Symlink CLAUDE.md, settings.json (Claude), and GEMINI.md to this repo's copies
   -h, --help       Show this help
 
 At least one of --home or --tool-configs is required.
@@ -107,9 +107,14 @@ fi
 
 link_tool_instruction_files() {
 	local claude_md_src="${REPO_ROOT}/.claude/CLAUDE.md"
+	local claude_settings_src="${REPO_ROOT}/.claude/settings.json"
 	local gemini_md_src="${REPO_ROOT}/.gemini/GEMINI.md"
 	if [[ ! -f "${claude_md_src}" ]]; then
 		echo "ERROR: expected file missing: ${claude_md_src}" >&2
+		exit 1
+	fi
+	if [[ ! -f "${claude_settings_src}" ]]; then
+		echo "ERROR: expected file missing: ${claude_settings_src}" >&2
 		exit 1
 	fi
 	if [[ ! -f "${gemini_md_src}" ]]; then
@@ -118,6 +123,7 @@ link_tool_instruction_files() {
 	fi
 	mkdir -p -- "${HOME}/.claude" "${HOME}/.gemini"
 	safe_link "${claude_md_src}" "${HOME}/.claude/CLAUDE.md"
+	safe_link "${claude_settings_src}" "${HOME}/.claude/settings.json"
 	safe_link "${gemini_md_src}" "${HOME}/.gemini/GEMINI.md"
 }
 

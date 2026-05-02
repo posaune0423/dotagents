@@ -1,0 +1,65 @@
+{
+  "env": {
+    // "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    // "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    // "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
+    // "ANTHROPIC_BASE_URL": "http://localhost:1234",
+    // "ANTHROPIC_AUTH_TOKEN": "dummy",
+    // "ANTHROPIC_DEFAULT_OPUS_MODEL": "qwen3.6-35b-a3b-ud-mlx",
+    // "ANTHROPIC_DEFAULT_SONNET_MODEL": "qwen3.6-35b-a3b-ud-mlx",
+    // "ANTHROPIC_DEFAULT_HAIKU_MODEL": "qwen3.6-35b-a3b-ud-mlx"
+  },
+  "permissions": {
+    "allow": ["mcp__pencil"]
+  },
+  "model": "opus",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Task completed\" with title \"Claude Code\" sound name \"Glass\"'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Waiting for input\" with title \"Claude Code\" sound name \"Blow\"'"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": true,
+    "coderabbit@coderabbit": true,
+    "scheduler@claude-scheduler": true,
+    "feature-dev@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "codex@openai-codex": true
+  },
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "high"
+}
