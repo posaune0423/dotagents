@@ -1,4 +1,4 @@
-# Codex 設定の共有ベース（このリポジトリ用）
+# ===================== Base Config =====================
 # ローカルでは ~/.codex/config.toml とマージするか、notify / projects / MCP のパスを環境に合わせて追記してください。
 
 model = "gpt-5.5"
@@ -7,19 +7,53 @@ model_context_window = 272000
 model_auto_compact_token_limit = 190400
 tool_output_token_limit = 12000
 personality = "pragmatic"
+web_search = "cached"
 suppress_unstable_features_warning = true
 plan_mode_reasoning_effort = "high"
-
 oss_provider = "lmstudio"
 
 # ローカルパスを含むためデフォルトは空。必要なら ~/.codex 側で設定。
 notify = []
 
+# ===================== Profiles =====================
+[profiles.lmstudio]
+oss_provider = "lmstudio"
+
+[profiles.lmstudio.features]
+apps = false
+
+# ===================== Features =====================
 [features]
+browser_use = true
+child_agents_md = true
 codex_hooks = true
 multi_agent = true
+multi_agent_v2 = true
 memories = true
-chronicle = false
+chronicle = true
+image_generation = true
+in_app_browser = true
+js_repl = true
+js_repl_tools_only = false
+prevent_idle_sleep = true
+realtime_conversation = true
+remote_control = true
+request_permissions_tool = true
+runtime_metrics = true
+shell_snapshot = true
+shell_tool = true
+shell_zsh_fork = false
+skill_env_var_dependency_prompt = true
+skill_mcp_dependency_install = true
+tool_call_mcp_elicitation = true
+tool_search = true
+tool_search_always_defer_mcp_tools = true
+tool_suggest = true
+unavailable_dummy_tools = true
+undo = true
+unified_exec = true
+workspace_dependencies = true
+workspace_owner_usage_nudge = true
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
@@ -27,10 +61,7 @@ chronicle = false
 [notice]
 fast_default_opt_out = true
 
-[memories]
-no_memories_if_mcp_or_web_search = true
-
-# Agents（相対パスはこのリポジトリの .codex/ を起点）
+# ===================== Agents =====================
 
 [agents.default]
 description = "Default built-in subagent role."
@@ -48,6 +79,18 @@ config_file = "agents/worker.toml"
 description = "Built-in monitoring role."
 config_file = "agents/monitor.toml"
 
+[agents.light_worker]
+description = "Light_worker for format, lint, typecheck, test, and similar repetitive/simple tasks. Escalate complex or architectural work to worker."
+config_file = "agents/light_worker.toml"
+
+[agents.browser_debugger]
+description = "Browser debugger role for browser-based reproduction, UI evidence gathering, or client-side debugging through a browser MCP server."
+config_file = "agents/browser_debugger.toml"
+
+[agents.docs_researcher]
+description = "Docs researcher role for documentation-backed verification of APIs, version-specific behavior, or framework options."
+config_file = "agents/docs_researcher.toml"
+
 [agents.qwen_worker]
 description = "Local Qwen worker via custom LM Studio provider."
 config_file = "agents/qwen_worker.toml"
@@ -57,35 +100,3 @@ config_file = "agents/qwen_worker.toml"
 # - [mcp_servers.*]（パス依存のもの）
 # - [marketplaces.*]（ローカルキャッシュパス）
 # - notify（Computer Use バイナリや osascript など）
-
-[mcp_servers.chrome-devtools]
-command = "npx"
-args = ["chrome-devtools-mcp@latest"]
-
-[mcp_servers.exa]
-command = "npx"
-args = ["-y", "exa-mcp-server"]
-
-[plugins."github@openai-curated"]
-enabled = true
-
-[plugins."slack@openai-curated"]
-enabled = true
-
-[plugins."coderabbit@openai-curated"]
-enabled = true
-
-[plugins."documents@openai-primary-runtime"]
-enabled = true
-
-[plugins."spreadsheets@openai-primary-runtime"]
-enabled = true
-
-[plugins."presentations@openai-primary-runtime"]
-enabled = true
-
-[plugins."computer-use@openai-bundled"]
-enabled = true
-
-[plugins."browser-use@openai-bundled"]
-enabled = true
