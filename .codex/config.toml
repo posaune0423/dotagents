@@ -95,6 +95,22 @@ config_file = "agents/docs_researcher.toml"
 description = "Local Qwen worker via custom LM Studio provider."
 config_file = "agents/qwen_worker.toml"
 
+[agents.reviewer]
+description = "Reviewer role for PR-style review focused on correctness, security, behavior regressions, and missing tests."
+config_file = "agents/reviewer.toml"
+
+[agents.frontend_developer]
+description = "Frontend developer role for scoped frontend implementation or UI bug fixes with production-level behavior and quality."
+config_file = "agents/frontend_developer.toml"
+
+[agents.backend_developer]
+description = "Backend developer role for scoped backend implementation or backend bug fixes after the owning path is known."
+config_file = "agents/backend_developer.toml"
+
+[agents.fullstack_developer]
+description = "Fullstack developer role for one bounded feature or bug spans frontend and backend and a single worker should own the entire path."
+config_file = "agents/fullstack_developer.toml"
+
 # 以下は環境ごとに ~/.codex/config.toml で設定することを想定:
 # - [projects."..."] trust_level
 # - [mcp_servers.*]（パス依存のもの）
