@@ -8,6 +8,8 @@ relink-codex-prompts.sh
 Reconfigure ~/.codex so:
   - ~/.codex/commands is removed
   - ~/.codex/prompts points to ~/.agents/commands
+  - ~/.codex/hooks.json is linked to this repository's .codex/hooks.json
+  - ~/.codex/hooks is linked to this repository's .codex/hooks
 
 This is designed to make the current Codex-specific layout
 reproducible on demand.
@@ -15,11 +17,17 @@ EOF
 }
 
 timestamp() { date +%Y%m%d-%H%M%S; }
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
-CODEx_DIR="${HOME}/.codex"
-HOME_COMMANDS="${CODEx_DIR}/commands"
-HOME_PROMPTS="${CODEx_DIR}/prompts"
+CODEX_DIR="${HOME}/.codex"
+HOME_COMMANDS="${CODEX_DIR}/commands"
+HOME_PROMPTS="${CODEX_DIR}/prompts"
+HOME_HOOKS_JSON="${CODEX_DIR}/hooks.json"
+HOME_HOOKS_DIR="${CODEX_DIR}/hooks"
 SOURCE_COMMANDS="${HOME}/.agents/commands"
+SOURCE_HOOKS_JSON="${REPO_ROOT}/.codex/hooks.json"
+SOURCE_HOOKS_DIR="${REPO_ROOT}/.codex/hooks"
 
 safe_link() {
 	local src="$1"
@@ -50,12 +58,20 @@ main() {
 		exit 2
 	fi
 
-	if [[ ! -d "${CODEx_DIR}" ]]; then
-		mkdir -p "${CODEx_DIR}"
+	if [[ ! -d "${CODEX_DIR}" ]]; then
+		mkdir -p "${CODEX_DIR}"
 	fi
 
 	if [[ ! -d "${SOURCE_COMMANDS}" ]]; then
 		echo "ERROR: expected source directory missing: ${SOURCE_COMMANDS}" >&2
+		exit 1
+	fi
+	if [[ ! -f "${SOURCE_HOOKS_JSON}" ]]; then
+		echo "ERROR: expected source hooks config missing: ${SOURCE_HOOKS_JSON}" >&2
+		exit 1
+	fi
+	if [[ ! -d "${SOURCE_HOOKS_DIR}" ]]; then
+		echo "ERROR: expected source hooks directory missing: ${SOURCE_HOOKS_DIR}" >&2
 		exit 1
 	fi
 
@@ -65,6 +81,8 @@ main() {
 	fi
 
 	safe_link "${SOURCE_COMMANDS}" "${HOME_PROMPTS}"
+	safe_link "${SOURCE_HOOKS_JSON}" "${HOME_HOOKS_JSON}"
+	safe_link "${SOURCE_HOOKS_DIR}" "${HOME_HOOKS_DIR}"
 }
 
 main "$@"
