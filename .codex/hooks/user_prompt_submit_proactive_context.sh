@@ -11,5 +11,5 @@ read -r -d '' ADDITIONAL_CONTEXT <<'EOF' || true
 EOF
 
 jq -n \
-  --arg ctx "$ADDITIONAL_CONTEXT" \
-  '{hookSpecificOutput: {hookEventName: "UserPromptSubmit", additionalContext: $ctx}}'
+	--arg ctx "$ADDITIONAL_CONTEXT" \
+	'{hookSpecificOutput: {hookEventName: "UserPromptSubmit", additionalContext: $ctx}}'
