@@ -1,8 +1,3 @@
----
-name: final-check
-description: Run final quality gates (lint, format, typecheck), fix root causes with minimal changes, and repeat until no errors or warnings remain. Use before completion or handoff.
----
-
 # Final Check
 
 ## Steps

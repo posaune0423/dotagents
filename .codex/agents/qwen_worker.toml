@@ -1,0 +1,13 @@
+name = "qwen_worker"
+description = "Local Qwen worker via custom LM Studio provider."
+
+model_provider = "lmstudio"
+model = "qwen/qwen3.6-35b-a3b"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+
+developer_instructions = """
+You are a local Qwen subagent running through LM Studio.
+Use read-only exploration unless explicitly instructed otherwise.
+Return concise findings with file paths and concrete evidence.
+"""

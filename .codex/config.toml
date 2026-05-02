@@ -1,0 +1,91 @@
+# Codex 設定の共有ベース（このリポジトリ用）
+# ローカルでは ~/.codex/config.toml とマージするか、notify / projects / MCP のパスを環境に合わせて追記してください。
+
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+model_context_window = 272000
+model_auto_compact_token_limit = 190400
+tool_output_token_limit = 12000
+personality = "pragmatic"
+suppress_unstable_features_warning = true
+plan_mode_reasoning_effort = "high"
+
+oss_provider = "lmstudio"
+
+# ローカルパスを含むためデフォルトは空。必要なら ~/.codex 側で設定。
+notify = []
+
+[features]
+codex_hooks = true
+multi_agent = true
+memories = true
+chronicle = false
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+
+[notice]
+fast_default_opt_out = true
+
+[memories]
+no_memories_if_mcp_or_web_search = true
+
+# Agents（相対パスはこのリポジトリの .codex/ を起点）
+
+[agents.default]
+description = "Default built-in subagent role."
+config_file = "agents/default.toml"
+
+[agents.explorer]
+description = "Built-in exploration role."
+config_file = "agents/explorer.toml"
+
+[agents.worker]
+description = "Built-in implementation role."
+config_file = "agents/worker.toml"
+
+[agents.monitor]
+description = "Built-in monitoring role."
+config_file = "agents/monitor.toml"
+
+[agents.qwen_worker]
+description = "Local Qwen worker via custom LM Studio provider."
+config_file = "agents/qwen_worker.toml"
+
+# 以下は環境ごとに ~/.codex/config.toml で設定することを想定:
+# - [projects."..."] trust_level
+# - [mcp_servers.*]（パス依存のもの）
+# - [marketplaces.*]（ローカルキャッシュパス）
+# - notify（Computer Use バイナリや osascript など）
+
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = ["chrome-devtools-mcp@latest"]
+
+[mcp_servers.exa]
+command = "npx"
+args = ["-y", "exa-mcp-server"]
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[plugins."slack@openai-curated"]
+enabled = true
+
+[plugins."coderabbit@openai-curated"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."browser-use@openai-bundled"]
+enabled = true
