@@ -4,9 +4,9 @@ set shell := ["bash", "-cu"]
 default:
     @just --list
 
-# Symlink dotagents -> ~/.agents (global)
+# Symlink dotagents -> ~/.agents (global); ~/.claude/CLAUDE.md and ~/.gemini/GEMINI.md only
 link-global:
-    ./scripts/link-dotagents.sh --home --all
+    ./scripts/link-dotagents.sh --home --all --tool-configs
 
 # Remove ~/.codex/commands and symlink ~/.codex/prompts -> ~/.agents/commands
 link-codex-prompts:

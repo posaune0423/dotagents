@@ -3,6 +3,10 @@ node_modules/
 .env
 .env.*
 
+# Gemini CLI writes under ~/.gemini; repo only tracks GEMINI.md (SSoT)
+.gemini/*
+!.gemini/GEMINI.md
+
 # nix-build / nix flake build
 result
 result-*
