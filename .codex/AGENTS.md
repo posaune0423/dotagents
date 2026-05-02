@@ -4,7 +4,7 @@
 
 - Actively use skills and subagents to keep the main thread context clean.
   - **Skill**: For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` directly under that skill before starting work (for example, `skills/<name>/SKILL.md`), and apply its procedures and constraints exactly as written. Do not stop at merely declaring that you will use the skill.
-  - **Subagent**: Delegate tasks where an independent context is useful (such as refactoring, reviews, or broad exploration), or when you want work to run in parallel.
+  - **Subagent**: Subagents are launched only when explicitly requested, but for tasks that need an independent context or parallelization (such as refactoring, reviews, or broad exploration), delegation is mandatory.
   - [browser_debugger](./agents/browser_debugger.toml): A dedicated subagent for debugging UIs and web apps.
   - [docs_researcher](./agents/docs_researcher.toml): A dedicated subagent that uses `ctx7` and web_search tools to search for and collect necessary information from official documentation, forums, issues, and local files.
   - [light_worker](./agents/light_worker.toml): A dedicated subagent for lightweight tasks such as formatting, linting, type checks, and PR creation/updating workflows (docs/metadata updates, quick PR-ready touch-ups).

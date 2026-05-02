@@ -4,7 +4,7 @@
 
 - 積極的にskill, subagentを使用しmain threadのcontextをcleanに保ってください
   - **Skill**: 専門知識が必要なタスク → 作業開始前に該当スキル直下の `SKILL.md`（例: `skills/<name>/SKILL.md`）を読み、手順/制約をそのまま適用する。宣言だけで終わらせない。
-  - **Subagent**: 独立コンテキストが有効なタスク（リファクタリング・レビュー・広範囲探索など）、または並列実行したい場合に委任する。
+  - **Subagent**: サブエージェントは「明示的に依頼された場合」にのみ起動します。独立コンテキストが有効なタスク（リファクタリング・レビュー・広範囲探索など）や並列化が有効なタスクでは、必ず委任してください。
   - [browser_debugger](./agents/browser_debugger.toml): UIやweb appのdebugを行う専用のsubagent
   - [docs_researcher](./agents/docs_researcher.toml): 公式ドキュメント、API、フレームワーク情報を一次情報ベースで収集する専用のsubagent
   - [light_worker](./agents/light_worker.toml): format, lint, type checkなどの軽いタスクに加え、PR作成・更新などの軽量なPRワークフローを実行する専用subagent
