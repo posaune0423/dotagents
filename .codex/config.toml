@@ -24,6 +24,7 @@ apps = false
 
 # ===================== Features =====================
 [features]
+goals = true
 browser_use = true
 child_agents_md = true
 codex_hooks = true
@@ -98,6 +99,10 @@ config_file = "agents/qwen_worker.toml"
 [agents.reviewer]
 description = "Reviewer role for PR-style review focused on correctness, security, behavior regressions, and missing tests."
 config_file = "agents/reviewer.toml"
+
+[agents.architect]
+description = "Architect role for high-level architectural decisions and design."
+config_file = "agents/architect.toml"
 
 [agents.frontend_developer]
 description = "Frontend developer role for scoped frontend implementation or UI bug fixes with production-level behavior and quality."
