@@ -3,7 +3,16 @@ import prettier from "eslint-config-prettier"
 
 export default [
   {
-    ignores: [".git/**", "node_modules/**", ".github/**", "**/*.min.*", "**/*.lock", "bun.lockb", "skills/.system/**"],
+    ignores: [
+      ".git/**",
+      "node_modules/**",
+      ".github/**",
+      "**/*.min.*",
+      "**/*.lock",
+      "bun.lockb",
+      "skills/.system/**",
+      "skills/**/scripts/**/*.ts",
+    ],
   },
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
