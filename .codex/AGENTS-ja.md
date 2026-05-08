@@ -4,13 +4,10 @@
 
 - 積極的にskill, subagentを使用しmain threadのcontextをcleanに保ってください
   - **Skill**: 専門知識が必要なタスク → 作業開始前に該当スキル直下の `SKILL.md`（例: `skills/<name>/SKILL.md`）を読み、手順/制約をそのまま適用する。宣言だけで終わらせない。
-  - **Subagent**: サブエージェントは「明示的に依頼された場合」にのみ起動します。独立コンテキストが有効なタスク（リファクタリング・レビュー・広範囲探索など）や並列化が有効なタスクでは、必ず委任してください。
+  - **Subagent**: 独立コンテキストや並列実行に効く作業（リファクタリング、レビュー、広範囲探索、UIデバッグ、ドキュメント調査、軽量PRワークフローなど）では、ユーザーから明示的な依頼がなくても、下記の専用サブエージェントへ率先して委任する。そのような場合、委任は必須。
   - [browser_debugger](./agents/browser_debugger.toml): UIやweb appのdebugを行う専用のsubagent
   - [docs_researcher](./agents/docs_researcher.toml): 公式ドキュメント、API、フレームワーク情報を一次情報ベースで収集する専用のsubagent
   - [light_worker](./agents/light_worker.toml): format, lint, type checkなどの軽いタスクに加え、PR作成・更新などの軽量なPRワークフローを実行する専用subagent
-  - [qwen_worker](./agents/qwen_worker.toml): lmstudioでlocal llmのqwen3.6を使用する専用のsubagent
-  - ※ 両者は併用可。Skill の知識を Subagent に渡して実行することもある。
-  - ※ 小さいタスクで該当する Skill/Subagent がない場合は、通常フローで進める。
 
 ## 開発スタイル
 

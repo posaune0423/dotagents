@@ -12,6 +12,9 @@ suppress_unstable_features_warning = true
 plan_mode_reasoning_effort = "high"
 oss_provider = "lmstudio"
 
+apps = false
+
+
 # ローカルパスを含むためデフォルトは空。必要なら ~/.codex 側で設定。
 notify = []
 

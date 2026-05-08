@@ -7,7 +7,7 @@ cat >/dev/null || true
 
 # Use `read <<EOF` (not `$(cat <<EOF)`) so apostrophes in the text are safe on Bash 3.2 (macOS).
 read -r -d '' ADDITIONAL_CONTEXT <<'EOF' || true
-[Skill / Subagent] Use Skills (read that skill's SKILL.md first; follow it—do not only declare use) and Subagents (isolated context, refactors/reviews/wide search, parallelism).
+[Skill / Subagent] Use Skills (read that skill's SKILL.md first; follow it—do not only declare use) and Subagents proactively (isolated context, refactors/reviews/wide search, parallelism)—delegate when the task clearly benefits, without waiting for the user to request a subagent.
 EOF
 
 jq -n \
