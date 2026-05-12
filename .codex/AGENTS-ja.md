@@ -29,7 +29,7 @@ KPI やカバレッジ目標が与えられたら、達成するまで試行す�
 - Find: Use `fd` instead of `find`
 - JSON: Use `jq` for JSON processing
 - Shell: Fish shell is the primary shell
-  - Task: `justfile` instead of Makefile
+- Task: `justfile` instead of Makefile
 - Node.js: bun, v24+
 - E2E: `playwright` instead of `chrome-devtools`
 - Python: `uv`

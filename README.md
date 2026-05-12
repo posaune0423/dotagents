@@ -2,10 +2,25 @@
 
 このリポジトリは **グローバルな agent 設定**（skills / rules / commands）の **SSoT (Single Source of Truth)** です。
 
-## 前提条件
+## 環境構築（基本は Nix）
 
-- [just](https://github.com/casey/just)（例: `brew install just`）
-- [Bun](https://bun.sh)（formatter / linter / git hooks 用）
+[Nix](https://nixos.org/download/)（flakes 有効）だけ用意すれば、CLI ツールは [flake.nix](flake.nix) の devShell から揃います（**just / Bun / git / lefthook / shellcheck / shfmt**）。
+
+### 手順
+
+1. リポジトリのルートに移動する。
+2. **初回のみ**、依存と Git hooks を入れる（どちらか一方でよい）:
+   - `nix run .#setup` — `bun install` のみ（インストール完了時に `prepare` が走り lefthook が入る）。
+   - または `nix develop` でシェルに入ってから `just bootstrap`（同じく `bun install`）。
+3. 以降の作業は `nix develop` のシェル内で `just` / `bun` を使う。
+
+**PATH の注意:** devShell は flake の CLI を PATH の先頭に載せます。ワンショットで `nix develop -c bash -lc '…'` のように **ログインシェル（`-l`）** を使うと、`~/.bash_profile` などが PATH を組み替え、**ホストのツールが先に解決される**ことがあります。スクリプトや CI では `bash -c`（`-l` なし）を使ってください。direnv や対話的な `nix develop` では通常この問題は出ません。
+
+**direnv** を使う場合は [`.envrc`](.envrc) により同じ devShell が自動で載ります。初回だけ `direnv allow` が必要です。
+
+### Nix を使わない場合
+
+- [just](https://github.com/casey/just) と [Bun](https://bun.sh) をそれぞれ [公式の手順](https://github.com/casey/just#installation)で入れ、ルートで `bun install` を実行してください（`prepare` で lefthook が入ります）。
 
 ## リポジトリ構成（概要）
 
@@ -16,6 +31,7 @@
 | `commands/` | Cursor / エージェント向けコマンド定義                                                                                                    |
 | `scripts/`  | リンク・同期・検証シェル                                                                                                                 |
 | `justfile`  | 上記スクリプトと開発タスクのエントリポイント                                                                                             |
+| `.envrc`    | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                             |
 | `.codex/`   | （任意）Codex 用の共有ベース設定。`config.toml` はパス依存を除いた最小構成なので、ローカルの `~/.codex/config.toml` とマージして使う想定 |
 
 ## 設計
@@ -68,12 +84,20 @@ just verify-project /path/to/your-project
 
 ## 開発（formatter / linter / hooks）
 
+devShell に入った状態（`nix develop` または direnv）で次を実行します。
+
 ```bash
-bun install
-just prepare
 just format
 just lint
 just check
+```
+
+ワンショットで devShell 経由だけ呼ぶ場合の例:
+
+```bash
+nix develop -c just format
+nix develop -c just lint
+nix develop -c just check
 ```
 
 ## 仕様

@@ -26,6 +26,10 @@ install target:
 
 # --- dev (delegates to package.json / bun) ---
 
+# Nix の devShell に入ったあと、初回だけ。`bun install` が package.json の prepare（lefthook）まで実行する。一発なら: nix run .#setup
+bootstrap:
+    bun install
+
 prepare:
     bun run prepare
 
