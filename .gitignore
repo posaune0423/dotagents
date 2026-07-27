@@ -3,6 +3,7 @@
 node_modules/
 .env
 .env.*
+!.env.example
 
 # Gemini CLI writes under ~/.gemini; repo only tracks GEMINI.md (SSoT)
 .gemini/*
@@ -11,3 +12,15 @@ node_modules/
 # nix-build / nix flake build
 result
 result-*
+
+# xai-x-search output. The script resolves --out-dir against the repo root, so
+# anchor these; nested data/ or work/ dirs elsewhere stay tracked.
+/data/
+/work/
+
+# Codex CLI auto-manages these system skills; not ours to track
+skills/.system/
+
+# Codex writes its approved-command allowlist here (~/.codex/rules -> rules/).
+# Machine-local: contains absolute paths and per-project approvals.
+rules/default.rules

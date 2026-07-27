@@ -82,7 +82,7 @@ Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN
 14. Once CI passes and the PR is approved, ask the user if they want to merge the PR.
 
 15. If the user confirms, merge the PR:
-    - Use `gh pr merge --squash --delete-branch` to squash-merge and delete the remote branch
+    - Use `gh pr merge --merge --delete-branch` to merge with a merge commit and delete the remote branch
 
 16. After successful merge, check if we're in a git worktree:
     - Run: `[ "$(git rev-parse --git-common-dir)" != "$(git rev-parse --git-dir)" ]`

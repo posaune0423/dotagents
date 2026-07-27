@@ -101,7 +101,7 @@ Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN
 Once CI passes and the PR is approved (or the user asks to merge), confirm with the user, then:
 
 ```bash
-gh pr merge --squash --delete-branch
+gh pr merge --merge --delete-branch
 ```
 
 After a successful merge, check if we're in a git worktree:

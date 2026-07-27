@@ -51,6 +51,7 @@
       }
     }
   },
+  "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "high"
+  "remoteControlAtStartup": true
 }
