@@ -13,9 +13,10 @@ node_modules/
 result
 result-*
 
-# xai-x-search output (skills/xai-x-search/scripts/xai_x_search.ts --out-dir)
-data/
-work/
+# xai-x-search output. The script resolves --out-dir against the repo root, so
+# anchor these; nested data/ or work/ dirs elsewhere stay tracked.
+/data/
+/work/
 
 # Codex CLI auto-manages these system skills; not ours to track
 skills/.system/
