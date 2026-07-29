@@ -42,6 +42,19 @@ export function parseArgs(argv, { flags, booleans = [], usage, defaults = {} }) 
   return args
 }
 
+/**
+ * Reads a numeric flag, rejecting junk instead of letting NaN through — an unnoticed
+ * NaN silently disables retry loops and comparisons rather than erroring.
+ */
+export function numberArg(args, name, { min = -Infinity, integer = false } = {}) {
+  const raw = args[name]
+  const value = Number(raw)
+  if (!Number.isFinite(value) || value < min || (integer && !Number.isInteger(value))) {
+    fail(`--${name} must be ${integer ? "an integer" : "a number"} >= ${min}, got ${JSON.stringify(raw)}`)
+  }
+  return value
+}
+
 // Playwright belongs to the project under test, not to this skill — resolve it from
 // there so we drive the exact version the repo already installs.
 export async function loadChromium(repoRoot) {

@@ -86,13 +86,14 @@ if [[ "$stop" -eq 1 ]]; then
 	fi
 	pid="$(cat "$pid_file")"
 	if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
-		# Dev servers spawn children (next/webpack workers); kill the whole group.
+		# Dev servers spawn children (next/webpack workers); kill the whole group, and
+		# fall back to the bare pid when the group kill is not available.
 		kill -TERM "-${pid}" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
 		for _ in $(seq 1 20); do
 			kill -0 "$pid" 2>/dev/null || break
 			sleep 0.5
 		done
-		kill -KILL "-${pid}" 2>/dev/null || true
+		kill -KILL "-${pid}" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
 	fi
 	rm -f "$pid_file"
 	echo "Stopped dev server (pid ${pid})."
@@ -133,13 +134,18 @@ else
 fi
 
 : >"$log_file"
-# setsid gives the server its own process group so --stop can take the children with it.
+# The server needs its own process group so --stop can take its children (next/webpack
+# workers) with it. setsid does that on Linux but does not ship with macOS, so fall back
+# to bash job control: with `set -m`, a background job becomes a process-group leader.
 if command -v setsid >/dev/null 2>&1; then
 	setsid bash -c "cd '${dir}' && exec ${dev_command}" >>"$log_file" 2>&1 &
+	server_pid=$!
 else
+	set -m
 	bash -c "cd '${dir}' && exec ${dev_command}" >>"$log_file" 2>&1 &
+	server_pid=$!
+	set +m
 fi
-server_pid=$!
 echo "$server_pid" >"$pid_file"
 
 echo "Starting dev server in ${dir} on port ${port} (pid ${server_pid}); log: ${log_file}" >&2

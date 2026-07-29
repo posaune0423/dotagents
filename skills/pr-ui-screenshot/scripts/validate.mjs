@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Rejects screenshots that are blank, tiny, or prove the wrong thing was captured.
 import { readFileSync } from "node:fs"
-import { fail, parseArgs } from "./lib/common.mjs"
+import { fail, numberArg, parseArgs } from "./lib/common.mjs"
 import { decode, differingPixels, standardDeviation } from "./lib/png.mjs"
 
 const USAGE = `Usage: validate.mjs --manifest <file> [options]
@@ -28,9 +28,9 @@ const args = parseArgs(process.argv.slice(2), {
 })
 if (!args.manifest) fail(`--manifest is required\n${USAGE}`)
 
-const minStddev = Number(args["min-stddev"])
-const minWidth = Number(args["min-width"])
-const minHeight = Number(args["min-height"])
+const minStddev = numberArg(args, "min-stddev", { min: 0 })
+const minWidth = numberArg(args, "min-width", { min: 0, integer: true })
+const minHeight = numberArg(args, "min-height", { min: 0, integer: true })
 
 const manifest = JSON.parse(readFileSync(args.manifest, "utf8"))
 const problems = []

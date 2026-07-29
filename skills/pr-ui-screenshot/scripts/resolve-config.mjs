@@ -37,8 +37,12 @@ function git(cwd, cliArgs) {
   }
 }
 
-const repoRoot = args["repo-root"] ?? git(process.cwd(), ["rev-parse", "--show-toplevel"])
-if (!repoRoot || !existsSync(repoRoot)) fail("Could not determine repo root. Use --repo-root <path>.")
+// Absolutise: repoRoot is handed to other scripts as a cwd and used to resolve
+// Playwright, so a relative "." would be interpreted against the wrong directory.
+const repoRootRaw = args["repo-root"] ?? git(process.cwd(), ["rev-parse", "--show-toplevel"])
+if (!repoRootRaw) fail("Could not determine repo root. Use --repo-root <path>.")
+const repoRoot = resolve(repoRootRaw)
+if (!existsSync(repoRoot)) fail(`Repo root does not exist: ${repoRoot}`)
 
 const layers = [join(SKILL_DIR, "presets", "default.json")]
 
@@ -94,6 +98,8 @@ for (const layer of layers) {
   } catch (error) {
     fail(`Config layer is not valid JSON: ${layer}\n  ${error.message}`)
   }
+  // A top-level array or null would replace the accumulated config wholesale.
+  if (!isPlainObject(parsed)) fail(`Config layer must be a JSON object, not ${JSON.stringify(parsed)}: ${layer}`)
   if (args.explain) process.stderr.write(`config layer: ${layer}\n`)
   config = merge(config, parsed)
 }

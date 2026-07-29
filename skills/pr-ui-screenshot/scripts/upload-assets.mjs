@@ -51,7 +51,11 @@ function repoRootFor() {
 
 function saveState(state) {
   mkdirSync(dirname(statePath), { recursive: true })
-  writeFileSync(statePath, JSON.stringify(state, null, 2))
+  // These are live session cookies. Writing first and chmod-ing after would leave them
+  // world-readable for a moment, so narrow an existing file *before* writing and create
+  // a new one at 0600 from the start (the mode option only applies on creation).
+  if (existsSync(statePath)) chmodSync(statePath, 0o600)
+  writeFileSync(statePath, JSON.stringify(state, null, 2), { mode: 0o600 })
   chmodSync(statePath, 0o600)
 }
 
@@ -99,12 +103,16 @@ async function readDraft(textarea) {
   return textarea.inputValue()
 }
 
-async function clearDraft(textarea) {
-  // GitHub autosaves the comment draft; leaving markup behind would resurface it later.
-  await textarea.evaluate(node => {
-    node.value = ""
+// GitHub autosaves the comment draft, so whatever we leave in the box comes back later.
+async function setDraft(textarea, value) {
+  await textarea.evaluate((node, next) => {
+    node.value = next
     node.dispatchEvent(new Event("input", { bubbles: true }))
-  })
+  }, value)
+}
+
+async function clearDraft(textarea) {
+  await setDraft(textarea, "")
 }
 
 async function uploadOne(page, textarea, absPath) {
@@ -198,28 +206,35 @@ if (!textarea) {
   )
 }
 await textarea.scrollIntoViewIfNeeded()
-await clearDraft(textarea)
+
+// The box may hold a comment the user started and has not sent. We only borrow it as an
+// upload form, so snapshot it first and put it back no matter how this run ends.
+const originalDraft = await readDraft(textarea)
+if (originalDraft.trim()) log("Note: preserving the unsent comment draft already in the box.")
 
 const failures = []
 let uploaded = 0
-for (const { label, shot } of shots) {
-  const absPath = isAbsolute(shot.path) ? shot.path : resolve(shot.path)
-  if (!existsSync(absPath)) {
-    failures.push(`${label}: file not found (${absPath})`)
-    continue
+try {
+  await clearDraft(textarea)
+  for (const { label, shot } of shots) {
+    const absPath = isAbsolute(shot.path) ? shot.path : resolve(shot.path)
+    if (!existsSync(absPath)) {
+      failures.push(`${label}: file not found (${absPath})`)
+      continue
+    }
+    try {
+      shot.url = await uploadOne(page, textarea, absPath)
+      uploaded += 1
+      log(`- ${label} -> ${shot.url}`)
+    } catch (error) {
+      failures.push(`${label}: ${error.message}`)
+    }
+    await page.waitForTimeout(1000)
   }
-  try {
-    shot.url = await uploadOne(page, textarea, absPath)
-    uploaded += 1
-    log(`- ${label} -> ${shot.url}`)
-  } catch (error) {
-    failures.push(`${label}: ${error.message}`)
-  }
-  await page.waitForTimeout(1000)
+} finally {
+  await setDraft(textarea, originalDraft).catch(() => {})
+  await browser.close()
 }
-
-await clearDraft(textarea)
-await browser.close()
 
 const outManifest = args["out-manifest"] ?? args.manifest
 writeFileSync(outManifest, `${JSON.stringify(manifest, null, 2)}\n`)

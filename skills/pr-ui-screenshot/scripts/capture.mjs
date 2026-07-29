@@ -2,7 +2,7 @@
 // Drives Playwright over a capture manifest and writes one PNG per target/locale/side.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
-import { fail, loadChromium, log, parseArgs } from "./lib/common.mjs"
+import { fail, loadChromium, log, numberArg, parseArgs } from "./lib/common.mjs"
 
 const USAGE = `Usage: capture.mjs --config <file> --manifest <file> --base-url <url> [options]
 
@@ -110,22 +110,26 @@ async function captureOne(context, target, options) {
       box = (await locator.boundingBox()) ?? box
     }
 
-    const pageSize = await page.evaluate(() => ({
+    // boundingBox() is viewport-relative but a fullPage clip is document-relative, and
+    // scrollIntoViewIfNeeded above may well have scrolled. Convert to document
+    // coordinates and always shoot fullPage so the two can never disagree.
+    const page_ = await page.evaluate(() => ({
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
       width: document.documentElement.scrollWidth,
       height: document.documentElement.scrollHeight,
     }))
-    const x = Math.max(0, Math.floor(box.x - PADDING))
-    const y = Math.max(0, Math.floor(box.y - PADDING))
+    const x = Math.max(0, Math.floor(box.x + page_.scrollX - PADDING))
+    const y = Math.max(0, Math.floor(box.y + page_.scrollY - PADDING))
     const clip = {
       x,
       y,
-      width: Math.min(Math.ceil(box.width + PADDING * 2), pageSize.width - x),
-      height: Math.min(Math.ceil(box.height + PADDING * 2), pageSize.height - y),
+      width: Math.min(Math.ceil(box.width + PADDING * 2), page_.width - x),
+      height: Math.min(Math.ceil(box.height + PADDING * 2), page_.height - y),
     }
     if (clip.width <= 0 || clip.height <= 0) throw new Error(`Computed an empty clip for ${target.selector}`)
 
-    const clipped = clip.height + clip.y > page.viewportSize().height
-    await page.screenshot({ path: outPath, clip, fullPage: clipped, animations: "disabled" })
+    await page.screenshot({ path: outPath, clip, fullPage: true, animations: "disabled" })
     return { ...shot, width: clip.width, height: clip.height }
   } finally {
     await page.close()
@@ -160,7 +164,7 @@ const config = JSON.parse(readFileSync(args.config, "utf8"))
 const manifest = JSON.parse(readFileSync(args.manifest, "utf8"))
 const baseUrl = args["base-url"].replace(/\/$/, "")
 const side = args.side
-const retries = Number(args.retries)
+const retries = numberArg(args, "retries", { min: 0, integer: true })
 const only = args.only ? new Set(args.only.split(",").map(entry => entry.trim())) : null
 // Default outside the repo: screenshots are build artefacts, and writing them into the
 // working tree invites accidental commits.
