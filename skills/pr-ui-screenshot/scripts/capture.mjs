@@ -103,7 +103,12 @@ async function captureOne(context, target, options) {
     // Grow the viewport rather than zooming out: shrinking text to fit makes the
     // wording — the thing being reviewed — unreadable.
     const wanted = Math.ceil(box.height + PADDING * 2)
-    if (wanted > viewport.height && wanted <= MAX_VIEWPORT_HEIGHT) {
+    if (wanted > MAX_VIEWPORT_HEIGHT) {
+      log(
+        `  ! ${target.id ?? target.selector} needs ${wanted}px but the cap is ${MAX_VIEWPORT_HEIGHT}px; ` +
+          `capturing it full-page instead. Narrow the selector if the result is unwieldy.`,
+      )
+    } else if (wanted > viewport.height) {
       await page.setViewportSize({ width: viewport.width, height: wanted })
       await page.waitForTimeout(200)
       await locator.scrollIntoViewIfNeeded()

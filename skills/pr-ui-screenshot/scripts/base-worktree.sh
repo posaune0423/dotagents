@@ -76,9 +76,28 @@ if [[ -z "$worktree" ]]; then
 	worktree="${TMPDIR:-/tmp}/pr-ui-screenshot/$(basename "$repo_root")-base"
 fi
 
+# True only for a path git actually has registered as a worktree of this repo. Every
+# recursive delete below is gated on this: a typo in --worktree must never be able to
+# erase an unrelated directory.
+is_registered_worktree() {
+	local candidate="$1" resolved listed
+	resolved="$(cd "$candidate" 2>/dev/null && pwd -P)" || return 1
+	while IFS= read -r listed; do
+		[[ "$listed" == "$resolved" ]] && return 0
+	done < <(git -C "$repo_root" worktree list --porcelain |
+		sed -n 's/^worktree //p' |
+		while IFS= read -r path; do (cd "$path" 2>/dev/null && pwd -P) || true; done)
+	return 1
+}
+
 if [[ "$remove" -eq 1 ]]; then
 	if [[ -d "$worktree" ]]; then
-		# Drop the symlink first so `git worktree remove` never walks into shared deps.
+		if ! is_registered_worktree "$worktree"; then
+			echo "Refusing to delete ${worktree}: it is not a registered worktree of ${repo_root}." >&2
+			echo "Remove it by hand if that is really what you want." >&2
+			exit 1
+		fi
+		# Drop the symlink first so the removal never walks into the shared deps.
 		[[ -L "${worktree}/node_modules" ]] && rm -f "${worktree}/node_modules"
 		git -C "$repo_root" worktree remove --force "$worktree" 2>/dev/null || rm -rf "$worktree"
 	fi
@@ -122,7 +141,19 @@ if [[ -d "${worktree}/.git" || -f "${worktree}/.git" ]]; then
 		echo "Reusing worktree already at ${merge_base}" >&2
 	fi
 else
-	rm -rf "$worktree"
+	if [[ -e "$worktree" ]]; then
+		# Something is already there but it is not a worktree checkout. Only clear it when
+		# git still has it registered (a half-removed worktree); otherwise it is someone
+		# else's directory and we must not touch it.
+		if is_registered_worktree "$worktree"; then
+			git -C "$repo_root" worktree remove --force "$worktree" 2>/dev/null || true
+		fi
+		if [[ -e "$worktree" ]]; then
+			echo "Refusing to overwrite ${worktree}: it exists and is not a registered worktree." >&2
+			echo "Pass a different --worktree path, or remove that directory by hand." >&2
+			exit 1
+		fi
+	fi
 	git -C "$repo_root" worktree add --detach --force "$worktree" "$merge_base" >&2
 fi
 
@@ -143,6 +174,13 @@ elif [[ "$share_node_modules" -eq 1 && "$lock_changed" -eq 0 && -d "${repo_root}
 	ln -sfn "${repo_root}/node_modules" "${worktree}/node_modules"
 	echo "Symlinked node_modules from the parent checkout (lockfile is unchanged)." >&2
 elif [[ -n "$install_command" ]]; then
+	# A symlink left by an earlier run points at the parent's node_modules. Installing
+	# through it would write the base commit's dependencies into the main checkout, so
+	# drop the link and give the worktree its own tree.
+	if [[ -L "${worktree}/node_modules" ]]; then
+		echo "Removing the shared node_modules symlink before installing (lockfile diverged)." >&2
+		rm -f "${worktree}/node_modules"
+	fi
 	echo "Installing dependencies in the worktree: ${install_command}" >&2
 	(cd "$worktree" && eval "$install_command") >&2
 else

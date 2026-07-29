@@ -45,7 +45,12 @@ const statePath = args["storage-state"] ?? DEFAULT_STATE
 
 function repoRootFor() {
   if (args["repo-root"]) return args["repo-root"]
-  if (args.config) return JSON.parse(readFileSync(args.config, "utf8")).repoRoot
+  if (args.config) {
+    const fromConfig = JSON.parse(readFileSync(args.config, "utf8")).repoRoot
+    // resolve-config.mjs always sets this; a hand-written config might not.
+    if (!fromConfig) fail(`${args.config} has no "repoRoot". Pass --repo-root <path> instead.`)
+    return fromConfig
+  }
   return process.cwd()
 }
 

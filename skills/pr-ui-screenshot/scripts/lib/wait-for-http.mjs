@@ -11,9 +11,23 @@ if (!url) {
   process.exit(2)
 }
 
+// Guard both inputs: Infinity would make a deadline that never expires, and a NaN pid
+// would make `alive()` report the server dead on the first tick.
 const timeoutSec = Number(timeoutArg ?? 0)
+if (!Number.isFinite(timeoutSec) || timeoutSec < 0) {
+  process.stderr.write(`timeoutSeconds must be a non-negative finite number, got ${JSON.stringify(timeoutArg)}\n`)
+  process.exit(2)
+}
+
 const pidIndex = rest.indexOf("--pid")
-const pid = pidIndex >= 0 ? Number(rest[pidIndex + 1]) : null
+let pid = null
+if (pidIndex >= 0) {
+  pid = Number(rest[pidIndex + 1])
+  if (!Number.isInteger(pid) || pid <= 0) {
+    process.stderr.write(`--pid must be a positive integer, got ${JSON.stringify(rest[pidIndex + 1])}\n`)
+    process.exit(2)
+  }
+}
 
 const sleep = ms => new Promise(done => setTimeout(done, ms))
 
