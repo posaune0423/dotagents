@@ -1,0 +1,37 @@
+{
+  "dev": {
+    "command": "npm run dev",
+    "port": 3000,
+    "basePort": 3001,
+    "readyPath": "/",
+    "readyTimeoutSec": 180,
+    "env": {}
+  },
+  "install": {
+    "command": "npm ci",
+    "shareNodeModules": true
+  },
+  "locales": {
+    "list": [],
+    "default": "",
+    "strategy": "path-prefix"
+  },
+  "detect": {
+    "translation": ["**/locales/*/*.json", "locale/*/*.json", "public/locales/*/*.json"],
+    "component": ["src/components/**/*.tsx", "components/**/*.tsx"],
+    "route": ["pages/**/*.tsx", "app/**/page.tsx", "src/pages/**/*.tsx", "src/app/**/page.tsx"]
+  },
+  "viewports": [
+    { "name": "sm", "width": 375, "height": 667 },
+    { "name": "lg", "width": 1280, "height": 800 }
+  ],
+  "defaultViewport": "sm",
+  "auth": {
+    "cookies": []
+  },
+  "section": {
+    "heading": "## Screenshots",
+    "insertBefore": [],
+    "template": "templates/default.md"
+  }
+}
