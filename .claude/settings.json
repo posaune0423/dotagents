@@ -1,9 +1,7 @@
 {
   "env": {},
   "permissions": {
-    "allow": [
-      "mcp__pencil"
-    ]
+    "allow": ["mcp__pencil"]
   },
   "model": "opus",
   "enabledPlugins": {

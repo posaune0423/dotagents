@@ -32,11 +32,11 @@ skill 探索は **`skills/<name>/SKILL.md` の 1 階層しか見ない**。`proj
 
 実測（`claude -p` で確認）:
 
-| 配置                                            | 認識 |
-| ----------------------------------------------- | ---- |
-| `skills/<name>/SKILL.md`                        | ✅   |
-| `skills/projects/<repo>/<name>/SKILL.md`        | ❌   |
-| `skills/<name>` → `projects/<repo>/<name>`      | ✅   |
+| 配置                                       | 認識 |
+| ------------------------------------------ | ---- |
+| `skills/<name>/SKILL.md`                   | ✅   |
+| `skills/projects/<repo>/<name>/SKILL.md`   | ❌   |
+| `skills/<name>` → `projects/<repo>/<name>` | ✅   |
 
 ## 追加手順
 
