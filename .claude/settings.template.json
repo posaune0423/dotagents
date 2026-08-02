@@ -13,30 +13,6 @@
     "allow": ["mcp__pencil"]
   },
   "model": "opus",
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "osascript -e 'display notification \"Task completed\" with title \"Claude Code\" sound name \"Glass\"'"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "osascript -e 'display notification \"Waiting for input\" with title \"Claude Code\" sound name \"Blow\"'"
-          }
-        ]
-      }
-    ]
-  },
   "enabledPlugins": {
     "lua-lsp@claude-plugins-official": true,
     "coderabbit@coderabbit": true,

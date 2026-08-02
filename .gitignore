@@ -21,6 +21,17 @@ result-*
 # Codex CLI auto-manages these system skills; not ours to track
 skills/.system/
 
+# Project-specific skills not yet shared with the team — see
+# skills/projects/README.md. The bucket's contents stay machine-local; the
+# README is tracked so the directory and its purpose remain in the repo.
+/skills/projects/*
+!/skills/projects/README.md
+
+# Skill discovery only scans skills/<name>/SKILL.md — one level — so each
+# project skill also needs a symlink at skills/<name> into projects/.
+# Ignore those symlinks (one line per project skill).
+/skills/slack-qa-request
+
 # Codex writes its approved-command allowlist here (~/.codex/rules -> rules/).
 # Machine-local: contains absolute paths and per-project approvals.
 rules/default.rules
