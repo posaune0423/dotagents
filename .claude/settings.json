@@ -1,7 +1,7 @@
 {
   "env": {},
   "permissions": {
-    "allow": ["mcp__pencil"]
+    "allow": []
   },
   "model": "opus",
   "enabledPlugins": {
@@ -28,6 +28,7 @@
     }
   },
   "effortLevel": "high",
+  "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true

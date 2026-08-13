@@ -27,10 +27,8 @@ skills/.system/
 /skills/projects/*
 !/skills/projects/README.md
 
-# Skill discovery only scans skills/<name>/SKILL.md — one level — so each
-# project skill also needs a symlink at skills/<name> into projects/.
-# Ignore those symlinks (one line per project skill).
-/skills/slack-qa-request
+# Individual not-yet-shared skills are ignored via .git/info/exclude, not here:
+# their names identify internal repos and workflows, and this file is committed.
 
 # Codex writes its approved-command allowlist here (~/.codex/rules -> rules/).
 # Machine-local: contains absolute paths and per-project approvals.
