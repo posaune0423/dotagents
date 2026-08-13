@@ -1,4 +1,0 @@
-# Skill templates are markdown *sources* with block placeholders ({{#each}} / {{#if}}).
-# Prettier inserts blank lines around those lines, which would split the rendered
-# markdown tables apart. Keep them exactly as written.
-skills/*/templates/
