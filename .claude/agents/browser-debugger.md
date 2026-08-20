@@ -27,6 +27,7 @@ Begin immediately. Do not restate the task or announce a plan first.
 ## Constraints
 
 - Do not edit repository files. Fixes belong to the caller; you supply evidence and re-verify afterwards.
+- The `Bash` tool is granted for driving the browser and reading files only: `playwright-cli`, the project's own start command, and `cat`, `head`, `rg`. Writing screenshots or traces to a scratch directory is expected; writing anywhere inside the repository is not. Never run `rm`, `mv`, `cp`, `chmod`, `git commit`, or `git push`.
 - Never report a symptom you did not observe. Mark anything unconfirmed as a hypothesis.
 - Scale the evidence to the strength of the claim: calling something the root cause requires the observation that rules out the alternatives. Without it, rank it as a hypothesis instead.
 - Do not start a long-lived server without saying so, and shut down whatever you start.

@@ -26,7 +26,7 @@ Begin immediately. Do not restate the task or announce a plan first.
 
 ## Constraints
 
-- Do not modify repository files.
+- Do not modify repository files. The `Bash` tool is granted for read-only inspection only: the `ctx7` CLI, and reading manifests or lockfiles with `cat`, `head`, `rg`, or `jq`. Never run a command that writes, including redirection into a file, `rm`, `mv`, `cp`, `chmod`, `git commit`, `git push`, or a package install. If an answer would require running something that writes, say so instead of running it.
 - Never answer from memory. Every load-bearing claim needs a source you actually read in this task.
 - Scale the evidence to the strength of the claim: a version-specific default or a behavior change needs an exact reference, not a summary. If you cannot produce one, downgrade the claim to "unverified" rather than stating it.
 - Prefer targeted search and file reads over broad scans.

@@ -59,7 +59,7 @@
 設計の原則:
 
 - **model は「必要な知能」、effort は「速度ダイヤル」。** モデル階層を下げて速くするのではなく `effort` を役割ごとに下げる。Claude Code は全モデルが同じ使用量枠を共有するため、Codex の `gpt-5.3-codex-spark` のような「別枠だから安いモデルを使う」動機が存在しない。よって Haiku は使わない。
-- **`effort` を省略するとセッションの `effortLevel` を継承する。** 既定は Opus + High なので、省略は「Opus / high 思考で走る」意味になる。機械的な作業では最大のレイテンシ源。
+- **`effort` を省略するとセッション側の設定を継承する。** つまり省略は「速度を指定しない」ではなく「呼び出し元と同じ思考量で走る」こと。このリポジトリの想定は Opus + high なので、機械的な作業ほど明示的に下げる価値が大きい（実際の既定値はモデルと設定に依存するため、ここでは特定の値を前提にしない）。
 - **組み込みとプラグインと重複させない。** 組み込みの `Explore` / `Plan` / `general-purpose` と、有効化済み plugin の `code-architect` / `code-explorer` / `code-reviewer` / `codex-rescue` が担う役割は作らない。とくに探索は組み込み `Explore` が速い（カスタム subagent は呼び出しごとに CLAUDE.md 階層と git status を再読み込みするが、`Explore` はこれをスキップする）。
 - **数を増やさない。** 各 agent の `name` と `description` は毎セッション main thread の system prompt に載る。増やすと誤ルーティングが増え、失敗1回ごとに委譲の往復が丸ごと無駄になる。
 - **`skills:` は「ほぼ毎回使うもの」だけ。** 挙げたスキルは全文が起動時に system prompt へ注入される。使うかどうかが呼び出しごとに変わるものは挙げず、`Skill` ツールでオンデマンドに取らせる。
@@ -80,7 +80,8 @@ just link-global
 ```
 
 > **注意**: `just link-global` は **main checkout のルート**で実行してください。worktree 内で実行すると
-> symlink が worktree のパスを指し、worktree を削除した時点で壊れます。
+> symlink が worktree のパスを指し、worktree を削除した時点で壊れます。`just verify-global` は
+> リンク先が main checkout のパスと一致するかを確認するので、このミスを検出できます。
 
 - **Codex 固有**（`~/.codex/commands` を削除し、`~/.codex/prompts` を `~/.agents/commands` に symlink）:
 

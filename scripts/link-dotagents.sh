@@ -15,8 +15,10 @@ Options:
   --all            Also link commands and rules into ~/.agents (use with --home)
   --tool-configs   Symlink CLAUDE.md, settings.json, agents/ (Claude), and GEMINI.md
                    to this repo's copies
-  --verify         Read-only check that every link above exists and resolves into a
-                   dotagents checkout. Exits non-zero on drift.
+  --verify         Check that every link above exists and resolves into the MAIN
+                   dotagents checkout. Verification itself writes nothing; combining
+                   it with the flags above links first, then verifies. Exits non-zero
+                   on drift.
   -h, --help       Show this help
 
 At least one of --home, --tool-configs, or --verify is required.
@@ -166,10 +168,24 @@ resolve_link() {
 	fi
 }
 
+# Root of the MAIN working tree, even when this script runs from a git worktree.
+# Links must point there: a link into a worktree breaks when that worktree is removed.
+EXPECTED_ROOT=""
+
+expected_root() {
+	local common
+	if common="$(git -C "${REPO_ROOT}" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
+		dirname -- "${common}"
+	else
+		printf '%s\n' "${REPO_ROOT}"
+	fi
+}
+
 check_link() {
 	local dst="$1"
 	local want="$2"
 	local resolved
+	local expect="${EXPECTED_ROOT}${want}"
 
 	if [[ ! -L "${dst}" ]]; then
 		if [[ -e "${dst}" ]]; then
@@ -185,12 +201,40 @@ check_link() {
 		echo "BROKEN: ${dst} -> ${resolved}" >&2
 		return 1
 	fi
-	if [[ "${resolved}" != *"${want}" ]]; then
-		echo "UNEXPECTED TARGET: ${dst} -> ${resolved} (expected a path ending in ${want})" >&2
+	if [[ "${resolved}" != "${expect}" ]]; then
+		echo "UNEXPECTED TARGET: ${dst} -> ${resolved} (expected ${expect})" >&2
 		return 1
 	fi
 
 	echo "OK: ${dst} -> ${resolved}"
+}
+
+# Claude Code silently ignores an agent file whose frontmatter is missing, unclosed,
+# or whose name does not match the filename, so check the shape here rather than
+# discovering it at delegation time.
+validate_agent_file() {
+	local f="$1"
+	local fm got want
+
+	if [[ "$(head -n 1 -- "${f}")" != "---" ]]; then
+		echo "INVALID (no YAML frontmatter): ${f}" >&2
+		return 1
+	fi
+	if ! fm="$(awk 'NR > 1 { if ($0 == "---") { closed = 1; exit } print } END { if (!closed) exit 3 }' "${f}")"; then
+		echo "INVALID (frontmatter not closed): ${f}" >&2
+		return 1
+	fi
+	if ! grep -qE '^description:' <<<"${fm}"; then
+		echo "INVALID (missing description): ${f}" >&2
+		return 1
+	fi
+
+	want="$(basename -- "${f}" .md)"
+	got="$(awk '/^name:/ { sub(/^name:[[:space:]]*/, ""); gsub(/[[:space:]]/, ""); print; exit }' <<<"${fm}")"
+	if [[ "${got}" != "${want}" ]]; then
+		echo "INVALID (name '${got}' does not match filename '${want}'): ${f}" >&2
+		return 1
+	fi
 }
 
 # Assumes the flag set used by `just link-global` (--home --all --tool-configs).
@@ -198,6 +242,10 @@ verify_links() {
 	local rc=0
 	local f
 	local count=0
+	local valid=0
+
+	EXPECTED_ROOT="$(expected_root)"
+	echo "Expecting links into: ${EXPECTED_ROOT}"
 
 	check_link "${HOME}/.agents/skills" "/skills" || rc=1
 	check_link "${HOME}/.agents/commands" "/commands" || rc=1
@@ -207,12 +255,12 @@ verify_links() {
 	check_link "${HOME}/.claude/agents" "/.claude/agents" || rc=1
 	check_link "${HOME}/.gemini/GEMINI.md" "/.gemini/GEMINI.md" || rc=1
 
-	# Claude Code only loads an agent file that starts with YAML frontmatter.
 	shopt -s nullglob
 	for f in "${HOME}/.claude/agents"/*.md; do
 		count=$((count + 1))
-		if [[ "$(head -n 1 -- "${f}")" != "---" ]]; then
-			echo "INVALID (no YAML frontmatter): ${f}" >&2
+		if validate_agent_file "${f}"; then
+			valid=$((valid + 1))
+		else
 			rc=1
 		fi
 	done
@@ -220,8 +268,10 @@ verify_links() {
 
 	if [[ "${count}" -eq 0 ]]; then
 		echo "WARN: no agent definitions under ${HOME}/.claude/agents" >&2
+	elif [[ "${valid}" -eq "${count}" ]]; then
+		echo "OK: ${count} agent definition(s) loadable by Claude Code"
 	else
-		echo "OK: ${count} agent definition(s) visible to Claude Code"
+		echo "INVALID: only ${valid} of ${count} agent definition(s) are loadable" >&2
 	fi
 
 	return "${rc}"
