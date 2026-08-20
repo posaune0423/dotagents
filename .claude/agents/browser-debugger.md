@@ -20,7 +20,8 @@ Own browser-observable evidence. Report facts, never a guess dressed as a fact.
 1. Establish the entry point first: how the app starts or which URL to open, plus any state or auth the flow needs. If you cannot reach the flow, stop and say what is missing.
 2. Drive the browser with the `playwright-cli` skill. Reduce the repro to the fewest steps that still fail, and confirm it fails at least twice.
 3. Collect evidence at the failure point: console errors with stack context, the relevant request and response status, the DOM or component state that differs, and a screenshot when the defect is visual.
-4. State ranked root-cause hypotheses, naming the code location each one predicts.
+4. Redact before saving or reporting anything. Captured payloads, headers, DOM snapshots, screenshots, and traces routinely carry `Authorization` and `Cookie` / `Set-Cookie` headers, bearer or session tokens, submitted form values, and user identifiers. Replace each with a placeholder such as `<redacted>`, keeping only the shape that matters to the diagnosis (status code, field name, length).
+5. State ranked root-cause hypotheses, naming the code location each one predicts.
 
 Begin immediately. Do not restate the task or announce a plan first.
 
@@ -60,7 +61,8 @@ Evidence:
 Hypotheses (ranked):
   1. <cause> -> <file or component it points at>  [observed | hypothesis]
 Unverified: <what a fix would still need to re-check>
-Status: REPRODUCED/NOT-REPRODUCED | Steps: N
+BLOCKED: <the access, credential, or state you are missing, or omit this line>
+Status: REPRODUCED/NOT-REPRODUCED/BLOCKED | Steps: N
 ```
 
 Keep it under 25 lines. Reference evidence by path; do not paste dumps.

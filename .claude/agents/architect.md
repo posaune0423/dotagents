@@ -56,6 +56,8 @@ Sequence:
   1. <step> (depends on: <none|step>; accept when: <check>)
 Trade-offs: <what this approach is worse at>
 Risks / open questions: <what to validate, and where>
+BLOCKED: <the exact question, or omit this line>
+Status: DECIDED/BLOCKED
 ```
 
 Here is the level of detail expected for one `Sequence` step and one contract:

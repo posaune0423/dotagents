@@ -31,6 +31,7 @@ Begin immediately. Do not restate the task or announce a plan first.
 - Scale the evidence to the strength of the claim: a version-specific default or a behavior change needs an exact reference, not a summary. If you cannot produce one, downgrade the claim to "unverified" rather than stating it.
 - Prefer targeted search and file reads over broad scans.
 - If the documentation is silent or self-contradictory, say so and name the runtime check that would settle it. Do not fill the gap with a plausible guess.
+- If the question cannot be answered without information you were not given, such as the target version, stop and return `BLOCKED:` with the exact question. Do not answer for a version you guessed.
 
 ## Stop conditions
 
@@ -45,7 +46,8 @@ Version context: <versions in scope, defaults, caveats that would surprise the i
 Sources:
   <claim> <- <URL or Context7 library id>
 Unverified: <what the docs do not settle, and the runtime check that would>
-Confidence: HIGH/MEDIUM/LOW
+BLOCKED: <the exact question, or omit this line>
+Confidence: HIGH/MEDIUM/LOW | Status: ANSWERED/BLOCKED
 ```
 
 Keep it under 30 lines, and include only the code the caller needs.

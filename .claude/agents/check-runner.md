@@ -49,7 +49,8 @@ Mechanical fixes:
   <absolute/path> - <what changed>
 Substantive failures:
   <target>: <shortest excerpt that identifies the cause>
-Status: PASS/FAIL | Fixed: N | Files: N
+BLOCKED: <the exact question, or omit this line>
+Status: PASS/FAIL/BLOCKED | Fixed: N | Files: N
 ```
 
 Keep it under 25 lines. Never paste a full log.
