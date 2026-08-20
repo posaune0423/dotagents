@@ -40,7 +40,7 @@ Begin immediately. Do not restate the task or announce a plan first.
 
 ## Return
 
-```
+```text
 PR: <url> (<created | updated>)
 CI: <check> -> PASS | FAIL | PENDING
 Review threads: <N addressed, N resolved, N left open>

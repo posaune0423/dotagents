@@ -42,7 +42,7 @@ It is acceptable and expected to report that everything already passed. Do not m
 
 ## Return
 
-```
+```text
 Commands:
   <command> -> PASS | FAIL
 Mechanical fixes:

@@ -39,7 +39,7 @@ Begin immediately. Do not restate the task or announce a plan first.
 
 ## Return
 
-```
+```text
 Files changed:
   <absolute/path> - <why>
 Verified:

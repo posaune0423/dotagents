@@ -40,7 +40,7 @@ Begin immediately. Do not restate the task or announce a plan first.
 
 ## Return
 
-```
+```text
 Answer: <the specific thing asked, in the shape asked for>
 Version context: <versions in scope, defaults, caveats that would surprise the implementer>
 Sources:

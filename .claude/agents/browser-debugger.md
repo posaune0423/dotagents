@@ -53,7 +53,7 @@ It is acceptable and expected to report that the symptom did not reproduce. Do n
 
 ## Return
 
-```
+```text
 Repro: <steps, URL, viewport, preconditions>  (reproduced N/N times)
 Expected vs actual: <one line each>
 Evidence:

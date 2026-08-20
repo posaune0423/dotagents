@@ -46,7 +46,7 @@ Before committing to a recommendation, answer all four. If any answer is no, fix
 
 ## Return
 
-```
+```text
 Recommendation: <one sentence>
 Shape:
   <module/layer> - <responsibility> - <existing file it follows>
@@ -62,7 +62,7 @@ Status: DECIDED/BLOCKED
 
 Here is the level of detail expected for one `Sequence` step and one contract:
 
-```
+```text
 Contracts:
   linkClaudeAgents(repoRoot, home): links <repo>/.claude/agents -> ~/.claude/agents;
     errors if the source dir is absent; existing non-symlink dst is moved to a timestamped backup;
