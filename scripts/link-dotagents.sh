@@ -3,19 +3,27 @@ set -euo pipefail
 
 usage() {
 	cat <<'EOF'
-link-dotagents.sh --home [--all] [--tool-configs]
+link-dotagents.sh --home [--all] [--tool-configs] [--verify]
 
 Create symlinks from this repo (SSoT) into:
   - ~/.agents (global agent config)
-  - optionally ~/.claude/CLAUDE.md, ~/.claude/settings.json, and ~/.gemini/GEMINI.md
+  - optionally ~/.claude/CLAUDE.md, ~/.claude/settings.json, ~/.claude/agents,
+    and ~/.gemini/GEMINI.md
 
 Options:
   --home           Link repo skills into ~/.agents/skills
   --all            Also link commands and rules into ~/.agents (use with --home)
-  --tool-configs   Symlink CLAUDE.md, settings.json (Claude), and GEMINI.md to this repo's copies
+  --tool-configs   Symlink CLAUDE.md, settings.json, agents/ (Claude), and GEMINI.md
+                   to this repo's copies
+  --verify         Read-only check that every link above exists and resolves into a
+                   dotagents checkout. Exits non-zero on drift.
   -h, --help       Show this help
 
-At least one of --home or --tool-configs is required.
+At least one of --home, --tool-configs, or --verify is required.
+
+Note: subagent definitions are NOT shared via ~/.agents. Claude Code reads Markdown
+(.claude/agents/*.md) and Codex reads TOML (.codex/agents/*.toml), so each tool gets
+its own symlink.
 
 Behavior:
   - If destination exists and is not a symlink, it is moved aside as a timestamped backup.
@@ -29,6 +37,7 @@ REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 DO_HOME=false
 HOME_ALL=false
 DO_TOOL_CONFIGS=false
+DO_VERIFY=false
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -42,6 +51,10 @@ while [[ $# -gt 0 ]]; do
 		;;
 	--tool-configs)
 		DO_TOOL_CONFIGS=true
+		shift
+		;;
+	--verify)
+		DO_VERIFY=true
 		shift
 		;;
 	-h | --help)
@@ -105,9 +118,10 @@ if [[ "${DO_HOME}" == "true" ]]; then
 	did_something=true
 fi
 
-link_tool_instruction_files() {
+link_tool_configs() {
 	local claude_md_src="${REPO_ROOT}/.claude/CLAUDE.md"
 	local claude_settings_src="${REPO_ROOT}/.claude/settings.json"
+	local claude_agents_src="${REPO_ROOT}/.claude/agents"
 	local gemini_md_src="${REPO_ROOT}/.gemini/GEMINI.md"
 	if [[ ! -f "${claude_md_src}" ]]; then
 		echo "ERROR: expected file missing: ${claude_md_src}" >&2
@@ -117,6 +131,10 @@ link_tool_instruction_files() {
 		echo "ERROR: expected file missing: ${claude_settings_src}" >&2
 		exit 1
 	fi
+	if [[ ! -d "${claude_agents_src}" ]]; then
+		echo "ERROR: expected directory missing: ${claude_agents_src}" >&2
+		exit 1
+	fi
 	if [[ ! -f "${gemini_md_src}" ]]; then
 		echo "ERROR: expected file missing: ${gemini_md_src}" >&2
 		exit 1
@@ -124,12 +142,94 @@ link_tool_instruction_files() {
 	mkdir -p -- "${HOME}/.claude" "${HOME}/.gemini"
 	safe_link "${claude_md_src}" "${HOME}/.claude/CLAUDE.md"
 	safe_link "${claude_settings_src}" "${HOME}/.claude/settings.json"
+	safe_link "${claude_agents_src}" "${HOME}/.claude/agents"
 	safe_link "${gemini_md_src}" "${HOME}/.gemini/GEMINI.md"
 }
 
 if [[ "${DO_TOOL_CONFIGS}" == "true" ]]; then
-	link_tool_instruction_files
+	link_tool_configs
 	did_something=true
+fi
+
+# Resolve a symlink one level, without readlink -f (unreliable on BSD/macOS).
+resolve_link() {
+	local dst="$1"
+	local target
+	target="$(readlink -- "${dst}")"
+	if [[ "${target}" != /* ]]; then
+		target="$(dirname -- "${dst}")/${target}"
+	fi
+	if [[ -d "${target}" ]]; then
+		(cd -- "${target}" && pwd)
+	else
+		printf '%s/%s\n' "$(cd -- "$(dirname -- "${target}")" && pwd)" "$(basename -- "${target}")"
+	fi
+}
+
+check_link() {
+	local dst="$1"
+	local want="$2"
+	local resolved
+
+	if [[ ! -L "${dst}" ]]; then
+		if [[ -e "${dst}" ]]; then
+			echo "DRIFT (not a symlink): ${dst}" >&2
+		else
+			echo "MISSING: ${dst}" >&2
+		fi
+		return 1
+	fi
+
+	resolved="$(resolve_link "${dst}")"
+	if [[ ! -e "${resolved}" ]]; then
+		echo "BROKEN: ${dst} -> ${resolved}" >&2
+		return 1
+	fi
+	if [[ "${resolved}" != *"${want}" ]]; then
+		echo "UNEXPECTED TARGET: ${dst} -> ${resolved} (expected a path ending in ${want})" >&2
+		return 1
+	fi
+
+	echo "OK: ${dst} -> ${resolved}"
+}
+
+# Assumes the flag set used by `just link-global` (--home --all --tool-configs).
+verify_links() {
+	local rc=0
+	local f
+	local count=0
+
+	check_link "${HOME}/.agents/skills" "/skills" || rc=1
+	check_link "${HOME}/.agents/commands" "/commands" || rc=1
+	check_link "${HOME}/.agents/rules" "/rules" || rc=1
+	check_link "${HOME}/.claude/CLAUDE.md" "/.claude/CLAUDE.md" || rc=1
+	check_link "${HOME}/.claude/settings.json" "/.claude/settings.json" || rc=1
+	check_link "${HOME}/.claude/agents" "/.claude/agents" || rc=1
+	check_link "${HOME}/.gemini/GEMINI.md" "/.gemini/GEMINI.md" || rc=1
+
+	# Claude Code only loads an agent file that starts with YAML frontmatter.
+	shopt -s nullglob
+	for f in "${HOME}/.claude/agents"/*.md; do
+		count=$((count + 1))
+		if [[ "$(head -n 1 -- "${f}")" != "---" ]]; then
+			echo "INVALID (no YAML frontmatter): ${f}" >&2
+			rc=1
+		fi
+	done
+	shopt -u nullglob
+
+	if [[ "${count}" -eq 0 ]]; then
+		echo "WARN: no agent definitions under ${HOME}/.claude/agents" >&2
+	else
+		echo "OK: ${count} agent definition(s) visible to Claude Code"
+	fi
+
+	return "${rc}"
+}
+
+if [[ "${DO_VERIFY}" == "true" ]]; then
+	did_something=true
+	verify_links
 fi
 
 if [[ "${did_something}" == "false" ]]; then
