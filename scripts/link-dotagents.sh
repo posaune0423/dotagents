@@ -235,6 +235,22 @@ validate_agent_file() {
 		echo "INVALID (name '${got}' does not match filename '${want}'): ${f}" >&2
 		return 1
 	fi
+
+	# The checks above only test the shape. When a YAML parser is on PATH, also confirm
+	# the block actually parses: an unquoted description containing ": " is a YAML error,
+	# and Claude Code then ignores the agent with no visible message. Ruby ships with
+	# macOS; where it is absent the shape checks stand on their own.
+	if command -v ruby >/dev/null 2>&1; then
+		if ! AGENT_NAME="${want}" ruby -ryaml -e '
+			d = YAML.safe_load(STDIN.read)
+			abort unless d.is_a?(Hash)
+			abort if d["description"].to_s.strip.empty?
+			abort unless d["name"].to_s == ENV["AGENT_NAME"]
+		' <<<"${fm}" 2>/dev/null; then
+			echo "INVALID (frontmatter is not parseable YAML): ${f}" >&2
+			return 1
+		fi
+	fi
 }
 
 # Assumes the flag set used by `just link-global` (--home --all --tool-configs).
