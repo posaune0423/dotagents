@@ -24,21 +24,48 @@
 
 ## リポジトリ構成（概要）
 
-| パス        | 内容                                                                                                                                     |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `skills/`   | エージェントスキル（SSoT）                                                                                                               |
-| `rules/`    | ルール（`.mdc` など）                                                                                                                    |
-| `commands/` | Cursor / エージェント向けコマンド定義                                                                                                    |
-| `scripts/`  | リンク・同期・検証シェル                                                                                                                 |
-| `justfile`  | 上記スクリプトと開発タスクのエントリポイント                                                                                             |
-| `.envrc`    | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                             |
-| `.codex/`   | （任意）Codex 用の共有ベース設定。`config.toml` はパス依存を除いた最小構成なので、ローカルの `~/.codex/config.toml` とマージして使う想定 |
+| パス        | 内容                                                                                                                                                                                                        |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skills/`   | エージェントスキル（SSoT）                                                                                                                                                                                  |
+| `rules/`    | ルール（`.mdc` など）                                                                                                                                                                                       |
+| `commands/` | Cursor / エージェント向けコマンド定義                                                                                                                                                                       |
+| `scripts/`  | リンク・同期・検証シェル                                                                                                                                                                                    |
+| `justfile`  | 上記スクリプトと開発タスクのエントリポイント                                                                                                                                                                |
+| `.envrc`    | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                                                                |
+| `.claude/`  | Claude Code 用の共有設定。`CLAUDE.md` / `settings.json` と subagent 定義 `agents/*.md`                                                                                                                      |
+| `.codex/`   | （任意）Codex 用の共有ベース設定。subagent は `agents/*.toml` ＋ `config.toml` の `[agents.*]` 登録。`config.toml` はパス依存を除いた最小構成なので、ローカルの `~/.codex/config.toml` とマージして使う想定 |
 
 ## 設計
 
 - **グローバル**: `~/.agents` にこのrepoの `skills/` `rules/` `commands/` を symlink（SSoT）
 - **プロジェクト固有**: `<project>/.agents` はプロジェクト内で管理（ここは自由に追加/上書き）
 - **各エージェント**: `<project>/.cursor/.codex/.claude` は `<project>/.agents` を参照するように symlink
+- **Subagent**: 形式がツールごとに異なる（Claude Code は Markdown `.claude/agents/*.md`、Codex は TOML `.codex/agents/*.toml` ＋ `config.toml` 登録、Cursor は該当機能なし）ため `~/.agents` では共有しない。Claude Code 用はディレクトリごと `.claude/agents` → `~/.claude/agents` に symlink する
+- **プロジェクト固有の subagent**: 必要な場合は `<project>/.claude/agents/` に直接置く（`<project>/.agents` 経由では配布しない）
+
+## Subagent（Claude Code）
+
+`.claude/agents/*.md` に定義し、`just link-global` で `~/.claude/agents` に symlink されます。
+
+| agent              | 用途                                                                 | model  | effort |
+| ------------------ | -------------------------------------------------------------------- | ------ | ------ |
+| `architect`        | 設計・トレードオフ・契約・実装順序の決定                             | fable  | xhigh  |
+| `impl-worker`      | 仕様が確定した実装を1件担当。並列実装を main thread から切り離す     | opus   | medium |
+| `browser-debugger` | 実ブラウザで再現手順と証拠（console / network / DOM / screenshot）   | opus   | medium |
+| `check-runner`     | format / lint / typecheck / test / build の実行ループ                | sonnet | low    |
+| `docs-verifier`    | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認 | sonnet | low    |
+| `pr-runner`        | PR 作成・更新、CI 監視、レビューコメント対応                         | sonnet | low    |
+
+設計の原則:
+
+- **model は「必要な知能」、effort は「速度ダイヤル」。** モデル階層を下げて速くするのではなく `effort` を役割ごとに下げる。Claude Code は全モデルが同じ使用量枠を共有するため、Codex の `gpt-5.3-codex-spark` のような「別枠だから安いモデルを使う」動機が存在しない。よって Haiku は使わない。
+- **`effort` を省略するとセッションの `effortLevel` を継承する。** 既定は Opus + High なので、省略は「Opus / high 思考で走る」意味になる。機械的な作業では最大のレイテンシ源。
+- **組み込みとプラグインと重複させない。** 組み込みの `Explore` / `Plan` / `general-purpose` と、有効化済み plugin の `code-architect` / `code-explorer` / `code-reviewer` / `codex-rescue` が担う役割は作らない。とくに探索は組み込み `Explore` が速い（カスタム subagent は呼び出しごとに CLAUDE.md 階層と git status を再読み込みするが、`Explore` はこれをスキップする）。
+- **数を増やさない。** 各 agent の `name` と `description` は毎セッション main thread の system prompt に載る。増やすと誤ルーティングが増え、失敗1回ごとに委譲の往復が丸ごと無駄になる。
+- **`skills:` は「ほぼ毎回使うもの」だけ。** 挙げたスキルは全文が起動時に system prompt へ注入される。使うかどうかが呼び出しごとに変わるものは挙げず、`Skill` ツールでオンデマンドに取らせる。
+- **`tools` はコンテキスト削減ではなく安全性のため。** Claude Code には Codex の `sandbox_mode` に相当する設定が無いので、書き込み禁止を表現する手段は `tools` allowlist だけ。
+
+プロンプトは共通スケルトン（役割1文 → `Working mode` → `Constraints` → `Stop conditions` → `Return` → `When NOT to use`）に揃えています。`.claude/agents/` 直下には YAML frontmatter 付きの agent 定義 `.md` 以外を置かないこと（frontmatter が無いファイルは読み込みで警告になります）。
 
 ## 使い方
 
@@ -51,6 +78,9 @@
 ```bash
 just link-global
 ```
+
+> **注意**: `just link-global` は **main checkout のルート**で実行してください。worktree 内で実行すると
+> symlink が worktree のパスを指し、worktree を削除した時点で壊れます。
 
 - **Codex 固有**（`~/.codex/commands` を削除し、`~/.codex/prompts` を `~/.agents/commands` に symlink）:
 
@@ -77,6 +107,14 @@ just install /path/to/your-project
 ```
 
 ### 検証
+
+グローバル（`~/.agents` / `~/.claude` / `~/.gemini` の symlink 健全性。読み取りのみ）:
+
+```bash
+just verify-global
+```
+
+プロジェクト:
 
 ```bash
 just verify-project /path/to/your-project
