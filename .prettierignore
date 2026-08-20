@@ -2,3 +2,11 @@
 # Prettier inserts blank lines around those lines, which would split the rendered
 # markdown tables apart. Keep them exactly as written.
 skills/*/templates/
+
+# Worktrees are excluded from git via .git/info/exclude, which prettier does not read.
+# Without this, formatting the main checkout rewrites files inside every live worktree.
+.claude/worktrees/
+
+# Machine-local Claude settings: gitignored, so it varies per developer.
+# Prettier would otherwise fail `just check` on someone else's local file.
+.claude/settings.local.json
