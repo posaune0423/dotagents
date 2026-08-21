@@ -1,10 +1,11 @@
 ---
 name: architect
 description: >-
-  Decides the shape of a change before implementation: boundaries, contracts, trade-offs, migration path,
-  and the order of work. Use it when a change spans multiple subsystems, when the trade-offs are not
-  obvious, or when getting an interface wrong would be expensive to undo. Do not use it for a routine
-  implementation plan; the built-in Plan agent is faster for that.
+  Invoke by name with @agent-architect when a design decision spans multiple subsystems, the
+  trade-offs are not obvious, or getting an interface wrong would be expensive to undo: it decides
+  boundaries, contracts, migration path, and the order of work. Deliberately not written for
+  auto-delegation, because design work belongs in the main thread unless you want a deeper reasoning
+  pass on a hard call. For a routine implementation plan the built-in Plan agent is faster.
 tools: Read, Glob, Grep, WebFetch, WebSearch, TodoWrite
 model: fable
 effort: xhigh

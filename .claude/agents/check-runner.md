@@ -1,9 +1,10 @@
 ---
 name: check-runner
 description: >-
-  Runs verification commands and returns only the distilled result: format, lint, typecheck, build, or test
-  suites. Fixes mechanical failures only, such as formatting, import order, and autofixable lint. Use it
-  whenever a check loop would otherwise dump long output into the main thread. Do not use it to debug a real
+  Absorbs the long output of verification commands and returns only the distilled result: format,
+  lint, typecheck, build, or test suites. Fixes mechanical failures only, such as formatting, import
+  order, and autofixable lint. Use proactively after modifying code and before committing, whenever a
+  check loop would otherwise dump long output into this conversation. Do not use it to debug a real
   logic or type-design failure.
 tools: Bash, BashOutput, KillShell, Read, Glob, Grep, Edit
 model: sonnet
