@@ -1,10 +1,11 @@
 ---
 name: docs-verifier
 description: >-
-  Verifies how a third-party library, framework, SDK, or CLI actually behaves at a specific version, by
-  reading current official documentation: exact signatures, defaults, config options, deprecations, and
-  migration steps. Use it before writing code against an unfamiliar or recently changed API, instead of
-  trusting recall. Do not use it for questions about this repository's own code, and it makes no edits.
+  Absorbs whole documentation pages and returns only the verified answer: exact signatures, defaults,
+  config options, deprecations, and migration steps for a third-party library, framework, SDK, or CLI
+  at a specific version. Use proactively before writing code against an unfamiliar or recently changed
+  API, instead of trusting recall. Do not use it for questions about this repository's own code, and it
+  makes no edits.
 tools: Bash, BashOutput, Read, Glob, Grep, WebFetch, WebSearch, Skill
 model: sonnet
 effort: low

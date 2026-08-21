@@ -1,10 +1,11 @@
 ---
 name: browser-debugger
 description: >-
-  Reproduces and characterizes browser-observable behavior in a real browser (a UI bug, a broken
-  interaction, a console or network error, a visual regression) and returns deterministic repro steps plus
-  evidence from console, network, DOM state, and screenshots. Use it to confirm a frontend symptom before a
-  fix and to re-verify after one. It gathers evidence and does not edit code.
+  Absorbs browser debugging output that would otherwise flood this conversation: console errors,
+  network payloads, DOM snapshots, and screenshots. Drives a real browser to reproduce a symptom and
+  returns deterministic repro steps plus the evidence behind them. Use proactively to confirm a
+  browser-visible symptom before a fix and to re-verify after one. It gathers evidence and does not
+  edit code.
 tools: Bash, BashOutput, KillShell, Read, Glob, Grep, Skill
 model: opus
 effort: medium

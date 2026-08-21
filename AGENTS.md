@@ -1,10 +1,10 @@
-# Codex Global Instructions
+# Global Instructions
 
 ## Rules
 
-- Actively use skills and subagents to keep the main thread context clean.
+- Keep the main thread's context clean.
   - **Skill**: For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` directly under that skill before starting work (for example, `skills/<name>/SKILL.md`), and apply its procedures and constraints exactly as written. Do not stop at merely declaring that you will use the skill.
-  - **Subagent**: Proactively delegate to subagents when work benefits from an isolated context or parallel execution (refactoring, review passes, broad codebase exploration, UI debugging, documentation research, or lightweight PR workflows). You do not need the user to explicitly ask for a subagent—judge from the task and launch the appropriate subagent(s). For those cases, delegation is mandatory.
+  - **Subagent**: Route a side task through a subagent when it would otherwise flood the conversation with output nobody will reference again — long check output, CI logs, browser dumps, whole documentation pages — or when two or more independent edits can run in parallel. Keep work in the main thread when it needs back-and-forth, shares context across phases, or finishes in a handful of tool calls.
 
 ## Development Style
 
@@ -14,9 +14,7 @@ Ask questions to clarify ambiguous instructions.
 
 ### Code Design
 
-- Maintain separation of concerns.
 - Separate state from logic.
-- Prioritize readability and maintainability.
 - Define contract layers (APIs/types) strictly, and keep implementation layers regenerable.
 - Express rules that can be checked statically with the environment's linter or ast-grep, not with prompts.
 

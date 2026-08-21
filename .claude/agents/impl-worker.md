@@ -1,10 +1,11 @@
 ---
 name: impl-worker
 description: >-
-  Implements a change that is already specified, where the files to touch, the intended behavior, and the
-  acceptance check are known. Use it to run two or more independent edits in parallel, or to keep a large
-  mechanical edit out of the main thread. Do not use it for exploration, for choosing an approach, or while
-  the spec still has open questions.
+  Runs an already-specified change in its own context so the edit volume stays out of this
+  conversation: fan out two or more independent edits in parallel, or hand off one large mechanical
+  edit across many files. The files to touch, the intended behavior, and the acceptance check must
+  already be known. Do not use it for a change you could finish in a handful of tool calls, for
+  exploration, or while the spec still has open questions.
 tools: Read, Edit, Write, Glob, Grep, Bash, BashOutput, KillShell, TodoWrite, Skill
 model: opus
 effort: medium

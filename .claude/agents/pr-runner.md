@@ -1,10 +1,10 @@
 ---
 name: pr-runner
 description: >-
-  Owns pull request mechanics end to end: opening or updating a PR, watching CI until it is green, and
-  applying minimal fixes for review threads. Use it once a change is complete and committed, so that gh
-  output, CI logs, and review threads stay out of the main thread. Do not use it to design or implement the
-  change itself.
+  Absorbs the volume of pull request mechanics: gh output, CI logs, and review threads. Opens or
+  updates a PR, watches CI until it is green, and applies minimal fixes for review comments. Use
+  proactively once a change is complete and committed, so none of that output lands in this
+  conversation. Do not use it to design or implement the change itself.
 tools: Bash, BashOutput, KillShell, Read, Edit, Glob, Grep, Skill
 model: sonnet
 effort: low
