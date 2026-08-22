@@ -1,30 +1,38 @@
-# Global Instructions
+# dotagents Repository Instructions
 
-## Rules
+## Purpose and Sources of Truth
 
-- Keep the main thread's context clean.
-  - **Skill**: For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` directly under that skill before starting work (for example, `skills/<name>/SKILL.md`), and apply its procedures and constraints exactly as written. Do not stop at merely declaring that you will use the skill.
-  - **Subagent**: Route a side task through a subagent when it would otherwise flood the conversation with output nobody will reference again — long check output, CI logs, browser dumps, whole documentation pages — or when two or more independent edits can run in parallel. Keep work in the main thread when it needs back-and-forth, shares context across phases, or finishes in a handful of tool calls.
+- This repository is the source of truth for reusable agent skills, commands, rules, and shared tool configuration.
+- Keep repository-specific guidance in this file. Cross-repository personal defaults belong in `codex/AGENTS.md`.
+- `codex/AGENTS.md` is the canonical global instruction file. `claude/CLAUDE.md` and `gemini/GEMINI.md` must remain relative symlinks to it.
+- Root `CLAUDE.md` and `GEMINI.md` bridge this repository's project instructions to tools that do not read root `AGENTS.md` directly.
 
-## Development Style
+## Repository Layout
 
-Develop with TDD (Exploration -> Red -> Green -> Refactoring).
-If KPIs or coverage targets are provided, keep iterating until they are met.
-Ask questions to clarify ambiguous instructions.
+- `skills/`, `commands/`, and `rules/` contain the shared agent assets linked into `~/.agents` and consumer projects.
+- `codex/`, `claude/`, and `gemini/` contain version-controlled global tool entries. Do not rename them back to hidden directories.
+- `scripts/` and `justfile` own installation, linking, and verification behavior.
+- Consumer projects still use tool-required hidden paths such as `.codex/`, `.claude/`, and `.cursor/`; only this repository's source directories are non-hidden.
+- Claude-created `.claude/worktrees/` is machine-local runtime state. Never move, delete, format, or stage it as part of configuration maintenance.
 
-### Code Design
+## Development Workflow
 
-- Separate state from logic.
-- Define contract layers (APIs/types) strictly, and keep implementation layers regenerable.
-- Express rules that can be checked statically with the environment's linter or ast-grep, not with prompts.
+- Use TDD for script behavior: add a failing integration test under `scripts/tests/`, observe the expected failure, then implement the smallest fix.
+- Use `just` as the task entry point and Bun for package scripts; when Node.js is required, use v24+.
+- Run `scripts/tests/link-dotagents.test.sh` for global-link changes and `just check` before handing off changes.
+- Shell changes must pass ShellCheck and `shfmt`; Markdown, JSON, and JavaScript/TypeScript must pass the repository's Prettier and ESLint configuration.
 
-### Tools
+## Link Safety
 
-- Search: Use `rg` (ripgrep) instead of `grep`.
-- Find: Use `fd` instead of `find`.
-- JSON: Use `jq` for JSON processing.
-- Shell: Fish shell is the primary shell.
-- Task: Use `justfile` instead of Makefile.
-- Node.js: bun, v24+.
-- E2E: Use `playwright` instead of `chrome-devtools`.
-- Python: `uv`.
+- Global links must resolve into the main checkout, never a disposable worktree.
+- Link only repository-managed entries. Keep `~/.codex/config.toml`, `~/.claude/settings.json`, credentials, histories, databases, plugins, and caches home-local.
+- Inspect a destination before replacing it. Preserve existing real files through the script's timestamped backup behavior; replacing an existing symlink is allowed.
+- Use relative symlinks inside this repository and absolute symlinks from home directories into the main checkout.
+- After changing link topology, update the link script, verifier, README, and integration test together.
+
+## Skill and Agent Maintenance
+
+- Keep each reusable skill's contract in its `SKILL.md`; use supporting scripts and references for operational detail.
+- Preserve top-level discovery links for project-specific skills that must remain globally discoverable.
+- Claude and Codex subagent formats are tool-specific. Do not merge `claude/agents/*.md` and `codex/agents/*.toml` into one generated format.
+- Keep unrelated working-tree changes out of the task's diff, especially machine-local project skills and active worktree state.

@@ -5,12 +5,14 @@ export default [
   {
     ignores: [
       ".git/**",
+      ".claude/worktrees/**",
       "node_modules/**",
       ".github/**",
       "**/*.min.*",
       "**/*.lock",
       "bun.lockb",
       "skills/.system/**",
+      "skills/projects/**",
       "skills/**/scripts/**/*.ts",
     ],
   },

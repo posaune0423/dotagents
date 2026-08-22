@@ -24,29 +24,33 @@
 
 ## リポジトリ構成（概要）
 
-| パス        | 内容                                                                                                                                                                                                        |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `skills/`   | エージェントスキル（SSoT）                                                                                                                                                                                  |
-| `rules/`    | ルール（`.mdc` など）                                                                                                                                                                                       |
-| `commands/` | Cursor / エージェント向けコマンド定義                                                                                                                                                                       |
-| `scripts/`  | リンク・同期・検証シェル                                                                                                                                                                                    |
-| `justfile`  | 上記スクリプトと開発タスクのエントリポイント                                                                                                                                                                |
-| `.envrc`    | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                                                                |
-| `.claude/`  | Claude Code 用の共有設定。`CLAUDE.md`（`AGENTS.md` への symlink）/ `settings.json` と subagent 定義 `agents/*.md`                                                                                           |
-| `.codex/`   | （任意）Codex 用の共有ベース設定。subagent は `agents/*.toml` ＋ `config.toml` の `[agents.*]` 登録。`config.toml` はパス依存を除いた最小構成なので、ローカルの `~/.codex/config.toml` とマージして使う想定 |
+| パス        | 内容                                                                                                                                                             |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skills/`   | エージェントスキル（SSoT）                                                                                                                                       |
+| `rules/`    | ルール（`.mdc` など）                                                                                                                                            |
+| `commands/` | Cursor / エージェント向けコマンド定義                                                                                                                            |
+| `scripts/`  | リンク・同期・検証シェル                                                                                                                                         |
+| `justfile`  | 上記スクリプトと開発タスクのエントリポイント                                                                                                                     |
+| `.envrc`    | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                     |
+| `codex/`    | 共通global instructionの正典 `AGENTS.md`、Codex subagent、hook、共有ベース設定。`config.toml` はreferenceであり、`~/.codex/config.toml` はhome固有のまま管理する |
+| `claude/`   | Claude Code用global instruction bridge、subagent定義、共有設定のreference。`~/.claude/settings.json` は自動linkしない                                            |
+| `gemini/`   | Gemini CLI用global instruction bridge                                                                                                                            |
 
 ## 設計
 
-- **グローバル**: `~/.agents` にこのrepoの `skills/` `rules/` `commands/` を symlink（SSoT）
-- **共通の instruction**: [AGENTS.md](AGENTS.md) が正典。root の `CLAUDE.md` と `.claude/CLAUDE.md` はどちらもそれへの symlink（Claude Code は `AGENTS.md` を読まないため、公式が挙げている橋渡しのうち symlink 方式を採用）。目的はトークン削減ではなく**乖離防止**で、同じ内容が複製されて実際に食い違っていたのを解消するためです。`.gemini/GEMINI.md` は現状コピーのままで、既知の残件です
+- **グローバルasset**: `~/.agents` にこのrepoの `skills/` `rules/` `commands/` を symlink（SSoT）
+- **共通のglobal instruction**: [codex/AGENTS.md](codex/AGENTS.md) が正典。`claude/CLAUDE.md` と `gemini/GEMINI.md` は相対symlinkで同じ内容を参照し、home側の標準パスから各bridgeへsymlinkする
+- **このrepo固有のinstruction**: root [AGENTS.md](AGENTS.md) が正典。root `CLAUDE.md` と `GEMINI.md` は各tool向けのproject instruction bridge
+- **home固有設定**: `~/.codex/config.toml` と `~/.claude/settings.json`、認証、履歴、DB、plugin、cacheはrepoへlinkしない
 - **プロジェクト固有**: `<project>/.agents` はプロジェクト内で管理（ここは自由に追加/上書き）
 - **各エージェント**: `<project>/.cursor/.codex/.claude` は `<project>/.agents` を参照するように symlink
-- **Subagent**: 形式がツールごとに異なる（Claude Code は Markdown `.claude/agents/*.md`、Codex は TOML `.codex/agents/*.toml` ＋ `config.toml` 登録、Cursor は該当機能なし）ため `~/.agents` では共有しない。Claude Code 用はディレクトリごと `.claude/agents` → `~/.claude/agents` に symlink する
+- **Subagent**: 形式がツールごとに異なる（Claude Code は `claude/agents/*.md`、Codex は `codex/agents/*.toml` ＋ `config.toml` 登録）ため `~/.agents` では共有せず、それぞれのhome標準パスへlinkする
 - **プロジェクト固有の subagent**: 必要な場合は `<project>/.claude/agents/` に直接置く（`<project>/.agents` 経由では配布しない）
+- **Cursorのglobal rule**: file symlinkではなくCursorの Customize → Rules で管理する。root `AGENTS.md` はproject ruleとして利用できる
 
 ## Subagent（Claude Code）
 
-`.claude/agents/*.md` に定義し、`just link-global` で `~/.claude/agents` に symlink されます。
+`claude/agents/*.md` に定義し、`just link-global` で `~/.claude/agents` に symlink されます。
 
 | agent              | 用途                                                                              | model  | effort |
 | ------------------ | --------------------------------------------------------------------------------- | ------ | ------ |
@@ -75,7 +79,7 @@
 - **`tools` はコンテキスト削減ではなく安全性のため。** Claude Code には Codex の `sandbox_mode` に相当する設定が無いので、書き込み禁止を表現する手段は `tools` allowlist だけ。
 - **共有 instruction は短く保つ。** 非 fork の subagent は**呼び出しごとに** CLAUDE.md 階層全体を読み直します（`Explore` / `Plan` だけが省略し、変更手段はありません）。セッション単位より強い動機でここを削る価値があります。公式の目標値は 1 ファイル 200 行未満で、`@path` import は整理には役立つがコンテキストは減りません（launch 時に読まれる）。
 
-プロンプトは共通スケルトン（役割1文 → `Working mode` → `Constraints` → `Stop conditions` → `Return` → `When NOT to use`）に揃えています。`.claude/agents/` 直下には YAML frontmatter 付きの agent 定義 `.md` 以外を置かないこと（frontmatter が無いファイルは読み込みで警告になります）。
+プロンプトは共通スケルトン（役割1文 → `Working mode` → `Constraints` → `Stop conditions` → `Return` → `When NOT to use`）に揃えています。`claude/agents/` 直下には YAML frontmatter 付きの agent 定義 `.md` 以外を置かないこと（frontmatter が無いファイルは読み込みで警告になります）。
 
 ## 使い方
 
@@ -89,9 +93,8 @@
 just link-global
 ```
 
-> **注意**: `just link-global` は **main checkout のルート**で実行してください。worktree 内で実行すると
-> symlink が worktree のパスを指し、worktree を削除した時点で壊れます。`just verify-global` は
-> リンク先が main checkout のパスと一致するかを確認するので、このミスを検出できます。
+> `just link-global` はGitのcommon directoryからmain checkoutを解決し、worktree内から実行しても
+> home linkをmain checkoutへ向けます。`just verify-global` は全管理対象とinstruction bridgeのdriftを検出します。
 
 - **Codex 固有**（`~/.codex/commands` を削除し、`~/.codex/prompts` を `~/.agents/commands` に symlink）:
 
@@ -119,7 +122,7 @@ just install /path/to/your-project
 
 ### 検証
 
-グローバル（`~/.agents` / `~/.claude` / `~/.gemini` の symlink 健全性。読み取りのみ）:
+グローバル（`~/.agents` / `~/.codex` / `~/.claude` / `~/.gemini` の管理対象symlink。読み取りのみ）:
 
 ```bash
 just verify-global

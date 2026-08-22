@@ -4,13 +4,17 @@ set shell := ["bash", "-cu"]
 default:
     @just --list
 
-# Symlink dotagents -> ~/.agents (global); ~/.claude/{CLAUDE.md,settings.json,agents} and ~/.gemini/GEMINI.md
+# Link shared assets plus managed Codex, Claude, and Gemini entries into home directories
 link-global:
-    ./scripts/link-dotagents.sh --home --all --tool-configs
+    ./scripts/link-dotagents.sh --home --all --tool-links
 
 # Read-only check that the global symlinks from link-global are intact
 verify-global:
     ./scripts/link-dotagents.sh --verify
+
+# Integration tests for global link topology and home-local config preservation
+test-links:
+    ./scripts/tests/link-dotagents.test.sh
 
 # Remove ~/.codex/commands and symlink ~/.codex/prompts -> ~/.agents/commands
 link-codex-prompts:

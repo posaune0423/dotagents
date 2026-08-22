@@ -8,8 +8,8 @@ relink-codex-prompts.sh
 Reconfigure ~/.codex so:
   - ~/.codex/commands is removed
   - ~/.codex/prompts points to ~/.agents/commands
-  - ~/.codex/hooks.json is linked to this repository's .codex/hooks.json
-  - ~/.codex/hooks is linked to this repository's .codex/hooks
+  - ~/.codex/hooks.json is linked to this repository's codex/hooks.json
+  - ~/.codex/hooks is linked to this repository's codex/hooks
 
 This is designed to make the current Codex-specific layout
 reproducible on demand.
@@ -20,14 +20,25 @@ timestamp() { date +%Y%m%d-%H%M%S; }
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
+main_checkout_root() {
+	local common
+	if common="$(git -C "${REPO_ROOT}" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
+		dirname -- "${common}"
+	else
+		printf '%s\n' "${REPO_ROOT}"
+	fi
+}
+
+SOURCE_ROOT="$(main_checkout_root)"
+
 CODEX_DIR="${HOME}/.codex"
 HOME_COMMANDS="${CODEX_DIR}/commands"
 HOME_PROMPTS="${CODEX_DIR}/prompts"
 HOME_HOOKS_JSON="${CODEX_DIR}/hooks.json"
 HOME_HOOKS_DIR="${CODEX_DIR}/hooks"
 SOURCE_COMMANDS="${HOME}/.agents/commands"
-SOURCE_HOOKS_JSON="${REPO_ROOT}/.codex/hooks.json"
-SOURCE_HOOKS_DIR="${REPO_ROOT}/.codex/hooks"
+SOURCE_HOOKS_JSON="${SOURCE_ROOT}/codex/hooks.json"
+SOURCE_HOOKS_DIR="${SOURCE_ROOT}/codex/hooks"
 
 safe_link() {
 	local src="$1"

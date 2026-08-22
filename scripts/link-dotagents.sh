@@ -3,29 +3,30 @@ set -euo pipefail
 
 usage() {
 	cat <<'EOF'
-link-dotagents.sh --home [--all] [--tool-configs] [--verify]
+link-dotagents.sh --home [--all] [--tool-links] [--verify]
 
 Create symlinks from this repo (SSoT) into:
   - ~/.agents (global agent config)
-  - optionally ~/.claude/CLAUDE.md, ~/.claude/settings.json, ~/.claude/agents,
-    and ~/.gemini/GEMINI.md
+  - optionally the managed Codex, Claude, and Gemini instruction/agent/hook
+    entries under ~/.codex, ~/.claude, and ~/.gemini
 
 Options:
   --home           Link repo skills into ~/.agents/skills
   --all            Also link commands and rules into ~/.agents (use with --home)
-  --tool-configs   Symlink CLAUDE.md, settings.json, agents/ (Claude), and GEMINI.md
-                   to this repo's copies
+  --tool-links     Link managed instructions, agent definitions, and hooks
+  --tool-configs   Deprecated alias for --tool-links
   --verify         Check that every link above exists and resolves into the MAIN
                    dotagents checkout. Verification itself writes nothing; combining
                    it with the flags above links first, then verifies. Exits non-zero
                    on drift.
   -h, --help       Show this help
 
-At least one of --home, --tool-configs, or --verify is required.
+At least one of --home, --tool-links, or --verify is required.
 
 Note: subagent definitions are NOT shared via ~/.agents. Claude Code reads Markdown
-(.claude/agents/*.md) and Codex reads TOML (.codex/agents/*.toml), so each tool gets
-its own symlink.
+(claude/agents/*.md) and Codex reads TOML (codex/agents/*.toml), so each tool gets
+its own symlink. Machine-local ~/.codex/config.toml and ~/.claude/settings.json are
+never replaced.
 
 Behavior:
   - If destination exists and is not a symlink, it is moved aside as a timestamped backup.
@@ -36,9 +37,20 @@ EOF
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
+main_checkout_root() {
+	local common
+	if common="$(git -C "${REPO_ROOT}" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
+		dirname -- "${common}"
+	else
+		printf '%s\n' "${REPO_ROOT}"
+	fi
+}
+
+SOURCE_ROOT="$(main_checkout_root)"
+
 DO_HOME=false
 HOME_ALL=false
-DO_TOOL_CONFIGS=false
+DO_TOOL_LINKS=false
 DO_VERIFY=false
 
 while [[ $# -gt 0 ]]; do
@@ -51,8 +63,13 @@ while [[ $# -gt 0 ]]; do
 		HOME_ALL=true
 		shift
 		;;
+	--tool-links)
+		DO_TOOL_LINKS=true
+		shift
+		;;
 	--tool-configs)
-		DO_TOOL_CONFIGS=true
+		echo "WARN: --tool-configs is deprecated; use --tool-links" >&2
+		DO_TOOL_LINKS=true
 		shift
 		;;
 	--verify)
@@ -106,10 +123,10 @@ link_home() {
 	local base="${HOME}/.agents"
 	mkdir -p "${base}"
 
-	safe_link "${REPO_ROOT}/skills" "${base}/skills"
+	safe_link "${SOURCE_ROOT}/skills" "${base}/skills"
 	if [[ "${HOME_ALL}" == "true" ]]; then
-		safe_link "${REPO_ROOT}/commands" "${base}/commands"
-		safe_link "${REPO_ROOT}/rules" "${base}/rules"
+		safe_link "${SOURCE_ROOT}/commands" "${base}/commands"
+		safe_link "${SOURCE_ROOT}/rules" "${base}/rules"
 	fi
 }
 
@@ -120,36 +137,42 @@ if [[ "${DO_HOME}" == "true" ]]; then
 	did_something=true
 fi
 
-link_tool_configs() {
-	local claude_md_src="${REPO_ROOT}/.claude/CLAUDE.md"
-	local claude_settings_src="${REPO_ROOT}/.claude/settings.json"
-	local claude_agents_src="${REPO_ROOT}/.claude/agents"
-	local gemini_md_src="${REPO_ROOT}/.gemini/GEMINI.md"
-	if [[ ! -f "${claude_md_src}" ]]; then
-		echo "ERROR: expected file missing: ${claude_md_src}" >&2
-		exit 1
-	fi
-	if [[ ! -f "${claude_settings_src}" ]]; then
-		echo "ERROR: expected file missing: ${claude_settings_src}" >&2
-		exit 1
-	fi
-	if [[ ! -d "${claude_agents_src}" ]]; then
-		echo "ERROR: expected directory missing: ${claude_agents_src}" >&2
-		exit 1
-	fi
-	if [[ ! -f "${gemini_md_src}" ]]; then
-		echo "ERROR: expected file missing: ${gemini_md_src}" >&2
-		exit 1
-	fi
-	mkdir -p -- "${HOME}/.claude" "${HOME}/.gemini"
+link_tool_entries() {
+	local codex_agents_md_src="${SOURCE_ROOT}/codex/AGENTS.md"
+	local codex_agents_src="${SOURCE_ROOT}/codex/agents"
+	local codex_hooks_src="${SOURCE_ROOT}/codex/hooks"
+	local codex_hooks_json_src="${SOURCE_ROOT}/codex/hooks.json"
+	local claude_md_src="${SOURCE_ROOT}/claude/CLAUDE.md"
+	local claude_agents_src="${SOURCE_ROOT}/claude/agents"
+	local gemini_md_src="${SOURCE_ROOT}/gemini/GEMINI.md"
+	local src
+
+	for src in \
+		"${codex_agents_md_src}" \
+		"${codex_agents_src}" \
+		"${codex_hooks_src}" \
+		"${codex_hooks_json_src}" \
+		"${claude_md_src}" \
+		"${claude_agents_src}" \
+		"${gemini_md_src}"; do
+		if [[ ! -e "${src}" ]]; then
+			echo "ERROR: expected source missing: ${src}" >&2
+			exit 1
+		fi
+	done
+
+	mkdir -p -- "${HOME}/.codex" "${HOME}/.claude" "${HOME}/.gemini"
+	safe_link "${codex_agents_md_src}" "${HOME}/.codex/AGENTS.md"
+	safe_link "${codex_agents_src}" "${HOME}/.codex/agents"
+	safe_link "${codex_hooks_src}" "${HOME}/.codex/hooks"
+	safe_link "${codex_hooks_json_src}" "${HOME}/.codex/hooks.json"
 	safe_link "${claude_md_src}" "${HOME}/.claude/CLAUDE.md"
-	safe_link "${claude_settings_src}" "${HOME}/.claude/settings.json"
 	safe_link "${claude_agents_src}" "${HOME}/.claude/agents"
 	safe_link "${gemini_md_src}" "${HOME}/.gemini/GEMINI.md"
 }
 
-if [[ "${DO_TOOL_CONFIGS}" == "true" ]]; then
-	link_tool_configs
+if [[ "${DO_TOOL_LINKS}" == "true" ]]; then
+	link_tool_entries
 	did_something=true
 fi
 
@@ -168,18 +191,7 @@ resolve_link() {
 	fi
 }
 
-# Root of the MAIN working tree, even when this script runs from a git worktree.
-# Links must point there: a link into a worktree breaks when that worktree is removed.
 EXPECTED_ROOT=""
-
-expected_root() {
-	local common
-	if common="$(git -C "${REPO_ROOT}" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
-		dirname -- "${common}"
-	else
-		printf '%s\n' "${REPO_ROOT}"
-	fi
-}
 
 check_link() {
 	local dst="$1"
@@ -207,6 +219,28 @@ check_link() {
 	fi
 
 	echo "OK: ${dst} -> ${resolved}"
+}
+
+check_repo_bridge() {
+	local path="$1"
+	local expected="$2"
+	local current
+
+	if [[ ! -L "${path}" ]]; then
+		echo "DRIFT (not a symlink): ${path}" >&2
+		return 1
+	fi
+	current="$(readlink -- "${path}")"
+	if [[ "${current}" != "${expected}" ]]; then
+		echo "UNEXPECTED TARGET: ${path} -> ${current} (expected ${expected})" >&2
+		return 1
+	fi
+	if [[ ! -e "${path}" ]]; then
+		echo "BROKEN: ${path} -> ${current}" >&2
+		return 1
+	fi
+
+	echo "OK: ${path} -> ${current}"
 }
 
 # Claude Code silently ignores an agent file whose frontmatter is missing, unclosed,
@@ -253,23 +287,28 @@ validate_agent_file() {
 	fi
 }
 
-# Assumes the flag set used by `just link-global` (--home --all --tool-configs).
+# Assumes the flag set used by `just link-global` (--home --all --tool-links).
 verify_links() {
 	local rc=0
 	local f
 	local count=0
 	local valid=0
 
-	EXPECTED_ROOT="$(expected_root)"
+	EXPECTED_ROOT="${SOURCE_ROOT}"
 	echo "Expecting links into: ${EXPECTED_ROOT}"
 
 	check_link "${HOME}/.agents/skills" "/skills" || rc=1
 	check_link "${HOME}/.agents/commands" "/commands" || rc=1
 	check_link "${HOME}/.agents/rules" "/rules" || rc=1
-	check_link "${HOME}/.claude/CLAUDE.md" "/.claude/CLAUDE.md" || rc=1
-	check_link "${HOME}/.claude/settings.json" "/.claude/settings.json" || rc=1
-	check_link "${HOME}/.claude/agents" "/.claude/agents" || rc=1
-	check_link "${HOME}/.gemini/GEMINI.md" "/.gemini/GEMINI.md" || rc=1
+	check_link "${HOME}/.codex/AGENTS.md" "/codex/AGENTS.md" || rc=1
+	check_link "${HOME}/.codex/agents" "/codex/agents" || rc=1
+	check_link "${HOME}/.codex/hooks" "/codex/hooks" || rc=1
+	check_link "${HOME}/.codex/hooks.json" "/codex/hooks.json" || rc=1
+	check_link "${HOME}/.claude/CLAUDE.md" "/claude/CLAUDE.md" || rc=1
+	check_link "${HOME}/.claude/agents" "/claude/agents" || rc=1
+	check_link "${HOME}/.gemini/GEMINI.md" "/gemini/GEMINI.md" || rc=1
+	check_repo_bridge "${EXPECTED_ROOT}/claude/CLAUDE.md" "../codex/AGENTS.md" || rc=1
+	check_repo_bridge "${EXPECTED_ROOT}/gemini/GEMINI.md" "../codex/AGENTS.md" || rc=1
 
 	shopt -s nullglob
 	for f in "${HOME}/.claude/agents"/*.md; do
