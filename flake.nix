@@ -1,5 +1,5 @@
 {
-  description = "Pinned CLI tooling for developing dotagents (just, Bun/JS, Lefthook, shell format & lint)";
+  description = "Pinned CLI tooling for developing dotagents (just, Bun/JS, jq/fd/rg, Lefthook, shell format & lint)";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -19,6 +19,9 @@
         pkgs.just
         pkgs.bun
         pkgs.gitMinimal
+        pkgs.fd
+        pkgs.jq
+        pkgs.ripgrep
         pkgs.lefthook
         pkgs.shellcheck
         pkgs.shfmt
@@ -60,7 +63,7 @@
       });
 
       packages = forAllSystems (pkgs: {
-        inherit (pkgs) just bun lefthook shellcheck shfmt;
+        inherit (pkgs) just bun fd jq ripgrep lefthook shellcheck shfmt;
         default = pkgs.symlinkJoin {
           name = "dotagents-toolchain";
           paths = repoPackages pkgs;

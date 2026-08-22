@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Shared agent schedule",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "version", "id", "name", "description", "skill", "schedule", "runtime", "targets"],
+  "properties": {
+    "$schema": {
+      "const": "../schema.json"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skill": {
+      "const": "SKILL.md"
+    },
+    "schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rrule", "timezone"],
+      "properties": {
+        "rrule": {
+          "type": "string",
+          "pattern": "^FREQ=(MINUTELY|HOURLY|DAILY|WEEKLY|MONTHLY|YEARLY)(;(INTERVAL=[1-9][0-9]*|BYHOUR=([0-9]|1[0-9]|2[0-3])(,([0-9]|1[0-9]|2[0-3]))*|BYMINUTE=([0-9]|[1-5][0-9])(,([0-9]|[1-5][0-9]))*|BYDAY=(MO|TU|WE|TH|FR|SA|SU)(,(MO|TU|WE|TH|FR|SA|SU))*|BYMONTHDAY=([1-9]|[12][0-9]|3[01])(,([1-9]|[12][0-9]|3[01]))*|BYMONTH=([1-9]|1[0-2])(,([1-9]|1[0-2]))*))*$"
+        },
+        "timezone": {
+          "type": "string",
+          "pattern": "^[A-Za-z_+-][A-Za-z0-9_+.-]*(/[A-Za-z0-9_+-][A-Za-z0-9_+.-]*)+$"
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["execution", "workingDirectory", "stateDirectory", "isolation", "platforms"],
+      "properties": {
+        "execution": {
+          "enum": ["local", "cloud", "either"]
+        },
+        "workingDirectory": {
+          "enum": ["select-on-install", "not-required"]
+        },
+        "stateDirectory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "isolation": {
+          "enum": ["shared", "worktree", "provider-managed"]
+        },
+        "platforms": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["macos", "linux", "windows", "any"]
+          }
+        }
+      }
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["claude-desktop-local", "claude-code-cloud", "codex-local", "gemini-local"]
+      }
+    }
+  }
+}

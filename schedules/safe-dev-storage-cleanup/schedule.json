@@ -1,0 +1,20 @@
+{
+  "$schema": "../schema.json",
+  "version": 1,
+  "id": "safe-dev-storage-cleanup",
+  "name": "安全な開発用ストレージcleanup",
+  "description": "merge済みで非稼働と確認できたGit worktree、および古いdangling Docker build cache・imageだけを削除する。",
+  "skill": "SKILL.md",
+  "schedule": {
+    "rrule": "FREQ=DAILY;BYHOUR=11;BYMINUTE=0",
+    "timezone": "Asia/Tokyo"
+  },
+  "runtime": {
+    "execution": "local",
+    "workingDirectory": "select-on-install",
+    "stateDirectory": "/Users/asumayamada/.local/state/dotagents/safe-dev-storage-cleanup",
+    "isolation": "shared",
+    "platforms": ["macos"]
+  },
+  "targets": ["claude-desktop-local", "codex-local"]
+}

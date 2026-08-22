@@ -1,0 +1,20 @@
+{
+  "$schema": "../schema.json",
+  "version": 1,
+  "id": "mac-storage-audit",
+  "name": "毎日のMacストレージ監査",
+  "description": "内蔵APFSコンテナとホームディレクトリを読み取り専用で監査し、日次差分と安全な整理候補を報告する。",
+  "skill": "SKILL.md",
+  "schedule": {
+    "rrule": "FREQ=DAILY;BYHOUR=9;BYMINUTE=0",
+    "timezone": "Asia/Tokyo"
+  },
+  "runtime": {
+    "execution": "local",
+    "workingDirectory": "select-on-install",
+    "stateDirectory": "/Users/asumayamada/.local/state/dotagents/mac-storage-audit",
+    "isolation": "shared",
+    "platforms": ["macos"]
+  },
+  "targets": ["claude-desktop-local", "codex-local"]
+}
