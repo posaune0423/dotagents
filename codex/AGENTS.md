@@ -18,6 +18,13 @@ Develop with TDD (Exploration -> Red -> Green -> Refactoring).
 If KPIs or coverage targets are provided, keep iterating until they are met.
 Ask questions to clarify ambiguous instructions.
 
+### Git Branching
+
+- Never prefix branch names with an agent or tool name such as `codex/`.
+- Follow the repository's established branch naming convention when one exists.
+- Otherwise, use a simple Git Flow convention: `feature/<short-kebab-case-name>` for features, `fix/<short-kebab-case-name>` for regular fixes, `release/<version-or-name>` for release preparation, and `hotfix/<short-kebab-case-name>` for urgent production fixes.
+- Reuse the repository's existing long-lived branches; do not introduce `develop` or another long-lived branch unless the repository already uses it or the user explicitly requests it.
+
 ### Code Design
 
 - Maintain separation of concerns.

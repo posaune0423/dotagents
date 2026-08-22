@@ -65,7 +65,7 @@ Here is the level of detail expected for one `Sequence` step and one contract:
 
 ```text
 Contracts:
-  linkClaudeAgents(repoRoot, home): links <repo>/.claude/agents -> ~/.claude/agents;
+  linkClaudeAgents(repoRoot, home): links <repo>/claude/agents -> ~/.claude/agents;
     errors if the source dir is absent; existing non-symlink dst is moved to a timestamped backup;
     idempotent (re-running replaces the symlink, never nests)
 Sequence:
