@@ -1,3 +1,14 @@
 {
-  "hooks": {}
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.codex/hooks/user_prompt_submit_proactive_context.sh"
+          }
+        ]
+      }
+    ]
+  }
 }

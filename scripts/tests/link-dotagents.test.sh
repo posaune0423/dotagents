@@ -63,6 +63,44 @@ shopt -u nullglob
 assert_link "${ROOT}/claude/CLAUDE.md" "../codex/AGENTS.md"
 assert_link "${ROOT}/gemini/GEMINI.md" "../codex/AGENTS.md"
 
+review_rc=0
+jq -e '.env == {} and .remoteControlAtStartup == false' "${ROOT}/claude/settings.template.json" >/dev/null || {
+	echo "FAIL: Claude settings template must be valid JSON with an empty env and opt-in Remote Control" >&2
+	review_rc=1
+}
+jq -e '.remoteControlAtStartup == false' "${ROOT}/claude/settings.json" >/dev/null || {
+	echo "FAIL: Claude reference settings must not start Remote Control automatically" >&2
+	review_rc=1
+}
+jq -e '
+	.hooks.UserPromptSubmit == [
+		{
+			"hooks": [
+				{
+					"type": "command",
+					"command": "~/.codex/hooks/user_prompt_submit_proactive_context.sh"
+				}
+			]
+		}
+	]
+' "${ROOT}/codex/hooks.json" >/dev/null || {
+	echo "FAIL: Codex UserPromptSubmit hook must register the proactive-context command" >&2
+	review_rc=1
+}
+rg -Fq 'links ~/.claude/agents -> <repo>/claude/agents;' "${ROOT}/claude/agents/architect.md" || {
+	echo "FAIL: Claude architect example must document the home-to-repository link direction" >&2
+	review_rc=1
+}
+rg -Fq 'Writes and file edits are unsupported, even when explicitly requested.' "${ROOT}/codex/agents/qwen_worker.toml" || {
+	echo "FAIL: Qwen worker must document its read-only sandbox boundary" >&2
+	review_rc=1
+}
+rg -Fq 'return `BLOCKED:`' "${ROOT}/codex/agents/qwen_worker.toml" || {
+	echo "FAIL: Qwen worker must block tasks that require modifications" >&2
+	review_rc=1
+}
+[[ "${review_rc}" -eq 0 ]] || fail "review finding regressions detected"
+
 HOME="${TEST_HOME}" bash "${ROOT}/scripts/link-dotagents.sh" --verify
 
 ln -sfn -- "${TEST_ROOT}/wrong-target" "${TEST_HOME}/.gemini/GEMINI.md"

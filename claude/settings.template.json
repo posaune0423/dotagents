@@ -1,14 +1,5 @@
 {
-  "env": {
-    // "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
-    // "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    // "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
-    // "ANTHROPIC_BASE_URL": "http://localhost:1234",
-    // "ANTHROPIC_AUTH_TOKEN": "dummy",
-    // "ANTHROPIC_DEFAULT_OPUS_MODEL": "qwen3.6-35b-a3b-ud-mlx",
-    // "ANTHROPIC_DEFAULT_SONNET_MODEL": "qwen3.6-35b-a3b-ud-mlx",
-    // "ANTHROPIC_DEFAULT_HAIKU_MODEL": "qwen3.6-35b-a3b-ud-mlx"
-  },
+  "env": {},
   "permissions": {
     "allow": ["mcp__pencil"]
   },
@@ -38,5 +29,5 @@
   },
   "skipDangerousModePermissionPrompt": true,
   "effortLevel": "high",
-  "remoteControlAtStartup": true
+  "remoteControlAtStartup": false
 }
