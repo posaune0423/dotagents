@@ -3,14 +3,12 @@
 ## Rules
 
 - Actively use skills and subagents to keep the main thread context clean.
-  - **Skill**: For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` directly under that skill before starting work (for example, `skills/<name>/SKILL.md`), and apply its procedures and constraints exactly as written. Do not stop at merely declaring that you will use the skill.
-  - **Subagent**: Proactively delegate to subagents when work benefits from an isolated context or parallel execution (refactoring, review passes, broad codebase exploration, UI debugging, documentation research, or lightweight PR workflows). You do not need the user to explicitly ask for a subagent—judge from the task and use the dedicated agents below. For those cases, delegation is mandatory.
-  - [browser_debugger](./agents/browser_debugger.toml): A dedicated subagent for debugging UIs and web apps.
-  - [docs_researcher](./agents/docs_researcher.toml): A dedicated subagent that uses `ctx7` and web_search tools to search for and collect necessary information from official documentation, forums, issues, and local files.
-  - [light_worker](./agents/light_worker.toml): A dedicated subagent for lightweight tasks such as formatting, linting, type checks, and PR creation/updating workflows (docs/metadata updates, quick PR-ready touch-ups).
-  - [qwen_worker](./agents/qwen_worker.toml): A dedicated subagent that uses the local LLM qwen3.6 via lmstudio.
-  - Note: Skills and subagents may be used together. You may also pass knowledge from a skill to a subagent and have it execute the work.
-  - Note: For small tasks where no relevant skill or subagent exists, proceed with the normal workflow.
+  - **Skill**: For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` before starting work (for example, `skills/<name>/SKILL.md`), and apply its procedures and constraints exactly as written. Do not stop at merely declaring skill use.
+  - **Subagent**: Delegate work when an isolated context or parallel execution is useful and the active host provides an appropriate subagent.
+    - `architect`: Clarifies architecture, trade-offs, responsibility boundaries, and implementation plans.
+    - `browser-debugger`: Reproduces browser issues and gathers evidence from the console, network, DOM, and screenshots.
+    - `docs-researcher`: Verifies APIs, defaults, and version differences against official documentation.
+    - `light-worker`: Handles mechanical checks such as formatting, linting, type checking, and tests.
 
 ## Development Style
 
@@ -40,6 +38,6 @@ Ask questions to clarify ambiguous instructions.
 - JSON: Use `jq` for JSON processing.
 - Shell: Fish shell is the primary shell.
 - Task: Use `justfile` instead of Makefile.
-- Node.js: bun, v24+.
+- Node.js: Use Bun and Node.js v24+.
 - E2E: Use `playwright` instead of `chrome-devtools`.
 - Python: `uv`.

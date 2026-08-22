@@ -82,17 +82,17 @@ config_file = "agents/worker.toml"
 description = "Built-in monitoring role."
 config_file = "agents/monitor.toml"
 
-[agents.light_worker]
-description = "Light_worker for format, lint, typecheck, test, and similar repetitive/simple tasks. Escalate complex or architectural work to worker."
-config_file = "agents/light_worker.toml"
+[agents.light-worker]
+description = "Light worker for format, lint, typecheck, test, and similar repetitive/simple tasks. Escalate complex or architectural work to worker."
+config_file = "agents/light-worker.toml"
 
-[agents.browser_debugger]
+[agents.browser-debugger]
 description = "Browser debugger role for browser-based reproduction, UI evidence gathering, or client-side debugging through a browser MCP server."
-config_file = "agents/browser_debugger.toml"
+config_file = "agents/browser-debugger.toml"
 
-[agents.docs_researcher]
+[agents.docs-researcher]
 description = "Docs researcher role for documentation-backed verification of APIs, version-specific behavior, or framework options."
-config_file = "agents/docs_researcher.toml"
+config_file = "agents/docs-researcher.toml"
 
 [agents.qwen_worker]
 description = "Local Qwen worker via custom LM Studio provider."

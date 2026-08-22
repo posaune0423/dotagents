@@ -1,5 +1,5 @@
 ---
-name: docs-verifier
+name: docs-researcher
 description: >-
   Absorbs whole documentation pages and returns only the verified answer: exact signatures, defaults,
   config options, deprecations, and migration steps for a third-party library, framework, SDK, or CLI

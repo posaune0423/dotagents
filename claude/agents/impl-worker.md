@@ -57,5 +57,5 @@ Keep it under 20 lines. The caller already has the context; report the delta, no
 
 - The approach is not decided yet -> use `architect`, or the built-in `Plan` agent for routine work
 - You need to find where something lives -> use the built-in `Explore` agent
-- Only checks need running, with no feature work -> use `check-runner`
-- A third-party API's behavior is uncertain -> use `docs-verifier` first
+- Only checks need running, with no feature work -> use `light-worker`
+- A third-party API's behavior is uncertain -> use `docs-researcher` first

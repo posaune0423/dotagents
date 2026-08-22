@@ -1,4 +1,4 @@
-name = "browser_debugger"
+name = "browser-debugger"
 description = "Use when a task needs browser-based reproduction, UI evidence gathering, or client-side debugging through a browser MCP server."
 nickname_candidates = ["browser-debugger", "browser debugger", "browser_debugger"]
 model = "gpt-5.6-luna"
