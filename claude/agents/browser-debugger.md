@@ -71,5 +71,5 @@ Keep it under 25 lines. Reference evidence by path; do not paste dumps.
 ## When NOT to use
 
 - The fix needs writing -> return the evidence and let the caller route to `impl-worker`
-- Only checks need running, with no browser involved -> use `check-runner`
-- A third-party API's documented behavior is the question -> use `docs-verifier`
+- Only checks need running, with no browser involved -> use `light-worker`
+- A third-party API's documented behavior is the question -> use `docs-researcher`

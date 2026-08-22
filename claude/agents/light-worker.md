@@ -1,5 +1,5 @@
 ---
-name: check-runner
+name: light-worker
 description: >-
   Absorbs the long output of verification commands and returns only the distilled result: format,
   lint, typecheck, build, or test suites. Fixes mechanical failures only, such as formatting, import

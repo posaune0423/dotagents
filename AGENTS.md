@@ -4,7 +4,8 @@
 
 - This repository is the source of truth for reusable agent skills, commands, rules, and shared tool configuration.
 - Keep repository-specific guidance in this file. Cross-repository personal defaults belong in `codex/AGENTS.md`.
-- `codex/AGENTS.md` is the canonical global instruction file. `claude/CLAUDE.md` and `gemini/GEMINI.md` must remain relative symlinks to it.
+- `codex/AGENTS-ja.md` is the canonical authoring source for global instructions. Write the Japanese source first, then translate the complete content into `codex/AGENTS.md`.
+- `claude/CLAUDE.md` and `gemini/GEMINI.md` must remain relative symlinks to the English runtime file at `codex/AGENTS.md`.
 - Root `CLAUDE.md` and `GEMINI.md` bridge this repository's project instructions to tools that do not read root `AGENTS.md` directly.
 
 ## Repository Layout
@@ -35,4 +36,9 @@
 - Keep each reusable skill's contract in its `SKILL.md`; use supporting scripts and references for operational detail.
 - Preserve top-level discovery links for project-specific skills that must remain globally discoverable.
 - Claude and Codex subagent formats are tool-specific. Do not merge `claude/agents/*.md` and `codex/agents/*.toml` into one generated format.
+- Keep shared subagent names identical across Claude and Codex definitions, using kebab-case.
 - Keep unrelated working-tree changes out of the task's diff, especially machine-local project skills and active worktree state.
+
+## Global Instruction Translation
+
+- Never edit `codex/AGENTS.md` as the primary source. Update `codex/AGENTS-ja.md` first, then translate the complete Japanese source into English.

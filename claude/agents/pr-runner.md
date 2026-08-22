@@ -55,5 +55,5 @@ Keep it under 20 lines. Never paste a full CI log; quote the shortest excerpt th
 ## When NOT to use
 
 - The change is not written or committed yet -> use `impl-worker`
-- A local check loop needs running, with no PR involved -> use `check-runner`
+- A local check loop needs running, with no PR involved -> use `light-worker`
 - CI fails for a reason that needs real diagnosis -> return it and let the caller route the fix

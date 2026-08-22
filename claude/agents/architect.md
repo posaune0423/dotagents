@@ -80,4 +80,4 @@ Keep the whole response under 40 lines.
 - A routine implementation plan is enough -> use the built-in `Plan` agent
 - The design is settled and needs building -> use `impl-worker`
 - The question is how existing code works -> use the built-in `Explore` agent
-- The question is how a third-party API behaves -> use `docs-verifier`
+- The question is how a third-party API behaves -> use `docs-researcher`

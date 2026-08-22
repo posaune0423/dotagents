@@ -24,22 +24,22 @@
 
 ## リポジトリ構成（概要）
 
-| パス        | 内容                                                                                                                                                             |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `skills/`   | エージェントスキル（SSoT）                                                                                                                                       |
-| `rules/`    | ルール（`.mdc` など）                                                                                                                                            |
-| `commands/` | Cursor / エージェント向けコマンド定義                                                                                                                            |
-| `scripts/`  | リンク・同期・検証シェル                                                                                                                                         |
-| `justfile`  | 上記スクリプトと開発タスクのエントリポイント                                                                                                                     |
-| `.envrc`    | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                     |
-| `codex/`    | 共通global instructionの正典 `AGENTS.md`、Codex subagent、hook、共有ベース設定。`config.toml` はreferenceであり、`~/.codex/config.toml` はhome固有のまま管理する |
-| `claude/`   | Claude Code用global instruction bridge、subagent定義、共有設定のreference。`~/.claude/settings.json` は自動linkしない                                            |
-| `gemini/`   | Gemini CLI用global instruction bridge                                                                                                                            |
+| パス        | 内容                                                                                                                                                                                           |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skills/`   | エージェントスキル（SSoT）                                                                                                                                                                     |
+| `rules/`    | ルール（`.mdc` など）                                                                                                                                                                          |
+| `commands/` | Cursor / エージェント向けコマンド定義                                                                                                                                                          |
+| `scripts/`  | リンク・同期・検証シェル                                                                                                                                                                       |
+| `justfile`  | 上記スクリプトと開発タスクのエントリポイント                                                                                                                                                   |
+| `.envrc`    | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                                                   |
+| `codex/`    | 共通global instructionの日本語正典`AGENTS-ja.md`と英訳runtime`AGENTS.md`、Codex subagent、hook、共有ベース設定。`config.toml`はreferenceであり、`~/.codex/config.toml`はhome固有のまま管理する |
+| `claude/`   | Claude Code用global instruction bridge、subagent定義、共有設定のreference。`~/.claude/settings.json` は自動linkしない                                                                          |
+| `gemini/`   | Gemini CLI用global instruction bridge                                                                                                                                                          |
 
 ## 設計
 
 - **グローバルasset**: `~/.agents` にこのrepoの `skills/` `rules/` `commands/` を symlink（SSoT）
-- **共通のglobal instruction**: [codex/AGENTS.md](codex/AGENTS.md) が正典。`claude/CLAUDE.md` と `gemini/GEMINI.md` は相対symlinkで同じ内容を参照し、home側の標準パスから各bridgeへsymlinkする
+- **共通のglobal instruction**: `codex/AGENTS-ja.md` を編集上の正典とする。日本語版を先に更新し、その全文を英訳した[codex/AGENTS.md](codex/AGENTS.md)へ反映する。`claude/CLAUDE.md`と`gemini/GEMINI.md`は英語runtime版への相対symlinkを維持し、home側の標準パスから各bridgeへsymlinkする
 - **このrepo固有のinstruction**: root [AGENTS.md](AGENTS.md) が正典。root `CLAUDE.md` と `GEMINI.md` は各tool向けのproject instruction bridge
 - **home固有設定**: `~/.codex/config.toml` と `~/.claude/settings.json`、認証、履歴、DB、plugin、cacheはrepoへlinkしない
 - **プロジェクト固有**: `<project>/.agents` はプロジェクト内で管理（ここは自由に追加/上書き）
@@ -57,14 +57,14 @@
 | `architect`        | 設計・トレードオフ・契約・実装順序の決定（**`@agent-architect` で明示呼び出し**） | fable  | xhigh  |
 | `impl-worker`      | 仕様が確定した実装を1件担当。並列実装を main thread から切り離す                  | opus   | medium |
 | `browser-debugger` | 実ブラウザで再現手順と証拠（console / network / DOM / screenshot）                | opus   | medium |
-| `check-runner`     | format / lint / typecheck / test / build の実行ループ                             | sonnet | low    |
-| `docs-verifier`    | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認              | sonnet | low    |
+| `light-worker`     | format / lint / typecheck / test / build の実行ループ                             | sonnet | low    |
+| `docs-researcher`  | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認              | sonnet | low    |
 | `pr-runner`        | PR 作成・更新、CI 監視、レビューコメント対応                                      | sonnet | low    |
 
 委譲の仕組み（実測と一次情報で確認したもの）:
 
 - **自動委譲は best effort。** Claude は「リクエスト中のタスク記述」「各 agent の `description`」「現在のコンテキスト」の 3 つで判断します。加えてセッションによっては「ユーザーに言われない限り agent を spawn するな」というシステムプロンプト側の指示が載るため、`description` をどう書いても発火が保証されません。**確実に走らせる手段は `@agent-<name>` だけです。**
-- **`description` は「主題」ではなく「吸収する使い捨て出力の量」で書く。** モデルはコンテキスト隔離の価値で判断しており、タスクの分野では判断していません。実測でも、出力の長い `check-runner` は発火し、設計判断とドキュメント参照は発火しませんでした。
+- **`description` は「主題」ではなく「吸収する使い捨て出力の量」で書く。** モデルはコンテキスト隔離の価値で判断しており、タスクの分野では判断していません。実測でも、出力の長い `light-worker` は発火し、設計判断とドキュメント参照は発火しませんでした。
 - **小文字の `use proactively` は実際に配線されています。** Agent ツールの説明に「description が proactively に使うべきと述べていれば、ユーザーに言われる前に使うよう最善を尽くせ」という指示が入っています（バイナリで確認）。一方 **`MUST BE USED` はバイナリにも公式ドキュメントにも存在しない folklore**、**全大文字 `PROACTIVELY` も無意味**（バイナリ内の該当箇所は無関係な認証ライブラリの定数）。
 - **設計判断とドキュメント参照が main thread に残るのは仕様どおり。** 公式ドキュメントは「頻繁な往復」「複数フェーズでコンテキストを共有」「小さく的を絞った変更」「レイテンシ重要」を main thread 向きと明記しています。よって `architect` は proactive 表現を入れず、明示呼び出し前提にしています。
 - **subagent には自動起動を強制/禁止する frontmatter フィールドがありません。** skill にある `when_to_use` / `disable-model-invocation` / `paths` に相当するものは無く、禁止側は permission で `Agent(<name>)` を deny するしかありません。

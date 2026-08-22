@@ -1,4 +1,4 @@
-name = "docs_researcher"
+name = "docs-researcher"
 description = "Use when a task needs documentation-backed verification of APIs, version-specific behavior, or framework options."
 nickname_candidates = ["docs-researcher", "docs researcher", "docs_researcher"]
 model = "gpt-5.3-codex-spark"
