@@ -1,10 +1,10 @@
 # dotagents
 
-このリポジトリは **グローバルな agent 設定**（skills / rules / commands）の **SSoT (Single Source of Truth)** です。
+このリポジトリは **グローバルな agent 設定**（skills / rules / commands）と共通scheduled taskの **SSoT (Single Source of Truth)** です。
 
 ## 環境構築（基本は Nix）
 
-[Nix](https://nixos.org/download/)（flakes 有効）だけ用意すれば、CLI ツールは [flake.nix](flake.nix) の devShell から揃います（**just / Bun / git / lefthook / shellcheck / shfmt**）。
+[Nix](https://nixos.org/download/)（flakes 有効）だけ用意すれば、CLI ツールは [flake.nix](flake.nix) の devShell から揃います（**just / Bun / git / fd / jq / rg / lefthook / shellcheck / shfmt**）。
 
 ### 手順
 
@@ -24,17 +24,18 @@
 
 ## リポジトリ構成（概要）
 
-| パス        | 内容                                                                                                                                                                                           |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `skills/`   | エージェントスキル（SSoT）                                                                                                                                                                     |
-| `rules/`    | ルール（`.mdc` など）                                                                                                                                                                          |
-| `commands/` | Cursor / エージェント向けコマンド定義                                                                                                                                                          |
-| `scripts/`  | リンク・同期・検証シェル                                                                                                                                                                       |
-| `justfile`  | 上記スクリプトと開発タスクのエントリポイント                                                                                                                                                   |
-| `.envrc`    | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                                                   |
-| `codex/`    | 共通global instructionの日本語正典`AGENTS-ja.md`と英訳runtime`AGENTS.md`、Codex subagent、hook、共有ベース設定。`config.toml`はreferenceであり、`~/.codex/config.toml`はhome固有のまま管理する |
-| `claude/`   | Claude Code用global instruction bridge、subagent定義、共有設定のreference。`~/.claude/settings.json` は自動linkしない                                                                          |
-| `gemini/`   | Gemini CLI用global instruction bridge                                                                                                                                                          |
+| パス         | 内容                                                                                                                                                                                           |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skills/`    | エージェントスキル（SSoT）                                                                                                                                                                     |
+| `rules/`     | ルール（`.mdc` など）                                                                                                                                                                          |
+| `commands/`  | Cursor / エージェント向けコマンド定義                                                                                                                                                          |
+| `schedules/` | Codex / Claudeなどで共通利用するscheduled task定義。home配下へsymlinkせず、各providerへ明示的に反映する                                                                                        |
+| `scripts/`   | リンク・同期・検証シェル                                                                                                                                                                       |
+| `justfile`   | 上記スクリプトと開発タスクのエントリポイント                                                                                                                                                   |
+| `.envrc`     | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                                                   |
+| `codex/`     | 共通global instructionの日本語正典`AGENTS-ja.md`と英訳runtime`AGENTS.md`、Codex subagent、hook、共有ベース設定。`config.toml`はreferenceであり、`~/.codex/config.toml`はhome固有のまま管理する |
+| `claude/`    | Claude Code用global instruction bridge、subagent定義、共有設定のreference。`~/.claude/settings.json` は自動linkしない                                                                          |
+| `gemini/`    | Gemini CLI用global instruction bridge                                                                                                                                                          |
 
 ## 設計
 
@@ -42,6 +43,7 @@
 - **共通のglobal instruction**: `codex/AGENTS-ja.md` を編集上の正典とする。日本語版を先に更新し、その全文を英訳した[codex/AGENTS.md](codex/AGENTS.md)へ反映する。`claude/CLAUDE.md`と`gemini/GEMINI.md`は英語runtime版への相対symlinkを維持し、home側の標準パスから各bridgeへsymlinkする
 - **このrepo固有のinstruction**: root [AGENTS.md](AGENTS.md) が正典。root `CLAUDE.md` と `GEMINI.md` は各tool向けのproject instruction bridge
 - **home固有設定**: `~/.codex/config.toml` と `~/.claude/settings.json`、認証、履歴、DB、plugin、cacheはrepoへlinkしない
+- **scheduled task**: `schedules/` で共通のcadenceとskillをGit管理し、provider固有の保存先、権限、履歴、thread関連付けはhomeまたはcloud側に残す
 - **プロジェクト固有**: `<project>/.agents` はプロジェクト内で管理（ここは自由に追加/上書き）
 - **各エージェント**: `<project>/.cursor/.codex/.claude` は `<project>/.agents` を参照するように symlink
 - **Subagent**: 形式がツールごとに異なる（Claude Code は `claude/agents/*.md`、Codex は `codex/agents/*.toml` ＋ `config.toml` 登録）ため `~/.agents` では共有せず、それぞれのhome標準パスへlinkする

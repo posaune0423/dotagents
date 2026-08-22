@@ -2,6 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+GIT_COMMON_DIR="$(git -C "${ROOT}" rev-parse --path-format=absolute --git-common-dir)"
+SOURCE_ROOT="$(dirname -- "${GIT_COMMON_DIR}")"
 TEST_ROOT="$(mktemp -d)"
 TEST_HOME="${TEST_ROOT}/home"
 
@@ -24,25 +26,33 @@ assert_link() {
 		fail "unexpected target: ${path} -> $(readlink -- "${path}") (expected ${expected})"
 }
 
-mkdir -p -- "${TEST_HOME}/.codex" "${TEST_HOME}/.claude/agents" "${TEST_HOME}/.gemini"
+mkdir -p -- \
+	"${TEST_HOME}/.agents/schedules" \
+	"${TEST_HOME}/.codex/automations" \
+	"${TEST_HOME}/.claude/agents" \
+	"${TEST_HOME}/.claude/scheduled-tasks" \
+	"${TEST_HOME}/.gemini"
 printf '%s\n' "local-codex-config" >"${TEST_HOME}/.codex/config.toml"
 printf '%s\n' "local-claude-settings" >"${TEST_HOME}/.claude/settings.json"
 printf '%s\n' "previous-global-instructions" >"${TEST_HOME}/.codex/AGENTS.md"
 printf '%s\n' "previous-agent" >"${TEST_HOME}/.claude/agents/local.md"
+printf '%s\n' "local-shared-schedule" >"${TEST_HOME}/.agents/schedules/local.txt"
+printf '%s\n' "local-codex-automation" >"${TEST_HOME}/.codex/automations/local.txt"
+printf '%s\n' "local-claude-schedule" >"${TEST_HOME}/.claude/scheduled-tasks/local.txt"
 
 HOME="${TEST_HOME}" bash "${ROOT}/scripts/link-dotagents.sh" --home --all --tool-links
 HOME="${TEST_HOME}" bash "${ROOT}/scripts/link-dotagents.sh" --home --all --tool-links
 
-assert_link "${TEST_HOME}/.agents/skills" "${ROOT}/skills"
-assert_link "${TEST_HOME}/.agents/commands" "${ROOT}/commands"
-assert_link "${TEST_HOME}/.agents/rules" "${ROOT}/rules"
-assert_link "${TEST_HOME}/.codex/AGENTS.md" "${ROOT}/codex/AGENTS.md"
-assert_link "${TEST_HOME}/.codex/agents" "${ROOT}/codex/agents"
-assert_link "${TEST_HOME}/.codex/hooks" "${ROOT}/codex/hooks"
-assert_link "${TEST_HOME}/.codex/hooks.json" "${ROOT}/codex/hooks.json"
-assert_link "${TEST_HOME}/.claude/CLAUDE.md" "${ROOT}/claude/CLAUDE.md"
-assert_link "${TEST_HOME}/.claude/agents" "${ROOT}/claude/agents"
-assert_link "${TEST_HOME}/.gemini/GEMINI.md" "${ROOT}/gemini/GEMINI.md"
+assert_link "${TEST_HOME}/.agents/skills" "${SOURCE_ROOT}/skills"
+assert_link "${TEST_HOME}/.agents/commands" "${SOURCE_ROOT}/commands"
+assert_link "${TEST_HOME}/.agents/rules" "${SOURCE_ROOT}/rules"
+assert_link "${TEST_HOME}/.codex/AGENTS.md" "${SOURCE_ROOT}/codex/AGENTS.md"
+assert_link "${TEST_HOME}/.codex/agents" "${SOURCE_ROOT}/codex/agents"
+assert_link "${TEST_HOME}/.codex/hooks" "${SOURCE_ROOT}/codex/hooks"
+assert_link "${TEST_HOME}/.codex/hooks.json" "${SOURCE_ROOT}/codex/hooks.json"
+assert_link "${TEST_HOME}/.claude/CLAUDE.md" "${SOURCE_ROOT}/claude/CLAUDE.md"
+assert_link "${TEST_HOME}/.claude/agents" "${SOURCE_ROOT}/claude/agents"
+assert_link "${TEST_HOME}/.gemini/GEMINI.md" "${SOURCE_ROOT}/gemini/GEMINI.md"
 
 shopt -s nullglob
 codex_instruction_backups=("${TEST_HOME}/.codex/AGENTS.md.bak."*)
@@ -59,6 +69,15 @@ shopt -u nullglob
 [[ "$(<"${TEST_HOME}/.codex/config.toml")" == "local-codex-config" ]] || fail "Codex config was modified"
 [[ ! -L "${TEST_HOME}/.claude/settings.json" ]] || fail "Claude settings must stay home-local"
 [[ "$(<"${TEST_HOME}/.claude/settings.json")" == "local-claude-settings" ]] || fail "Claude settings were modified"
+[[ ! -L "${TEST_HOME}/.agents/schedules" ]] || fail "shared schedules must not be linked globally"
+[[ "$(<"${TEST_HOME}/.agents/schedules/local.txt")" == "local-shared-schedule" ]] ||
+	fail "global schedule state was modified"
+[[ ! -L "${TEST_HOME}/.codex/automations" ]] || fail "Codex automations must stay home-local"
+[[ "$(<"${TEST_HOME}/.codex/automations/local.txt")" == "local-codex-automation" ]] ||
+	fail "Codex automation state was modified"
+[[ ! -L "${TEST_HOME}/.claude/scheduled-tasks" ]] || fail "Claude schedules must stay home-local"
+[[ "$(<"${TEST_HOME}/.claude/scheduled-tasks/local.txt")" == "local-claude-schedule" ]] ||
+	fail "Claude schedule state was modified"
 
 assert_link "${ROOT}/claude/CLAUDE.md" "../codex/AGENTS.md"
 assert_link "${ROOT}/gemini/GEMINI.md" "../codex/AGENTS.md"
@@ -110,8 +129,8 @@ fi
 
 HOME="${TEST_HOME}" bash "${ROOT}/scripts/relink-codex-prompts.sh"
 assert_link "${TEST_HOME}/.codex/prompts" "${TEST_HOME}/.agents/commands"
-assert_link "${TEST_HOME}/.codex/hooks" "${ROOT}/codex/hooks"
-assert_link "${TEST_HOME}/.codex/hooks.json" "${ROOT}/codex/hooks.json"
+assert_link "${TEST_HOME}/.codex/hooks" "${SOURCE_ROOT}/codex/hooks"
+assert_link "${TEST_HOME}/.codex/hooks.json" "${SOURCE_ROOT}/codex/hooks.json"
 
 FIXTURE_MAIN="${TEST_ROOT}/fixture-main"
 FIXTURE_WORKTREE="${TEST_ROOT}/fixture-worktree"

@@ -7,9 +7,9 @@
     "format": "bunx prettier --write .",
     "format:check": "bunx prettier --check .",
     "lint": "bunx eslint .",
-    "bash:format": "find scripts skills -type f -name '*.sh' ! -path 'skills/.system/*' ! -path 'skills/projects/*' -exec shfmt -w {} +",
-    "bash:format:check": "find scripts skills -type f -name '*.sh' ! -path 'skills/.system/*' ! -path 'skills/projects/*' -exec shfmt -d {} +",
-    "bash:lint": "find scripts skills -type f -name '*.sh' ! -path 'skills/.system/*' ! -path 'skills/projects/*' -exec shellcheck {} +",
+    "bash:format": "fd -H -t f -e sh . scripts skills schedules -X shfmt -w",
+    "bash:format:check": "fd -H -t f -e sh . scripts skills schedules -X shfmt -d",
+    "bash:lint": "fd -H -t f -e sh . scripts skills schedules -X shellcheck",
     "check": "bun run lint && bun run format:check && bun run bash:lint && bun run bash:format:check"
   },
   "devDependencies": {

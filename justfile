@@ -16,6 +16,14 @@ verify-global:
 test-links:
     ./scripts/tests/link-dotagents.test.sh
 
+# Validate provider-neutral scheduled-task definitions
+test-schedules:
+    ./scripts/tests/schedules.test.sh
+
+# Integration tests for destructive-boundary checks in worktree cleanup
+test-cleanup:
+    ./scripts/tests/safe-dev-storage-cleanup.test.sh
+
 # Remove ~/.codex/commands and symlink ~/.codex/prompts -> ~/.agents/commands
 link-codex-prompts:
     ./scripts/relink-codex-prompts.sh
@@ -48,4 +56,4 @@ lint:
     bun run lint
 
 check:
-    bun run check
+    bun run check && just test-schedules && just test-cleanup

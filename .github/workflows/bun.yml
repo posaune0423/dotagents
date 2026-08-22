@@ -23,7 +23,7 @@ jobs:
       - name: Prepare
         run: nix develop -c bun run prepare
       - name: Check
-        run: nix develop -c bun run check
+        run: nix develop -c just check
       - name: Format
         run: nix develop -c bun run format
       - name: Lint
