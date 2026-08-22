@@ -4,7 +4,7 @@
 
 - skillとsubagentを積極的に使い、main threadのcontextをcleanに保つ。
   - **Skill**: 専門知識が必要なタスクでは、作業開始前に該当skill直下の`SKILL.md`（例: `skills/<name>/SKILL.md`）を読み、手順と制約をそのまま適用する。使用を宣言するだけで終わらせない。
-  - **Subagent**: 独立したcontextや並列実行が有効な作業（refactoring、review、広範囲の探索、UI debugging、documentation research、軽量なPR workflowなど）は、ユーザーから明示的に依頼されていなくても、利用中のhostで使用可能な適切なsubagentへ積極的に委任する。そのような場合、委任は必須とする。
+  - **Subagent**: 独立したcontextや並列実行が有効で、利用中のhostに適切なsubagentがある場合に委任する。
     - `architect`: 設計、trade-off、責務境界、実装計画を整理する。
     - `browser-debugger`: browserで問題を再現し、console、network、DOM、screenshotから証拠を集める。
     - `docs-researcher`: 公式documentationからAPI、既定値、version差分を確認する。

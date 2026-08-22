@@ -3,7 +3,7 @@
 ## Purpose and Sources of Truth
 
 - This repository is the source of truth for reusable agent skills, commands, rules, and shared tool configuration.
-- Keep repository-specific guidance in this file. Cross-repository personal defaults belong in `codex/AGENTS.md`.
+- Keep repository-specific guidance in this file. Author cross-repository personal defaults in `codex/AGENTS-ja.md`.
 - `codex/AGENTS-ja.md` is the canonical authoring source for global instructions. Write the Japanese source first, then translate the complete content into `codex/AGENTS.md`.
 - `claude/CLAUDE.md` and `gemini/GEMINI.md` must remain relative symlinks to the English runtime file at `codex/AGENTS.md`.
 - Root `CLAUDE.md` and `GEMINI.md` bridge this repository's project instructions to tools that do not read root `AGENTS.md` directly.

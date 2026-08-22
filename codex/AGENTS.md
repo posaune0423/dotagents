@@ -4,7 +4,7 @@
 
 - Actively use skills and subagents to keep the main thread context clean.
   - **Skill**: For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` before starting work (for example, `skills/<name>/SKILL.md`), and apply its procedures and constraints exactly as written. Do not stop at merely declaring skill use.
-  - **Subagent**: Proactively delegate work that benefits from an isolated context or parallel execution, such as refactoring, reviews, broad exploration, UI debugging, documentation research, and lightweight PR workflows, to an appropriate subagent available in the active host. The user does not need to request delegation explicitly; when the task clearly benefits, delegation is mandatory.
+  - **Subagent**: Delegate work when an isolated context or parallel execution is useful and the active host provides an appropriate subagent.
     - `architect`: Clarifies architecture, trade-offs, responsibility boundaries, and implementation plans.
     - `browser-debugger`: Reproduces browser issues and gathers evidence from the console, network, DOM, and screenshots.
     - `docs-researcher`: Verifies APIs, defaults, and version differences against official documentation.

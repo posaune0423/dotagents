@@ -64,9 +64,9 @@
 委譲の仕組み（実測と一次情報で確認したもの）:
 
 - **自動委譲は best effort。** Claude は「リクエスト中のタスク記述」「各 agent の `description`」「現在のコンテキスト」の 3 つで判断します。加えてセッションによっては「ユーザーに言われない限り agent を spawn するな」というシステムプロンプト側の指示が載るため、`description` をどう書いても発火が保証されません。**確実に走らせる手段は `@agent-<name>` だけです。**
-- **`description` は「主題」ではなく「吸収する使い捨て出力の量」で書く。** モデルはコンテキスト隔離の価値で判断しており、タスクの分野では判断していません。実測でも、出力の長い `light-worker` は発火し、設計判断とドキュメント参照は発火しませんでした。
+- **`description` は「主題」ではなく「吸収する使い捨て出力の量」で書く。** モデルはコンテキスト隔離の価値で判断しており、タスクの分野では判断していません。実測では出力の長い`light-worker`が発火しました。`architect`は明示呼び出しとし、`docs-researcher`は外部documentationを大量に読む調査を隔離します。
 - **小文字の `use proactively` は実際に配線されています。** Agent ツールの説明に「description が proactively に使うべきと述べていれば、ユーザーに言われる前に使うよう最善を尽くせ」という指示が入っています（バイナリで確認）。一方 **`MUST BE USED` はバイナリにも公式ドキュメントにも存在しない folklore**、**全大文字 `PROACTIVELY` も無意味**（バイナリ内の該当箇所は無関係な認証ライブラリの定数）。
-- **設計判断とドキュメント参照が main thread に残るのは仕様どおり。** 公式ドキュメントは「頻繁な往復」「複数フェーズでコンテキストを共有」「小さく的を絞った変更」「レイテンシ重要」を main thread 向きと明記しています。よって `architect` は proactive 表現を入れず、明示呼び出し前提にしています。
+- **設計判断はmain thread、独立した設計reviewは`architect`。** 頻繁な往復や複数phaseでcontextを共有する設計判断はmain threadで扱い、独立した評価が必要なときだけ`architect`を明示呼び出しします。外部documentationの大量取得は`docs-researcher`へ隔離します。
 - **subagent には自動起動を強制/禁止する frontmatter フィールドがありません。** skill にある `when_to_use` / `disable-model-invocation` / `paths` に相当するものは無く、禁止側は permission で `Agent(<name>)` を deny するしかありません。
 
 設計の原則:
