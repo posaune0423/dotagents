@@ -9,6 +9,7 @@
     - `browser-debugger`: browserで問題を再現し、console、network、DOM、screenshotから証拠を集める。
     - `docs-researcher`: 公式documentationからAPI、既定値、version差分を確認する。
     - `light-worker`: formatting、lint、type check、testなどの機械的な検証を担当する。
+    - `web-operator`: ログイン済みbrowser経由でNotion、Slack、X、社内SaaSのページを取得し、要点のみ返す。
 
 ## 開発スタイル
 
@@ -47,5 +48,7 @@ KPIやcoverage目標が与えられた場合は、達成するまで反復する
 - Shell: Fish shellを優先する。
 - Task: Makefileではなく`justfile`を使用する。
 - Node.js: Bun、Node.js v24以上を使用する。
-- E2E: `chrome-devtools`ではなく`playwright`を使用する。
+- E2E・ローカル開発中のbrowser操作: `chrome-devtools`ではなく`playwright`を使用する。
+- 認証付きweb: ログインが必要なページは`web-operator`に委譲し、経路をMCP → CLI → 認証済みbrowserの順に選ぶ。browser profileの対応表は`~/.claude/browser-profiles.json`。`playwright`は新規profileでsessionを持たないため、保存済みのstorage stateが無い限り認証が必要な外部serviceには使わない。
+- 対話login: `ntn login`のようなbrowser往復を要するloginをagentから試さない。認証情報が無い場合は再試行せず、認証済みbrowser経路に切り替える。
 - Python: `uv`を使用する。

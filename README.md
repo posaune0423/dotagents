@@ -48,6 +48,7 @@
 - **各エージェント**: `<project>/.cursor/.codex/.claude` は `<project>/.agents` を参照するように symlink
 - **Subagent**: 形式がツールごとに異なる（Claude Code は `claude/agents/*.md`、Codex は `codex/agents/*.toml` ＋ `config.toml` 登録）ため `~/.agents` では共有せず、それぞれのhome標準パスへlinkする
 - **プロジェクト固有の subagent**: 必要な場合は `<project>/.claude/agents/` に直接置く（`<project>/.agents` 経由では配布しない）
+- **Hook**: hook scriptは `claude/hooks/` と `codex/hooks/` でGit管理し、`just link-global` で `~/.claude/hooks` と `~/.codex/hooks` へsymlinkする。hookの登録先（`~/.claude/settings.json` の `hooks`、`codex/hooks.json`）は起動側の設定なので、Claude側はhome固有設定として扱う
 - **Cursorのglobal rule**: file symlinkではなくCursorの Customize → Rules で管理する。root `AGENTS.md` はproject ruleとして利用できる
 
 ## Subagent（Claude Code）
@@ -62,6 +63,7 @@
 | `light-worker`     | format / lint / typecheck / test / build の実行ループ                             | sonnet | low    |
 | `docs-researcher`  | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認              | sonnet | low    |
 | `pr-runner`        | PR 作成・更新、CI 監視、レビューコメント対応                                      | sonnet | low    |
+| `web-operator`     | ログイン済みブラウザ経由で Notion / Slack / X / 社内 SaaS のページを取得          | sonnet | medium |
 
 委譲の仕組み（実測と一次情報で確認したもの）:
 
@@ -135,6 +137,39 @@ just verify-global
 ```bash
 just verify-project /path/to/your-project
 ```
+
+## Hook（Claude Code）
+
+`claude/hooks/*.sh` に置き、`just link-global` で `~/.claude/hooks` に symlink されます。登録は
+`~/.claude/settings.json` の `hooks` で行い、こちらは home 固有設定なので Git 管理しません。
+
+| hook                           | event                           | 役割                                                             |
+| ------------------------------ | ------------------------------- | ---------------------------------------------------------------- |
+| `worktree-git-wt.sh`           | WorktreeCreate / WorktreeRemove | Claude Code の worktree ライフサイクルを `git wt` に委譲する     |
+| `block-agent-branch-prefix.sh` | PreToolUse (Bash)               | `claude/` `codex/` 等の agent 名 prefix を持つ branch 作成を拒否 |
+
+`block-agent-branch-prefix.sh` の設計:
+
+- **拒否リスト方式**（`claude|codex|gemini|cursor|copilot|devin|agent|ai`）。Git Flow の許可リストにすると、
+  repository 固有の命名規則がある場合に誤爆する。常に誤りと言える agent prefix だけを弾く
+- **作成のみを拒否**する。`git branch -d claude/old` の削除、`git checkout claude/existing` の切り替え、
+  `--set-upstream-to=...` 等の維持操作、`--list` 等の参照は通す
+- **git の綴りは短形・長形の両方を見る**。`-c` だけでなく `--create`、`--force-create`、`--orphan` も
+  作成なので、短形しか見ないと長形が抜け道になる
+- **copy と rename は最後の引数が宛先**。`git branch -c main claude/foo` で最初の operand を読むと
+  source の `main` を拾って新 branch を見逃す
+- **push の refspec は省略形も解釈する**。`git push origin claude/foo`、`HEAD:claude/foo`、`+claude/foo` は
+  すべて remote branch の作成。`--delete` と `:claude/foo`（空 source）は削除なので通す
+- **quote は解析前に除去**する。`git checkout -b "claude/foo"` は tokenize で quote が残り、
+  anchored な prefix 一致が外れて抜け道になる
+- **command word が git 自身であることを要求**する。segment 内の任意の位置の `git` を見ると
+  `echo git checkout -b claude/foo` のような無害なコマンドを誤爆させる
+- **heredoc の本文は解析前に除去**する。skill や script を書くたびに、本文に含まれる
+  forbidden command の文字列で誤爆するため
+- 事前フィルタ `if: "Bash(git *)"` は**使わない**。権限ルール構文は前方一致のみで、
+  `cd /foo && git checkout -b claude/x` のように `git` で始まらない複合コマンドを取り逃す
+
+検証は `just test-hooks`（61 ケース。ブロックすべき形と、通すべき形の両方）。
 
 ## 開発（formatter / linter / hooks）
 
