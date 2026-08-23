@@ -144,6 +144,7 @@ link_tool_entries() {
 	local codex_hooks_json_src="${SOURCE_ROOT}/codex/hooks.json"
 	local claude_md_src="${SOURCE_ROOT}/claude/CLAUDE.md"
 	local claude_agents_src="${SOURCE_ROOT}/claude/agents"
+	local claude_hooks_src="${SOURCE_ROOT}/claude/hooks"
 	local gemini_md_src="${SOURCE_ROOT}/gemini/GEMINI.md"
 	local src
 
@@ -154,6 +155,7 @@ link_tool_entries() {
 		"${codex_hooks_json_src}" \
 		"${claude_md_src}" \
 		"${claude_agents_src}" \
+		"${claude_hooks_src}" \
 		"${gemini_md_src}"; do
 		if [[ ! -e "${src}" ]]; then
 			echo "ERROR: expected source missing: ${src}" >&2
@@ -168,6 +170,7 @@ link_tool_entries() {
 	safe_link "${codex_hooks_json_src}" "${HOME}/.codex/hooks.json"
 	safe_link "${claude_md_src}" "${HOME}/.claude/CLAUDE.md"
 	safe_link "${claude_agents_src}" "${HOME}/.claude/agents"
+	safe_link "${claude_hooks_src}" "${HOME}/.claude/hooks"
 	safe_link "${gemini_md_src}" "${HOME}/.gemini/GEMINI.md"
 }
 
@@ -306,6 +309,7 @@ verify_links() {
 	check_link "${HOME}/.codex/hooks.json" "/codex/hooks.json" || rc=1
 	check_link "${HOME}/.claude/CLAUDE.md" "/claude/CLAUDE.md" || rc=1
 	check_link "${HOME}/.claude/agents" "/claude/agents" || rc=1
+	check_link "${HOME}/.claude/hooks" "/claude/hooks" || rc=1
 	check_link "${HOME}/.gemini/GEMINI.md" "/gemini/GEMINI.md" || rc=1
 	check_repo_bridge "${EXPECTED_ROOT}/claude/CLAUDE.md" "../codex/AGENTS.md" || rc=1
 	check_repo_bridge "${EXPECTED_ROOT}/gemini/GEMINI.md" "../codex/AGENTS.md" || rc=1

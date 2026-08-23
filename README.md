@@ -34,7 +34,7 @@
 | `justfile`   | 上記スクリプトと開発タスクのエントリポイント                                                                                                                                                   |
 | `.envrc`     | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                                                   |
 | `codex/`     | 共通global instructionの日本語正典`AGENTS-ja.md`と英訳runtime`AGENTS.md`、Codex subagent、hook、共有ベース設定。`config.toml`はreferenceであり、`~/.codex/config.toml`はhome固有のまま管理する |
-| `claude/`    | Claude Code用global instruction bridge、subagent定義、共有設定のreference。`~/.claude/settings.json` は自動linkしない                                                                          |
+| `claude/`    | Claude Code用global instruction bridge、subagent定義、hook、共有設定のreference。`~/.claude/settings.json` は自動linkしない（hookの登録例は `claude/settings.template.json`）                  |
 | `gemini/`    | Gemini CLI用global instruction bridge                                                                                                                                                          |
 
 ## 設計

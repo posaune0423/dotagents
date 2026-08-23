@@ -29,5 +29,19 @@
   },
   "skipDangerousModePermissionPrompt": true,
   "effortLevel": "high",
-  "remoteControlAtStartup": false
+  "remoteControlAtStartup": false,
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/git-session-sync.sh",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  }
 }
