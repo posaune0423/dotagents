@@ -23,6 +23,14 @@ KPIやcoverage目標が与えられた場合は、達成するまで反復する
 - 規則がない場合は、Git Flowの簡潔な命名を使用する: featureは`feature/<short-kebab-case-name>`、通常のfixは`fix/<short-kebab-case-name>`、release準備は`release/<version-or-name>`、緊急のproduction fixは`hotfix/<short-kebab-case-name>`。
 - repositoryに既存のlong-lived branchがある場合はそれを再利用し、既存運用にない`develop`などのbranchを、ユーザーの明示的な依頼なしに追加しない。
 
+### Git worktree
+
+- worktreeを作る前に、`git rev-parse --path-format=absolute --git-dir`と`git rev-parse --path-format=absolute --git-common-dir`を比較する。
+- pathが異なる場合、現在のディレクトリは既にlinked worktreeなのでそこに留まり、ユーザーがworktreeのlifecycle操作を明示的に依頼していない限り新しく作らない。
+- worktreeの作成はshellに落とさず、host自身のworktree機能を使う（Claude Codeならworktree機能と`EnterWorktree`/`ExitWorktree`）。repositoryの`.worktreeinclude`が処理されるのはその経路だけで、新しいworktreeに必要なgitignore済みファイルがコピーされる。shellから`git worktree add`した場合は何もコピーされない。
+- shellから扱う必要がある場合は素の`git worktree add`を使い、削除は`git worktree remove`のあとに`git branch -d`を実行する。どちらも作業の破棄を既に拒否する: `remove`はdirtyなworktreeで停止し、`branch -d`は未マージbranchで停止する。`--force`や`-D`への昇格はユーザーが破棄を確認したあとだけ。
+- `node_modules`などの依存ディレクトリをworktree間でコピーしない。worktreeごとにinstallして、それぞれ独立して解決させる。
+
 ### コード設計
 
 - 関心を分離する。

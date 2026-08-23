@@ -25,11 +25,11 @@ Ask questions to clarify ambiguous instructions.
 
 ### Git Worktrees
 
-- Before invoking the `git-wt` skill to create or switch worktrees, compare `git rev-parse --path-format=absolute --git-dir` with `git rev-parse --path-format=absolute --git-common-dir`.
-- If the paths differ, the current directory is already a linked worktree; stay there and do not invoke `git-wt` unless the user explicitly requests a worktree lifecycle operation.
-- Use the `git-wt` skill only when a worktree lifecycle operation is actually needed.
-- Prefer `git wt` over raw `git worktree add`, `remove`, `move`, or `prune`.
-- Exception: the `safe-dev-storage-cleanup` schedule keeps its own script and raw `git worktree remove <exact-absolute-worktree-path>`. Its safety argument rests on exact-path matching and on never forcing, pruning, deleting branches, or removing directories by hand, so do not convert it to `git wt`.
+- Before creating a worktree, compare `git rev-parse --path-format=absolute --git-dir` with `git rev-parse --path-format=absolute --git-common-dir`.
+- If the paths differ, the current directory is already a linked worktree; stay there and do not create another one unless the user explicitly asks for a worktree lifecycle operation.
+- Create worktrees with the host's own worktree tooling (in Claude Code, its worktree feature and the `EnterWorktree` / `ExitWorktree` tools) rather than by shelling out. Only that path processes the repository's `.worktreeinclude`, which copies the gitignored files a fresh worktree needs; `git worktree add` run from a shell copies nothing.
+- When a worktree must be handled from a shell, use plain `git worktree add`, and remove it with `git worktree remove` followed by `git branch -d`. Both already refuse to discard work: `remove` stops on a dirty worktree and `branch -d` stops on an unmerged branch. Escalate to `--force` or `-D` only after the user confirms discarding it.
+- Never copy dependency directories such as `node_modules` between worktrees. Install them per worktree so each one resolves independently.
 
 ### Code Design
 

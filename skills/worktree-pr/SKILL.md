@@ -52,8 +52,8 @@ Do exactly this, non-interactively, from repo root.
 Run the following commands **in parallel** to fully understand the current state:
 
 ```bash
-# Worktree info (see skill: git-wt)
-git wt --json
+# Worktree info
+git worktree list --porcelain
 
 # Current branch
 git branch --show-current
