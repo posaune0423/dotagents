@@ -52,6 +52,7 @@ assert_link "${TEST_HOME}/.codex/hooks" "${SOURCE_ROOT}/codex/hooks"
 assert_link "${TEST_HOME}/.codex/hooks.json" "${SOURCE_ROOT}/codex/hooks.json"
 assert_link "${TEST_HOME}/.claude/CLAUDE.md" "${SOURCE_ROOT}/claude/CLAUDE.md"
 assert_link "${TEST_HOME}/.claude/agents" "${SOURCE_ROOT}/claude/agents"
+assert_link "${TEST_HOME}/.claude/hooks" "${SOURCE_ROOT}/claude/hooks"
 assert_link "${TEST_HOME}/.gemini/GEMINI.md" "${SOURCE_ROOT}/gemini/GEMINI.md"
 
 shopt -s nullglob
@@ -118,6 +119,15 @@ rg -Fq 'return `BLOCKED:`' "${ROOT}/codex/agents/qwen_worker.toml" || {
 	echo "FAIL: Qwen worker must block tasks that require modifications" >&2
 	review_rc=1
 }
+# Codex discovers a subagent only through its [agents.*] entry, so a TOML file
+# added without one is silently unavailable.
+for agent_toml in "${ROOT}"/codex/agents/*.toml; do
+	agent_name="$(basename -- "${agent_toml}" .toml)"
+	rg -Fq "[agents.${agent_name}]" "${ROOT}/codex/config.toml" || {
+		echo "FAIL: Codex agent ${agent_name} is not registered in codex/config.toml" >&2
+		review_rc=1
+	}
+done
 [[ "${review_rc}" -eq 0 ]] || fail "review finding regressions detected"
 
 HOME="${TEST_HOME}" bash "${ROOT}/scripts/link-dotagents.sh" --verify
@@ -143,6 +153,7 @@ mkdir -p -- \
 	"${FIXTURE_MAIN}/codex/agents" \
 	"${FIXTURE_MAIN}/codex/hooks" \
 	"${FIXTURE_MAIN}/claude/agents" \
+	"${FIXTURE_MAIN}/claude/hooks" \
 	"${FIXTURE_MAIN}/gemini"
 cp -- "${ROOT}/scripts/link-dotagents.sh" "${FIXTURE_MAIN}/scripts/link-dotagents.sh"
 printf '%s\n' "global" >"${FIXTURE_MAIN}/codex/AGENTS.md"
@@ -153,7 +164,8 @@ touch \
 	"${FIXTURE_MAIN}/rules/.keep" \
 	"${FIXTURE_MAIN}/codex/agents/.keep" \
 	"${FIXTURE_MAIN}/codex/hooks/.keep" \
-	"${FIXTURE_MAIN}/claude/agents/.keep"
+	"${FIXTURE_MAIN}/claude/agents/.keep" \
+	"${FIXTURE_MAIN}/claude/hooks/.keep"
 ln -s ../codex/AGENTS.md "${FIXTURE_MAIN}/claude/CLAUDE.md"
 ln -s ../codex/AGENTS.md "${FIXTURE_MAIN}/gemini/GEMINI.md"
 git -C "${FIXTURE_MAIN}" init -q
@@ -165,5 +177,6 @@ FIXTURE_MAIN_CANONICAL="$(cd "${FIXTURE_MAIN}" && pwd -P)"
 HOME="${WORKTREE_HOME}" bash "${FIXTURE_WORKTREE}/scripts/link-dotagents.sh" --home --all --tool-links
 assert_link "${WORKTREE_HOME}/.codex/AGENTS.md" "${FIXTURE_MAIN_CANONICAL}/codex/AGENTS.md"
 assert_link "${WORKTREE_HOME}/.claude/agents" "${FIXTURE_MAIN_CANONICAL}/claude/agents"
+assert_link "${WORKTREE_HOME}/.claude/hooks" "${FIXTURE_MAIN_CANONICAL}/claude/hooks"
 
 echo "PASS: managed global agent links"

@@ -24,6 +24,10 @@ test-schedules:
 test-cleanup:
     ./scripts/tests/safe-dev-storage-cleanup.test.sh
 
+# Integration tests for the Claude Code hook scripts in claude/hooks
+test-hooks:
+    ./scripts/tests/hooks.test.sh
+
 # Remove ~/.codex/commands and symlink ~/.codex/prompts -> ~/.agents/commands
 link-codex-prompts:
     ./scripts/relink-codex-prompts.sh
@@ -56,4 +60,4 @@ lint:
     bun run lint
 
 check:
-    bun run check && just test-schedules && just test-cleanup
+    bun run check && just test-schedules && just test-cleanup && just test-hooks
