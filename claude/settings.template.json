@@ -31,14 +31,24 @@
   "effortLevel": "high",
   "remoteControlAtStartup": false,
   "hooks": {
-    "SessionStart": [
+    "WorktreeCreate": [
       {
-        "matcher": "startup",
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/git-session-sync.sh",
-            "timeout": 20
+            "command": "$HOME/.claude/hooks/worktree-git-wt.sh",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/worktree-git-wt.sh",
+            "timeout": 120
           }
         ]
       }
