@@ -29,6 +29,7 @@ Ask questions to clarify ambiguous instructions.
 - If the paths differ, the current directory is already a linked worktree; stay there and do not invoke `git-wt` unless the user explicitly requests a worktree lifecycle operation.
 - Use the `git-wt` skill only when a worktree lifecycle operation is actually needed.
 - Prefer `git wt` over raw `git worktree add`, `remove`, `move`, or `prune`.
+- Exception: the `safe-dev-storage-cleanup` schedule keeps its own script and raw `git worktree remove <exact-absolute-worktree-path>`. Its safety argument rests on exact-path matching and on never forcing, pruning, deleting branches, or removing directories by hand, so do not convert it to `git wt`.
 
 ### Code Design
 

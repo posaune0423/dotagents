@@ -86,7 +86,10 @@ Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN
 
 16. After successful merge, check if we're in a git worktree:
     - Run: `[ "$(git rev-parse --git-common-dir)" != "$(git rev-parse --git-dir)" ]`
-    - **If in a worktree**: Use the ask user question tool (`request_user_input`) to ask if they want to clean up the worktree. If yes, delete it with `git wt -d "$(git branch --show-current)"` (see skill: git-wt), which removes the worktree and the merged branch. Escalate to `git wt -D` only when the user confirms discarding work. Then continue from the main worktree.
+    - **If in a worktree**: Use the ask user question tool (`request_user_input`) to ask if they want to clean up the worktree. If yes:
+      1. Capture the main worktree first, because the current directory stops existing once the worktree is deleted: `MAIN_WORKTREE="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"`
+      2. Delete with `git wt -d "$(git branch --show-current)"` (see skill: git-wt), which removes the worktree and the merged branch. Escalate to `git wt -D` only when the user confirms discarding work.
+      3. Run every later command against the captured path (`git -C "$MAIN_WORKTREE" ...`). The shell integration's `cd` does not persist between tool calls.
     - **If not in a worktree**: Just switch back to main with `git checkout main && git pull`
 
 ## Completion
