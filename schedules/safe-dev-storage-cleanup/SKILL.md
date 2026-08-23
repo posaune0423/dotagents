@@ -44,7 +44,7 @@ scriptが見つからない、実行権限がない、または失敗した場�
 8. worktree配下のファイル・ディレクトリに過去72時間以内の更新がない。判定できない場合はskipする。
 9. 対象pathが `git worktree list --porcelain` から得たcanonicalな絶対pathと完全一致し、`/`、`/Users/asumayamada`、`ghq root`、main checkout、main checkout内、またはそれらの親ではない。
 
-scriptは全条件を満たした候補だけ `git worktree remove <exact-absolute-worktree-path>` で削除します。`--force`、`git worktree prune`、手動ディレクトリ削除、branch削除は実行しません。ここでraw `git worktree remove` を使うのは意図的な例外で、global instructionの `git wt` 優先ルールより上述の完全一致判定を優先します（`git wt -d` はbranchも削除するため使いません）。判定と結果はstate directoryの `worktrees-latest.json` に保存されます。
+scriptは全条件を満たした候補だけ `git worktree remove <exact-absolute-worktree-path>` で削除します。`--force`、`git worktree prune`、手動ディレクトリ削除、branch削除は実行しません。対象を完全一致したpathだけに限定することがこのscriptの安全性の根拠なので、より便利な削除手段に置き換えないでください。判定と結果はstate directoryの `worktrees-latest.json` に保存されます。
 
 ## 3. Docker cleanup
 

@@ -1,0 +1,2 @@
+# Tracked so the directory survives a fresh clone: scripts/link-dotagents.sh
+# links claude/hooks to ~/.claude/hooks and exits with an error when it is missing.

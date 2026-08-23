@@ -30,28 +30,5 @@
   "skipDangerousModePermissionPrompt": true,
   "effortLevel": "high",
   "remoteControlAtStartup": false,
-  "hooks": {
-    "WorktreeCreate": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/worktree-git-wt.sh",
-            "timeout": 120
-          }
-        ]
-      }
-    ],
-    "WorktreeRemove": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/worktree-git-wt.sh",
-            "timeout": 120
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }
