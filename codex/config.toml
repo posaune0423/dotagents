@@ -106,6 +106,18 @@ config_file = "agents/reviewer.toml"
 description = "Architect role for high-level architectural decisions and design."
 config_file = "agents/architect.toml"
 
+[agents.researcher]
+description = "Read-only researcher for bounded primary-source, repository, data, or source-conflict evidence lanes."
+config_file = "agents/researcher.toml"
+
+[agents.evidence-analyst]
+description = "Read-only analyst for causal decomposition, comparison, sensitivity analysis, and alternative hypotheses."
+config_file = "agents/evidence-analyst.toml"
+
+[agents.evidence-auditor]
+description = "Read-only auditor for evidence support, coverage, source quality, freshness, and scope."
+config_file = "agents/evidence-auditor.toml"
+
 [agents.frontend_developer]
 description = "Frontend developer role for scoped frontend implementation or UI bug fixes with production-level behavior and quality."
 config_file = "agents/frontend_developer.toml"

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Evidence Work"
+  short_description: "Ground specialist research, diagnosis, and decisions in evidence"
+  default_prompt: "Use $evidence-work to investigate this question with evidence before drawing conclusions."
+policy:
+  allow_implicit_invocation: true

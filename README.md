@@ -62,6 +62,9 @@
 | `browser-debugger` | 実ブラウザで再現手順と証拠（console / network / DOM / screenshot）                | opus   | medium |
 | `light-worker`     | format / lint / typecheck / test / build の実行ループ                             | sonnet | low    |
 | `docs-researcher`  | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認              | sonnet | low    |
+| `researcher`       | 一次資料・repository・dataなど、独立したEvidence laneをread-onlyで調査            | sonnet | medium |
+| `evidence-analyst` | 原因分解・比較・感度・代替仮説をread-onlyで分析                                   | opus   | high   |
+| `evidence-auditor` | 重要claimのsupport・coverage・source品質・scopeをread-onlyで監査                  | opus   | high   |
 | `pr-runner`        | PR 作成・更新、CI 監視、レビューコメント対応                                      | sonnet | low    |
 | `web-operator`     | ログイン済みブラウザ経由で Notion / Slack / X / 社内 SaaS のページを取得          | sonnet | medium |
 
@@ -188,6 +191,42 @@ nix develop -c just format
 nix develop -c just lint
 nix develop -c just check
 ```
+
+## Evidence work のA/B評価
+
+`evidence-work` は、専門概念、source-backed research、対象固有の原因診断、business/personal decisionをEvidenceへ接続するskillです。日常質問と実装taskは既存flowを維持します。
+
+評価runnerは、対象skillを無効化した`control`、暗黙起動の`auto`、明示起動の`forced`を同一prompt・model・reasoning・tool条件で比較します。各runはread-onlyかつephemeralで、skill比較中はhookを無効にします。まずmodelを呼ばないplanを確認してください。
+
+```bash
+just eval-evidence-work-smoke --dry-run
+just eval-evidence-work-full --dry-run
+```
+
+実行command:
+
+```bash
+# 8 case x control/auto/forced x 1回
+just eval-evidence-work-smoke
+
+# 24 case x control/auto x 3回。tokenとreview時間が大きいので重要変更時のみ
+just eval-evidence-work-full
+
+# autoで取りこぼしたcaseだけforcedで診断
+just eval-evidence-work-forced direct-prop-amm,research-metaplanet
+
+# skill本体とは別にautoとauto+hookを比較
+just eval-evidence-work-hook
+```
+
+artifactはgit管理外の`data/evaluations/evidence-work/<run-id>/`へ保存されます。`comparison.md`はarm名を隠した状態で採点し、`arm-key.json`は採点後に開きます。`ratings.jsonl`を埋めた後、次のcommandで`summary.json`へ集計します。
+
+```bash
+./skills/evidence-work/scripts/eval.ts \
+  --summarize-run data/evaluations/evidence-work/<run-id>
+```
+
+実際のObsidian・業務情報を使うcaseはcommitせず、`--private-cases <git管理外のJSONL>`で追加してください。通常の`--cases`は`privacy_class: sanitized`、`--private-cases`は`privacy_class: private`だけを受け付けます。高costなprivate caseを絞って比較する場合は、`--case-ids id-a,id-b`を指定すると、選択したcaseだけをmode既定のarmで実行できます。
 
 ## 仕様
 

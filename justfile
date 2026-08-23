@@ -60,4 +60,24 @@ lint:
     bun run lint
 
 check:
-    bun run check && just test-schedules && just test-cleanup && just test-hooks
+    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-evidence-work
+
+# Validate evidence-work routing and the A/B evaluation harness without model calls
+test-evidence-work:
+	./scripts/tests/evidence-work-eval.test.sh
+
+# Compare control, automatic routing, and explicit invocation on the 8-case smoke set
+eval-evidence-work-smoke *args:
+	./skills/evidence-work/scripts/eval.ts --mode smoke {{args}}
+
+# Compare control and automatic routing across the full set with three repetitions
+eval-evidence-work-full *args:
+	./skills/evidence-work/scripts/eval.ts --mode full {{args}}
+
+# Diagnose selected routing failures by forcing evidence-work for comma-separated case ids
+eval-evidence-work-forced case_ids *args:
+	./skills/evidence-work/scripts/eval.ts --mode forced --forced-cases "{{case_ids}}" {{args}}
+
+# Measure the routing backstop separately after the skill itself passes smoke evaluation
+eval-evidence-work-hook *args:
+	./skills/evidence-work/scripts/eval.ts --mode hook {{args}}
