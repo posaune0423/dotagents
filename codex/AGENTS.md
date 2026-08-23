@@ -9,6 +9,7 @@
     - `browser-debugger`: Reproduces browser issues and gathers evidence from the console, network, DOM, and screenshots.
     - `docs-researcher`: Verifies APIs, defaults, and version differences against official documentation.
     - `light-worker`: Handles mechanical checks such as formatting, linting, type checking, and tests.
+    - `web-operator`: Retrieves Notion, Slack, X, and internal SaaS pages through an already-logged-in browser and returns only what matters.
 
 ## Development Style
 
@@ -39,5 +40,7 @@ Ask questions to clarify ambiguous instructions.
 - Shell: Fish shell is the primary shell.
 - Task: Use `justfile` instead of Makefile.
 - Node.js: Use Bun and Node.js v24+.
-- E2E: Use `playwright` instead of `chrome-devtools`.
+- E2E and browser work during local development: Use `playwright` instead of `chrome-devtools`.
+- Authenticated web: Delegate pages that require a login to `web-operator`, choosing a route in this order: MCP, then CLI, then the authenticated browser. The browser profile map lives at `~/.claude/browser-profiles.json`. Do not use `playwright` for an authenticated external service unless a saved storage state exists; it otherwise starts from a fresh profile with no session.
+- Interactive logins: Never attempt a login that needs a browser round trip, such as `ntn login`. When a credential is absent, switch to the authenticated browser route instead of retrying.
 - Python: `uv`.

@@ -118,6 +118,10 @@ config_file = "agents/backend_developer.toml"
 description = "Fullstack developer role for one bounded feature or bug spans frontend and backend and a single worker should own the entire path."
 config_file = "agents/fullstack_developer.toml"
 
+[agents.web-operator]
+description = "Web operator role for retrieving a page that only exists behind someone's login: Notion, Slack, X, or an internal SaaS screen reached through an already-authenticated browser."
+config_file = "agents/web-operator.toml"
+
 # 以下は環境ごとに ~/.codex/config.toml で設定することを想定:
 # - [projects."..."] trust_level
 # - [mcp_servers.*]（パス依存のもの）
