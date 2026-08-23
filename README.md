@@ -24,18 +24,18 @@
 
 ## リポジトリ構成（概要）
 
-| パス         | 内容                                                                                                                                                                                           |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `skills/`    | エージェントスキル（SSoT）                                                                                                                                                                     |
-| `rules/`     | ルール（`.mdc` など）                                                                                                                                                                          |
-| `commands/`  | Cursor / エージェント向けコマンド定義                                                                                                                                                          |
-| `schedules/` | Codex / Claudeなどで共通利用するscheduled task定義。home配下へsymlinkせず、各providerへ明示的に反映する                                                                                        |
-| `scripts/`   | リンク・同期・検証シェル                                                                                                                                                                       |
-| `justfile`   | 上記スクリプトと開発タスクのエントリポイント                                                                                                                                                   |
-| `.envrc`     | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                                                   |
-| `codex/`     | 共通global instructionの日本語正典`AGENTS-ja.md`と英訳runtime`AGENTS.md`、Codex subagent、hook、共有ベース設定。`config.toml`はreferenceであり、`~/.codex/config.toml`はhome固有のまま管理する |
-| `claude/`    | Claude Code用global instruction bridge、subagent定義、共有設定のreference。`~/.claude/settings.json` は自動linkしない                                                                          |
-| `gemini/`    | Gemini CLI用global instruction bridge                                                                                                                                                          |
+| パス         | 内容                                                                                                                                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skills/`    | エージェントスキル（SSoT）                                                                                                                                                                                  |
+| `rules/`     | ルール（`.mdc` など）                                                                                                                                                                                       |
+| `commands/`  | Cursor / エージェント向けコマンド定義                                                                                                                                                                       |
+| `schedules/` | Codex / Claudeなどで共通利用するscheduled task定義。home配下へsymlinkせず、各providerへ明示的に反映する                                                                                                     |
+| `scripts/`   | リンク・同期・検証シェル                                                                                                                                                                                    |
+| `justfile`   | 上記スクリプトと開発タスクのエントリポイント                                                                                                                                                                |
+| `.envrc`     | （任意）[direnv](https://direnv.net/) 用。`use flake` で devShell を自動適用                                                                                                                                |
+| `codex/`     | 共通global instructionの日本語正典`AGENTS-ja.md`と英訳runtime`AGENTS.md`、Codex subagent、hook、共有ベース設定。`config.toml`はreferenceであり、`~/.codex/config.toml`はhome固有のまま管理する              |
+| `claude/`    | Claude Code用global instruction bridge、subagent定義、hook（worktree生成をgit-wtへ委譲）、共有設定のreference。`~/.claude/settings.json` は自動linkしない（hookの登録例は `claude/settings.template.json`） |
+| `gemini/`    | Gemini CLI用global instruction bridge                                                                                                                                                                       |
 
 ## 設計
 
