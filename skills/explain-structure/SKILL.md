@@ -1,9 +1,9 @@
 ---
-name: explain
-description: Explain code, architecture, systems, and mechanisms overview-first with a diagram, then chapters, then detail. Use this whenever someone asks how something works, or asks you to explain, walk through, or map out code, a class or module structure, an architecture, a request or data flow, a state machine, a dependency graph, or a specialist mechanism — including phrasings like "how does X work", "walk me through", "これどうなってるの", "説明して", "構成を教えて". Use it even when no diagram was asked for, even when the answer feels short enough to just write out, and use it to rework an explanation that came out as a wall of prose. Skip it only for a single-fact lookup, a yes-or-no answer, or an implementation task.
+name: explain-structure
+description: Explain a sizable or complex structure overview-first — one diagram, then chapters, then detail. Use this when someone asks how a system, codebase, architecture, request or data flow, state machine, dependency graph, or pipeline is put together, and the subject spans roughly eight or more elements or crosses a layer, process, service, or repository boundary — including phrasings like "how does X work", "walk me through", "どこを通ってる", "構成を説明して", "依存関係を教えて". Use it even when no diagram was asked for. Do not use it to define a term or a concept, to answer a single-fact lookup, or to describe a handful of files that a few sentences already cover.
 ---
 
-# Explain
+# Explain Structure
 
 Prose serializes a structure that the reader then has to rebuild in their head. A diagram hands them the structure directly, which frees the text to carry only what a picture cannot: why a boundary sits where it does, what breaks first, which assumption is load-bearing.
 
@@ -11,9 +11,18 @@ The failure this skill exists to prevent is a flood of undifferentiated prose wi
 
 ## When this applies
 
-Use it when the reader has to hold a relationship in their head: who owns what, which way a dependency points, what calls what in which order, where a boundary sits, how state moves, or what differs between two options.
+Two conditions, both required.
 
-Skip it for a single fact, a value, a yes or no, or a two-line change. The gate is worth stating in the strong form both Google and the artifact-diagramming guidance use: draw a figure only for information that is otherwise hard to express in words. If a sentence says it faster, write the sentence.
+1. **The subject is an actual structure** — a codebase, a service topology, a request or data flow, a state machine, a dependency graph, a pipeline, a build or release path.
+2. **It is too big to hold at once** — roughly eight or more elements, or it crosses a boundary between layers, processes, services, or repositories.
+
+Do not load this skill for:
+
+- **A term or a concept.** "What is a prop AMM?" wants a mechanism explained in prose. A box labelled with the term teaches nothing the sentence did not. Route that to `evidence-work`'s specialist-explanation mode.
+- **A single-fact lookup.** A path, a value, a yes or no. Answer it in one line.
+- **A small structure.** Measured against a five-file, three-layer example, an unaided answer already produced the dependency direction, the inversion boundary, a responsibility table, and `file:line` citations. Below the threshold this skill adds length, not clarity — which is the opposite of its purpose.
+
+Above the threshold the gate still applies, in the strong form both Google and the artifact-diagramming guidance use: draw a figure only for information that is otherwise hard to express in words. If a sentence says it faster, write the sentence.
 
 Two neighbouring concerns stay separate from this one:
 
