@@ -16,6 +16,10 @@ verify-global:
 test-links:
     ./scripts/tests/link-dotagents.test.sh
 
+# Validate the default and role-specific Codex subagent model configuration
+test-agent-routing:
+    ./scripts/tests/codex-agent-routing.test.sh
+
 # Validate provider-neutral scheduled-task definitions
 test-schedules:
     ./scripts/tests/schedules.test.sh
@@ -60,7 +64,7 @@ lint:
     bun run lint
 
 check:
-    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-evidence-work
+    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-agent-routing && just test-evidence-work
 
 # Validate evidence-work routing and the A/B evaluation harness without model calls
 test-evidence-work:
