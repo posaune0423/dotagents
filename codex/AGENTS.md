@@ -34,6 +34,15 @@ Ask questions to clarify ambiguous instructions.
 - When a worktree must be handled from a shell, use plain `git worktree add`, and remove it with `git worktree remove` followed by `git branch -d`. Both already refuse to discard work: `remove` stops on a dirty worktree and `branch -d` stops on an unmerged branch. Escalate to `--force` or `-D` only after the user confirms discarding it.
 - Never copy dependency directories such as `node_modules` between worktrees. Install them per worktree so each one resolves independently.
 
+### Pull Requests
+
+- When the repository has a PR template, follow its headings and structure exactly and do not drop sections. Instead of deleting a section that does not apply, say why it does not apply.
+- Without a template, use these headings: background, what changed, why, verification, and review focus.
+- Describe every commit in the PR, not only the most recent change.
+- Reduce reviewer effort by making the body visually scannable: tables for comparisons and impact, Mermaid diagrams for flow or structural change, before/after screenshots for UI change. Point at code as `file.ts:42`.
+- Back verification with the exact commands run and their real output. Never write only "tested". Mark anything unverified as unverified.
+- Do not cut information for the sake of brevity; cut only redundant repetition.
+
 ### Code Design
 
 - Maintain separation of concerns.

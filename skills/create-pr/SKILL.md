@@ -46,7 +46,7 @@ Follow these exact steps:
 - **If no PR exists**: Create the PR with assignees and labels using the wrapper (reads the same `pr-defaults.env`):
   - `./.agents/skills/create-pr/scripts/gh-pr-create-with-meta.sh --base main ...` (pass `--title`, `--body` or `--body-file`, etc., as you would to `gh pr create`).
   - Defaults: assignee `@me` when `CREATE_PR_ASSIGNEES` is unset; comma-separated logins when set; empty string skips assignees. Labels follow the same rule as above (infer `bug` / `documentation` / `enhancement` / `question` / etc. from the branch prefix, or override with `CREATE_PR_LABELS`). Stock labels must exist on the repo (GitHub adds them by default on new repositories).
-  - Keep the title under 80 characters and the description under five sentences.
+  - Keep the title under 80 characters. Write the description in full, following the Pull Requests rules in the global instructions; do not compress it into a few sentences.
 
 The PR description should summarize ALL commits in the PR, not just the latest changes.
 
