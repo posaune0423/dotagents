@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: Use when implementing any feature or bugfix, before writing implementation code
+description: Use before implementing a change to externally observable behavior that is worth pinning as a spec, and for bug fixes where a failing reproduction test must come first. Do not use for configuration, documentation, dependency updates, one-off scripts, exploratory work, or mechanical changes already covered by existing tests.
 ---
 
 # Test-Driven Development (TDD)
@@ -10,6 +10,8 @@ description: Use when implementing any feature or bugfix, before writing impleme
 Write the test first. Watch it fail. Write minimal code to pass.
 
 **Core principle:** If you didn't watch the test fail, you don't know if it tests the right thing.
+
+**Scope:** This skill governs _how_ to do TDD once you have decided a behavior is worth pinning as a spec. It does not decide _whether_ this change needs tests — the global instructions do. Do not apply it to configuration, documentation, dependency updates, one-off scripts, or exploratory work.
 
 **Violating the letter of the rules is violating the spirit of the rules.**
 

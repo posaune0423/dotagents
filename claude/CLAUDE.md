@@ -14,9 +14,11 @@
 
 ## Development Style
 
-Develop with TDD (Exploration -> Red -> Green -> Refactoring).
-If KPIs or coverage targets are provided, keep iterating until they are met.
-Ask questions to clarify ambiguous instructions.
+- Write tests for behavior worth pinning as a spec: changes to externally observable behavior, and bug fixes. For a bug fix, write the failing reproduction test first and watch it fail before fixing.
+- Do not write tests for configuration, documentation, dependency bumps, anything a type checker or linter already guarantees, one-off investigation scripts, or implementation details you do not intend to freeze as a spec.
+- During exploration, and for mechanical or obvious changes, do not insist on Red -> Green ordering. Make it work first, then add tests once the behavior is worth keeping.
+- If KPIs or coverage targets are provided, keep iterating until they are met.
+- Ask questions to clarify ambiguous instructions.
 
 ### Git Branching
 
