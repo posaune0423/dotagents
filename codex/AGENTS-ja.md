@@ -9,6 +9,8 @@
     - `browser-debugger`: browserで問題を再現し、console、network、DOM、screenshotから証拠を集める。
     - `docs-researcher`: 公式documentationからAPI、既定値、version差分を確認する。
     - `light-worker`: formatting、lint、type check、testなどの機械的な検証を担当する。
+      - `light-worker`をspawnするときは`fork_turns="none"`を既定とし、必要な直近contextだけが不可欠な場合に限り必要最小限の正整数を使う。`fork_turns="all"`は使わない。
+      - 委任promptを自己完結させ、目的、作業directory、対象file・command、変更可否、完了条件を含める。
     - `web-operator`: ログイン済みbrowser経由でNotion、Slack、X、社内SaaSのページを取得し、要点のみ返す。
 
 ## 開発スタイル

@@ -9,6 +9,8 @@
     - `browser-debugger`: Reproduces browser issues and gathers evidence from the console, network, DOM, and screenshots.
     - `docs-researcher`: Verifies APIs, defaults, and version differences against official documentation.
     - `light-worker`: Handles mechanical checks such as formatting, linting, type checking, and tests.
+      - When spawning `light-worker`, default to `fork_turns="none"`; use the smallest positive integer only when recent context is essential. Never use `fork_turns="all"`.
+      - Make the delegated prompt self-contained with the objective, working directory, exact files or commands, whether edits are allowed, and acceptance criteria.
     - `web-operator`: Retrieves Notion, Slack, X, and internal SaaS pages through an already-logged-in browser and returns only what matters.
 
 ## Development Style
