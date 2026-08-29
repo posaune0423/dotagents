@@ -16,6 +16,16 @@ assert_contains() {
 	rg -Fq -- "${expected}" "${file}" || fail "${message}"
 }
 
+assert_not_contains() {
+	local file="$1"
+	local unexpected="$2"
+	local message="$3"
+
+	if rg -Fq -- "${unexpected}" "${file}"; then
+		fail "${message}"
+	fi
+}
+
 for agent in light-worker explorer monitor docs-researcher; do
 	assert_contains \
 		"${ROOT}/codex/agents/${agent}.toml" \
@@ -23,13 +33,13 @@ for agent in light-worker explorer monitor docs-researcher; do
 		"${agent} must remain routed to GPT-5.3-Codex-Spark"
 done
 
-assert_contains \
+assert_not_contains \
 	"${ROOT}/codex/config.toml" \
-	'default_subagent_model = "gpt-5.3-codex-spark"' \
-	'Codex config must default unspecified subagents to GPT-5.3-Codex-Spark'
-assert_contains \
+	'default_subagent_model' \
+	'Codex config must not override the model for unspecified subagents'
+assert_not_contains \
 	"${ROOT}/codex/config.toml" \
-	'default_subagent_reasoning_effort = "medium"' \
-	'Codex config must define the default subagent reasoning effort'
+	'default_subagent_reasoning_effort' \
+	'Codex config must not override the reasoning effort for unspecified subagents'
 
 echo "PASS: Codex agent model routing contract"

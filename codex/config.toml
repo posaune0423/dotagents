@@ -66,10 +66,6 @@ fast_default_opt_out = true
 
 # ===================== Agents =====================
 
-[agents]
-default_subagent_model = "gpt-5.3-codex-spark"
-default_subagent_reasoning_effort = "medium"
-
 [agents.default]
 description = "Default built-in subagent role."
 config_file = "agents/default.toml"
