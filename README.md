@@ -40,7 +40,7 @@
 ## 設計
 
 - **グローバルasset**: `~/.agents` にこのrepoの `skills/` `rules/` `commands/` を symlink（SSoT）
-- **共通のglobal instruction**: `codex/AGENTS-ja.md` を編集上の正典とする。日本語版を先に更新し、その全文を英訳した[codex/AGENTS.md](codex/AGENTS.md)へ反映する。`claude/CLAUDE.md`と`gemini/GEMINI.md`は英語runtime版への相対symlinkを維持し、home側の標準パスから各bridgeへsymlinkする
+- **共通のglobal instruction**: `codex/AGENTS-ja.md` を編集上の正典とする。日本語版を先に更新し、その全文を英訳した[codex/AGENTS.md](codex/AGENTS.md)へ反映する。`gemini/GEMINI.md`は英語runtime版への相対symlinkを維持する。`claude/CLAUDE.md`はsymlinkではなく実ファイルで、`codex/AGENTS.md`を土台にClaude Codeに存在しない概念（Codex固有の`fork_turns`など）を除いたもの。home側の標準パスからは各bridgeへsymlinkする
 - **このrepo固有のinstruction**: root [AGENTS.md](AGENTS.md) が正典。root `CLAUDE.md` と `GEMINI.md` は各tool向けのproject instruction bridge
 - **home固有設定**: `~/.codex/config.toml` と `~/.claude/settings.json`、認証、履歴、DB、plugin、cacheはrepoへlinkしない
 - **scheduled task**: `schedules/` で共通のcadenceとskillをGit管理し、provider固有の保存先、権限、履歴、thread関連付けはhomeまたはcloud側に残す

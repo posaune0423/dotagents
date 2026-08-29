@@ -5,7 +5,8 @@
 - This repository is the source of truth for reusable agent skills, commands, rules, and shared tool configuration.
 - Keep repository-specific guidance in this file. Author cross-repository personal defaults in `codex/AGENTS-ja.md`.
 - `codex/AGENTS-ja.md` is the canonical authoring source for global instructions. Write the Japanese source first, then translate the complete content into `codex/AGENTS.md`.
-- `claude/CLAUDE.md` and `gemini/GEMINI.md` must remain relative symlinks to the English runtime file at `codex/AGENTS.md`.
+- `gemini/GEMINI.md` must remain a relative symlink to the English runtime file at `codex/AGENTS.md`.
+- `claude/CLAUDE.md` is a real file, not a symlink. Seed it from `codex/AGENTS.md` and drop anything Claude Code does not implement, such as Codex's `fork_turns`. When `codex/AGENTS-ja.md` changes, port the change here too.
 - Root `CLAUDE.md` and `GEMINI.md` bridge this repository's project instructions to tools that do not read root `AGENTS.md` directly.
 
 ## Repository Layout

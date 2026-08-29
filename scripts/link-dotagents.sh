@@ -224,6 +224,25 @@ check_link() {
 	echo "OK: ${dst} -> ${resolved}"
 }
 
+check_repo_file() {
+	local path="$1"
+
+	if [[ -L "${path}" ]]; then
+		echo "DRIFT (must be a regular file, not a symlink): ${path}" >&2
+		return 1
+	fi
+	if [[ ! -f "${path}" ]]; then
+		echo "MISSING: ${path}" >&2
+		return 1
+	fi
+	if grep -q 'fork_turns' "${path}"; then
+		echo "DRIFT (Codex-only concept present): ${path}" >&2
+		return 1
+	fi
+
+	echo "OK: ${path} (regular file)"
+}
+
 check_repo_bridge() {
 	local path="$1"
 	local expected="$2"
@@ -311,7 +330,7 @@ verify_links() {
 	check_link "${HOME}/.claude/agents" "/claude/agents" || rc=1
 	check_link "${HOME}/.claude/hooks" "/claude/hooks" || rc=1
 	check_link "${HOME}/.gemini/GEMINI.md" "/gemini/GEMINI.md" || rc=1
-	check_repo_bridge "${EXPECTED_ROOT}/claude/CLAUDE.md" "../codex/AGENTS.md" || rc=1
+	check_repo_file "${EXPECTED_ROOT}/claude/CLAUDE.md" || rc=1
 	check_repo_bridge "${EXPECTED_ROOT}/gemini/GEMINI.md" "../codex/AGENTS.md" || rc=1
 
 	shopt -s nullglob

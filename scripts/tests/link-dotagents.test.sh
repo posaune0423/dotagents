@@ -26,6 +26,13 @@ assert_link() {
 		fail "unexpected target: ${path} -> $(readlink -- "${path}") (expected ${expected})"
 }
 
+assert_regular_file() {
+	local path="$1"
+
+	[[ ! -L "${path}" ]] || fail "expected a regular file, not a symlink: ${path}"
+	[[ -f "${path}" ]] || fail "expected regular file: ${path}"
+}
+
 mkdir -p -- \
 	"${TEST_HOME}/.agents/schedules" \
 	"${TEST_HOME}/.codex/automations" \
@@ -80,7 +87,9 @@ shopt -u nullglob
 [[ "$(<"${TEST_HOME}/.claude/scheduled-tasks/local.txt")" == "local-claude-schedule" ]] ||
 	fail "Claude schedule state was modified"
 
-assert_link "${ROOT}/claude/CLAUDE.md" "../codex/AGENTS.md"
+assert_regular_file "${ROOT}/claude/CLAUDE.md"
+grep -q 'fork_turns' "${ROOT}/claude/CLAUDE.md" &&
+	fail "claude/CLAUDE.md must not carry Codex-only concepts such as fork_turns"
 assert_link "${ROOT}/gemini/GEMINI.md" "../codex/AGENTS.md"
 
 review_rc=0
@@ -167,7 +176,7 @@ touch \
 	"${FIXTURE_MAIN}/codex/hooks/.keep" \
 	"${FIXTURE_MAIN}/claude/agents/.keep" \
 	"${FIXTURE_MAIN}/claude/hooks/.keep"
-ln -s ../codex/AGENTS.md "${FIXTURE_MAIN}/claude/CLAUDE.md"
+printf "# Claude Code Global Instructions\n" >"${FIXTURE_MAIN}/claude/CLAUDE.md"
 ln -s ../codex/AGENTS.md "${FIXTURE_MAIN}/gemini/GEMINI.md"
 git -C "${FIXTURE_MAIN}" init -q
 git -C "${FIXTURE_MAIN}" add .
