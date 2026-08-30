@@ -1,7 +1,6 @@
 .DS_Store
 .direnv/
 node_modules/
-/.worktrees/
 .env
 .env.*
 !.env.example

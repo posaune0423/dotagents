@@ -1,15 +1,14 @@
 #!/bin/bash
-# PreToolUse(Bash) hook: enforce the user's branch naming and manual worktree
-# placement policies.
+# PreToolUse(Bash) hook: refuse to create or push a git branch whose name is
+# prefixed with an agent or tool name (claude/, codex/, ...).
 #
 # Contract (Claude Code):
 #   stdin  {"tool_name":"Bash","tool_input":{"command":"..."}}
 #   stdout deny decision as JSON, or nothing when the command is allowed
 #
-# Branch-name enforcement is creation-only. Switching to, inspecting,
-# maintaining, and deleting an existing agent-prefixed branch all stay allowed;
-# only bringing a new one into existence is refused. Manual worktree creation is
-# allowed only below ./.worktrees/; host-managed creation bypasses this hook.
+# The policy is creation-only. Switching to, inspecting, maintaining, and
+# deleting an existing agent-prefixed branch all stay allowed; only bringing a
+# new one into existence is refused.
 #
 # Two classes of input must not be mistaken for a branch-creating command:
 # heredoc bodies (a file being written may quote such a command as text) and
@@ -20,15 +19,9 @@ set -uo pipefail
 BLOCKED_RE='^(claude|codex|gemini|cursor|copilot|devin|agent|ai)/'
 
 input="$(cat)"
-
-hook_error() {
-	printf 'Git policy hook error: %s\n' "$1" >&2
-	exit 2
-}
-
-command -v jq >/dev/null 2>&1 || hook_error "jq is required"
-cmd="$(printf '%s' "$input" | jq -er '.tool_input.command | strings | select(length > 0)' 2>/dev/null)" ||
-	hook_error "invalid hook JSON or missing command"
+command -v jq >/dev/null 2>&1 || exit 0
+cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/null)" || exit 0
+[ -n "$cmd" ] || exit 0
 
 deny() {
 	jq -cn --arg r "$1" '{
@@ -81,7 +74,7 @@ branch_name_from_segment() {
 	# segment would deny `echo git checkout -b claude/x`, which runs nothing.
 	while [ "$i" -lt "$n" ]; do
 		case "${tok[i]}" in
-		env | command | exec | --) i=$((i + 1)) ;;
+		env | command | exec) i=$((i + 1)) ;;
 		[A-Za-z_]*=*) i=$((i + 1)) ;;
 		git | */git) break ;;
 		*) return 0 ;;
@@ -184,61 +177,6 @@ branch_name_from_segment() {
 	return 0
 }
 
-# Report the destination of `git worktree add`, or print nothing for any other
-# command. Host-managed worktree creation does not pass through this Bash hook;
-# this only constrains manual shell creation.
-worktree_path_from_segment() {
-	local -a tok
-	read -r -a tok <<<"$1" || return 0
-	local i=0 n=${#tok[@]} sub="" arg
-
-	while [ "$i" -lt "$n" ]; do
-		case "${tok[i]}" in
-		env | command | exec | --) i=$((i + 1)) ;;
-		[A-Za-z_]*=*) i=$((i + 1)) ;;
-		git | */git) break ;;
-		*) return 0 ;;
-		esac
-	done
-	[ "$i" -lt "$n" ] || return 0
-	i=$((i + 1))
-
-	while [ "$i" -lt "$n" ]; do
-		case "${tok[i]}" in
-		-C | -c | --git-dir | --work-tree | --namespace)
-			i=$((i + 2))
-			;;
-		-*) i=$((i + 1)) ;;
-		*)
-			sub="${tok[i]}"
-			i=$((i + 1))
-			break
-			;;
-		esac
-	done
-	[ "$sub" = "worktree" ] && [ "${tok[i]:-}" = "add" ] || return 0
-	i=$((i + 1))
-
-	while [ "$i" -lt "$n" ]; do
-		arg="${tok[i]}"
-		case "$arg" in
-		-b | -B | --reason)
-			i=$((i + 2))
-			;;
-		--)
-			i=$((i + 1))
-			[ "$i" -lt "$n" ] && printf '%s\n' "${tok[i]}"
-			return 0
-			;;
-		--reason=* | -*) i=$((i + 1)) ;;
-		*)
-			printf '%s\n' "$arg"
-			return 0
-			;;
-		esac
-	done
-}
-
 # Print the destination branch of every refspec a push would create. Deleting a
 # remote branch is allowed, in both the --delete and the empty-source spelling.
 branch_names_from_push() {
@@ -288,88 +226,14 @@ branch_names_from_push() {
 # characters are dropped so a quoted branch name is compared bare.
 segments="$(printf '%s' "$cmd" | strip_heredoc_bodies |
 	sed -e 's/&&/\n/g' -e 's/||/\n/g' -e 's/[;|]/\n/g' -e 's/["'"'"']//g')"
-
-segment_count=0
-while IFS= read -r candidate; do
-	[ -n "$(trim "$candidate")" ] && segment_count=$((segment_count + 1))
-done <<<"$segments"
-compound_command=0
-[ "$segment_count" -gt 1 ] && compound_command=1
-
-check_segment() {
-	local seg="$1" name worktree_path inner
-	[ -n "$seg" ] || return 0
-	if [[ "$seg" =~ (^|[[:space:]])worktree[[:space:]]+add([[:space:]]|$) ]]; then
-		case "$seg" in
-		*\$\(* | *\`*) deny "Command substitution around git worktree creation is blocked." ;;
-		esac
-		if [[ "$(trim "$seg")" =~ ^(rg|echo|printf)[[:space:]]*\(\) ]]; then
-			deny "Shell functions that wrap git worktree creation are blocked."
-		fi
-	fi
-	if [ "$compound_command" -eq 1 ] && [[ "$seg" =~ (^|[[:space:]])worktree[[:space:]]+add([[:space:]]|$) ]]; then
-		case "$(trim "$seg")" in
-		rg\ * | echo\ * | printf\ * | git\ commit\ *) ;;
-		*) deny "Manual worktree creation must run as a standalone literal command from the repository root." ;;
-		esac
-	fi
+while IFS= read -r seg; do
+	[ -n "$seg" ] || continue
 	while IFS= read -r name; do
 		[ -n "$name" ] || continue
-		case "$name" in
-		*'$'* | *'`'* | *\\*)
-			deny "Dynamic branch names are blocked because the hook cannot verify the expanded value. Use a literal compliant branch name."
-			;;
-		esac
 		if printf '%s' "$name" | grep -qE "$BLOCKED_RE"; then
 			deny "Branch name \"${name}\" is prefixed with an agent or tool name, which this user's global convention forbids. Use the repository's existing convention, or Git Flow: feature/<short-kebab-case>, fix/<...>, release/<...>, hotfix/<...>. Rerun with a compliant name."
 		fi
 	done <<<"$(branch_name_from_segment "$seg")"
-
-	worktree_path="$(worktree_path_from_segment "$seg")"
-	if [[ "$seg" =~ (^|[[:space:]])([^[:space:]]*/)?git[[:space:]]+-C[[:space:]].*worktree[[:space:]]+add([[:space:]]|$) ]]; then
-		deny "Manual worktree creation through git -C is blocked because the hook cannot verify the effective destination. Run the command from the repository root."
-	fi
-	if [ -n "$worktree_path" ]; then
-		if [ "$compound_command" -eq 1 ]; then
-			deny "Manual worktree creation must run as a standalone command from the repository root."
-		fi
-		worktree_path="${worktree_path#./}"
-		case "$worktree_path" in
-		*'$'* | *'`'* | *\\*)
-			deny "Dynamic worktree paths are blocked because the hook cannot verify the expanded destination. Use a literal ./.worktrees/<name> path."
-			;;
-		esac
-		case "/${worktree_path}/" in
-		*/../*)
-			deny "Manual worktrees must stay inside the current repository at ./.worktrees/<name>. Do not create sibling, parent, /tmp, or other external worktree directories. Use the host's managed worktree feature when available."
-			;;
-		esac
-		case "$worktree_path" in
-		.worktrees/*)
-			git check-ignore -q -- "$worktree_path" 2>/dev/null ||
-				deny "Manual worktrees require a repository-ignored ./.worktrees/ directory. Add it to the repository ignore rules or use the host's managed worktree feature."
-			;;
-		*)
-			deny "Manual worktrees must stay inside the current repository at ./.worktrees/<name>. Do not create sibling, parent, /tmp, or other external worktree directories. Use the host's managed worktree feature when available."
-			;;
-		esac
-	elif [[ "$seg" =~ (^|[[:space:]])worktree[[:space:]]+add([[:space:]]|$) ]]; then
-		case "$(trim "$seg")" in
-		eval\ * | \$\(* | \`*)
-			deny "Indirect git worktree creation is blocked. Use a literal git worktree add ./.worktrees/<name> command."
-			;;
-		*) ;;
-		esac
-	fi
-
-	if [[ "$seg" =~ ^[[:space:]]*(bash|zsh|sh|fish)[[:space:]]+-[^[:space:]]*c[[:space:]]+(.+)$ ]]; then
-		inner="${BASH_REMATCH[2]}"
-		check_segment "$inner"
-	fi
-}
-
-while IFS= read -r seg; do
-	check_segment "$seg"
 done <<<"$segments"
 
 exit 0

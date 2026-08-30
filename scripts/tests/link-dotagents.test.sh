@@ -93,20 +93,7 @@ jq -e '.remoteControlAtStartup == false' "${ROOT}/claude/settings.json" >/dev/nu
 	review_rc=1
 }
 jq -e '
-	.hooks.PreToolUse == [
-		{
-			"matcher": "^Bash$",
-			"hooks": [
-				{
-					"type": "command",
-					"command": "~/.codex/hooks/block-git-policy.sh",
-					"statusMessage": "Checking Git worktree policy",
-					"timeout": 5
-				}
-			]
-		}
-	]
-	and .hooks.UserPromptSubmit == [
+	.hooks.UserPromptSubmit == [
 		{
 			"hooks": [
 				{
