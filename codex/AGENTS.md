@@ -28,7 +28,7 @@ Ask questions to clarify ambiguous instructions.
 
 ### Git Worktrees
 
-- When an agent creates a worktree, use `git wt --nocd` with `wt.basedir=.worktrees` so it stays under `<project>/.worktrees/`. If already inside a linked worktree, do not create another one.
+- When an agent creates a worktree, use `git -c wt.basedir=.worktrees wt --nocd` so it stays under `<project>/.worktrees/`. If already inside a linked worktree, do not create another one.
 
 ### Code Design
 
