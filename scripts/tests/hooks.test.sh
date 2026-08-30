@@ -167,7 +167,7 @@ git check-ignore -q .worktrees/review || fail_msg '.worktrees/ must be ignored b
 assert_hook_error '{not-json' 'invalid hook JSON'
 
 set +e
-missing_jq_output="$(PATH=/nonexistent /bin/bash "${HOOK}" <<<'{"tool_name":"Bash","tool_input":{"command":"git status"}}' 2>&1)"
+missing_jq_output="$(PATH=/bin bash "${HOOK}" <<<'{"tool_name":"Bash","tool_input":{"command":"git status"}}' 2>&1)"
 missing_jq_rc=$?
 set -e
 if [[ "${missing_jq_rc}" -ne 2 || "${missing_jq_output}" != *'jq is required'* ]]; then
