@@ -28,7 +28,7 @@ KPIやcoverage目標が与えられた場合は、達成するまで反復する
 
 ### Git worktree
 
-- agent自身がworktreeを作る場合は`git -c wt.basedir=.worktrees wt --nocd`を使い、`<project>/.worktrees/`配下へ作る。既にlinked worktree内なら新しく作らない。
+- agent自身がworktreeを作る場合は`git wt --basedir=.worktrees --nocd <branch>`を使い、`<project>/.worktrees/`配下へ作る。既にlinked worktree内なら新しく作らない。
 
 ### コード設計
 
