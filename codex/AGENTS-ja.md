@@ -28,11 +28,10 @@ KPIやcoverage目標が与えられた場合は、達成するまで反復する
 
 ### Git worktree
 
-- worktreeを作る前に、`git rev-parse --path-format=absolute --git-dir`と`git rev-parse --path-format=absolute --git-common-dir`を比較する。
-- pathが異なる場合、現在のディレクトリは既にlinked worktreeなのでそこに留まり、ユーザーがworktreeのlifecycle操作を明示的に依頼していない限り新しく作らない。
-- worktreeの作成はshellに落とさず、host自身のworktree機能を使う（Claude Codeならworktree機能と`EnterWorktree`/`ExitWorktree`）。repositoryの`.worktreeinclude`が処理されるのはその経路だけで、新しいworktreeに必要なgitignore済みファイルがコピーされる。shellから`git worktree add`した場合は何もコピーされない。
-- shellから扱う必要がある場合は素の`git worktree add`を使い、削除は`git worktree remove`のあとに`git branch -d`を実行する。どちらも作業の破棄を既に拒否する: `remove`はdirtyなworktreeで停止し、`branch -d`は未マージbranchで停止する。`--force`や`-D`への昇格はユーザーが破棄を確認したあとだけ。
-- `node_modules`などの依存ディレクトリをworktree間でコピーしない。worktreeごとにinstallして、それぞれ独立して解決させる。
+- 既にlinked worktree内ならそこに留まり、明示的な依頼なしに新しく作らない。
+- 作成はhost管理機能を優先し、shellではgitignore済み`./.worktrees/<name>`だけを使う。skill・subagent・automation・scriptを含め、手動のproject外配置は禁止しhookで強制する。
+- 削除は`git worktree remove`と`git branch -d`を使い、強制破棄はユーザー確認後だけ行う。
+- 依存directoryは共有・copyせず、worktreeごとにinstallする。
 
 ### コード設計
 
@@ -44,13 +43,7 @@ KPIやcoverage目標が与えられた場合は、達成するまで反復する
 
 ### Tool
 
-- Search: `grep`ではなく`rg`（ripgrep）を使用する。
-- Find: `find`ではなく`fd`を使用する。
-- JSON: JSON処理には`jq`を使用する。
-- Shell: Fish shellを優先する。
 - Task: Makefileではなく`justfile`を使用する。
 - Node.js: Bun、Node.js v24以上を使用する。
 - E2E・ローカル開発中のbrowser操作: `chrome-devtools`ではなく`playwright`を使用する。
-- 認証付きweb: ログインが必要なページは`web-operator`に委譲し、経路をMCP → CLI → 認証済みbrowserの順に選ぶ。browser profileの対応表は`~/.claude/browser-profiles.json`。`playwright`は新規profileでsessionを持たないため、保存済みのstorage stateが無い限り認証が必要な外部serviceには使わない。
-- 対話login: `ntn login`のようなbrowser往復を要するloginをagentから試さない。認証情報が無い場合は再試行せず、認証済みbrowser経路に切り替える。
 - Python: `uv`を使用する。
