@@ -1,0 +1,20 @@
+{
+  "$schema": "../schema.json",
+  "version": 1,
+  "id": "myfans-sub-issue-progress-watch",
+  "name": "myfans 親issue配下のsub-issue進捗watch",
+  "description": "getozinc/myfans で自分にassignされたissueの親issueを辿り、DES・BE・FEの兄弟sub-issueの進捗をbranch・PR・commitまで確認して、FEが着手判断できる形で報告する。",
+  "skill": "SKILL.md",
+  "schedule": {
+    "rrule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=11,13,15,17,19,21;BYMINUTE=0",
+    "timezone": "Asia/Tokyo"
+  },
+  "runtime": {
+    "execution": "local",
+    "workingDirectory": "not-required",
+    "stateDirectory": "/Users/asumayamada/.local/state/dotagents/myfans-sub-issue-progress-watch",
+    "isolation": "shared",
+    "platforms": ["macos"]
+  },
+  "targets": ["claude-desktop-local", "codex-local"]
+}
