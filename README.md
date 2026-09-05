@@ -51,6 +51,17 @@
 - **Hook**: hook scriptは `claude/hooks/` と `codex/hooks/` でGit管理し、`just link-global` で `~/.claude/hooks` と `~/.codex/hooks` へsymlinkする。hookの登録先（`~/.claude/settings.json` の `hooks`、`codex/hooks.json`）は起動側の設定なので、Claude側はhome固有設定として扱う
 - **Cursorのglobal rule**: file symlinkではなくCursorの Customize → Rules で管理する。root `AGENTS.md` はproject ruleとして利用できる
 
+## Instruction の設計原則
+
+global instruction（`codex/AGENTS-ja.md`）と skill は、GPT-6 Astra / Claude Fable 5.1 世代のモデルを前提に、Eric Provencher の [Rethinking skills and prompts for GPT-6 Astra](https://x.com/pvncher/status/2095991462416490862)（2026-09-05）と各社の一次資料に沿って見直している。
+
+- **harness が既定で言うことは書かない。** Codex の model instructions は `rg` 優先、tool call の並列化、変更に応じた test 実行、承認の扱いを既に指示している。Claude Code も CLAUDE.md の推奨は「削ってもミスが増えない行は削る」「1 file 200 行未満」。書くのは、私固有の判断基準（完了条件、質問の閾値、branch 命名、tool 選択）だけにする。
+- **強制よりも許可を書く。** 新しいモデルは自分で test を回し、境界を真面目に守る。「必ず〜せよ」「毎回 docs を読め」は context を浪費し、`ask first` の強い文言は途中で止まる原因になる。代わりに「local test は承認なしで回してよい」「完了とは動作確認まで」のように、安全な範囲の許可と完了条件を書く。
+- **skill は少なく、description は短く。** Codex は skill の name + description を常時 context に載せ、合計がおよそ 8,000 文字（context の 2%）を超えると description を短縮し、最終的に skill を落とす。Claude Code も listing に context の 1% の予算を持つ。`just test-skills` が repo 管理の skill について、frontmatter の key、name と directory の一致、description の上限（自作 300 文字、vendored 1,024 文字、合計 8,000 文字）を検査する。
+- **progressive disclosure。** 複数の mode を持つ skill は `SKILL.md` を router にし、mode 別の手順は `references/` に置いて必要な時だけ読ませる（例: `create-pr/references/ci-and-merge.md` を `create-pr` と `update-pr` が共有する）。手順書は「何をもって完了か」と「非自明な制約」に絞り、モデルが自分で判断できる細部（review checklist、一般的な test の書き方）は書かない。
+- **Claude 固有の frontmatter は Codex 側にも対応を置く。** `disable-model-invocation: true` は Claude Code だけが読むため、Codex では `agents/openai.yaml` の `policy.allow_implicit_invocation: false` で同じ意図を表す。
+- **model 固有の注意は AGENTS.md に 1 行で。** Fable 5.1 は並列 tool call が減り、file 全体の書き直しを好む傾向が公式に案内されているので、「独立した tool call は 1 message にまとめる」「差分編集する」を global instruction に置いている。
+
 ## Subagent（Claude Code）
 
 `claude/agents/*.md` に定義し、`just link-global` で `~/.claude/agents` に symlink されます。
@@ -172,7 +183,7 @@ just verify-project /path/to/your-project
 - 事前フィルタ `if: "Bash(git *)"` は**使わない**。権限ルール構文は前方一致のみで、
   `cd /foo && git checkout -b claude/x` のように `git` で始まらない複合コマンドを取り逃す
 
-検証は `just test-hooks`（61 ケース。ブロックすべき形と、通すべき形の両方）。
+検証は `just test-hooks`（61 ケース。ブロックすべき形と、通すべき形の両方）。skill の frontmatter 契約は `just test-skills`。
 
 ## 開発（formatter / linter / hooks）
 

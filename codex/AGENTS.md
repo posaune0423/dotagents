@@ -1,23 +1,23 @@
 # Global Instructions
 
-## Rules
+## How to work
 
-- Actively use skills and subagents to keep the main thread context clean.
-  - **Skill**: For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` before starting work (for example, `skills/<name>/SKILL.md`), and apply its procedures and constraints exactly as written. Do not stop at merely declaring skill use.
-  - **Subagent**: Delegate work when an isolated context or parallel execution is useful and the active host provides an appropriate subagent.
-    - `architect`: Clarifies architecture, trade-offs, responsibility boundaries, and implementation plans.
-    - `browser-debugger`: Reproduces browser issues and gathers evidence from the console, network, DOM, and screenshots.
-    - `docs-researcher`: Verifies APIs, defaults, and version differences against official documentation.
-    - `light-worker`: Handles mechanical checks such as formatting, linting, type checking, and tests.
-      - When spawning `light-worker`, default to `fork_turns="none"`; use the smallest positive integer only when recent context is essential. Never use `fork_turns="all"`.
-      - Make the delegated prompt self-contained with the objective, working directory, exact files or commands, whether edits are allowed, and acceptance criteria.
-    - `web-operator`: Retrieves Notion, Slack, X, and internal SaaS pages through an already-logged-in browser and returns only what matters.
+- Done means implemented, run, checked, and with whatever broke fixed. Do not stop after the first implementation to wait for review; the user says so when a task should stop early.
+- When something is ambiguous, proceed on stated assumptions for reversible work. Ask only where different readings change the deliverable materially, or before a destructive, public, or paid action, and keep working on what does not depend on the answer.
+- Local test, lint, format, typecheck, and build runs, file reads, and `git status`, `git diff`, and `git log` need no per-step approval.
+- Batch independent tool calls (searches, reads, check runs) into one message and run them in parallel. Sequence only what depends on an earlier result.
+- Change existing files with targeted edits to the affected lines; do not rewrite whole files.
+
+## Skills and subagents
+
+- For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` before starting work and apply its procedures and constraints exactly as written. Do not stop at merely declaring skill use.
+- Delegate to a subagent only when an isolated context or parallel execution is useful. Make the delegated prompt self-contained with the objective, working directory, exact files or commands, whether edits are allowed, and acceptance criteria.
+- When spawning `light-worker`, default to `fork_turns="none"`; use the smallest positive integer only when recent context is essential. Never use `fork_turns="all"`.
 
 ## Development Style
 
-Develop with TDD (Exploration -> Red -> Green -> Refactoring).
-If KPIs or coverage targets are provided, keep iterating until they are met.
-Ask questions to clarify ambiguous instructions.
+- Develop behavior changes with TDD (Exploration -> Red -> Green -> Refactoring). Configuration files, docs, throwaway scripts, and generated code are exempt.
+- If KPIs or coverage targets are provided, keep iterating until they are met.
 
 ### Git Branching
 
@@ -32,9 +32,7 @@ Ask questions to clarify ambiguous instructions.
 
 ### Code Design
 
-- Maintain separation of concerns.
 - Separate state from logic.
-- Prioritize readability and maintainability.
 - Define contract layers (APIs/types) strictly, and keep implementation layers regenerable.
 - Express rules that can be checked statically with the environment's linter or ast-grep, not with prompts.
 

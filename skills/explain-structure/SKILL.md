@@ -1,6 +1,9 @@
 ---
 name: explain-structure
-description: Explain a sizable or complex structure overview-first — one diagram, then chapters, then detail. Use this when someone asks how a system, codebase, architecture, request or data flow, state machine, dependency graph, or pipeline is put together, and the subject spans roughly eight or more elements or crosses a layer, process, service, or repository boundary — including phrasings like "how does X work", "walk me through", "どこを通ってる", "構成を説明して", "依存関係を教えて". Use it even when no diagram was asked for. Do not use it to define a term or a concept, to answer a single-fact lookup, or to describe a handful of files that a few sentences already cover.
+description: >-
+  Explain a sizable structure overview-first: one diagram, then chapters, then detail. Use when asked
+  how a codebase, architecture, data flow, state machine, dependency graph, or pipeline fits together
+  and it spans eight or more parts or crosses a layer or service boundary. Not for one-fact lookups.
 ---
 
 # Explain Structure

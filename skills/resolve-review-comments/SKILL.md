@@ -1,6 +1,8 @@
 ---
 name: resolve-review-comments
-description: Collects PR review comments and unresolved threads, applies minimal fixes, resolves addressed review threads, and verifies CI is green. Use when the user says "review comment", "レビューコメント", "resolve", or asks to respond to PR review feedback.
+description: >-
+  Collect PR review comments and unresolved threads, apply minimal fixes, resolve the addressed
+  threads, and confirm CI is green. Use when asked to respond to review feedback or レビューコメント.
 ---
 
 # Resolve Review Comments
@@ -14,27 +16,25 @@ description: Collects PR review comments and unresolved threads, applies minimal
 ## Prerequisites
 
 - The `gh` CLI is available
-- You know the PR number (e.g. `171`)
-- This repository’s default branch may not be `main` (confirm with `gh repo view`)
+- You know the PR number
+- The default branch may not be `main`; confirm with `gh repo view`
 
 ## Workflow
 
 ### 1) Collect PR comments and review bodies
 
 ```bash
-PR=171
+PR=<number>
 gh pr view "$PR" --json url,title,comments,reviews --jq '{url,title,commentsCount:(.comments|length),reviewsCount:(.reviews|length)}'
 gh pr view "$PR" --comments
 ```
 
 ### 2) List unresolved review threads (GraphQL)
 
-Get `owner/name` from `gh repo view --json nameWithOwner --jq .nameWithOwner`.
-
 ```bash
-OWNER=ango-ya
-NAME=crescent-uniswapx-quoter
-PR=171
+OWNER="$(gh repo view --json owner --jq .owner.login)"
+NAME="$(gh repo view --json name --jq .name)"
+PR=<number>
 
 gh api graphql -f query='
 query($owner:String!,$name:String!,$number:Int!){
@@ -61,20 +61,12 @@ query($owner:String!,$name:String!,$number:Int!){
 - **Fix now**: Clear bugs, typos, inconsistent config, things you can lock down with tests
 - **Defer**: Design decisions, unclear requirements, large blast radius (needs user confirmation)
 
-After fixing, run minimal local checks:
-
-```bash
-cargo fmt --all -- --check
-cargo clippy --all-targets -- -D warnings
-cargo test
-```
-
-(If CI uses flags like `ENABLE_APP_CONFIG_TESTS=1`, run the same locally.)
+After fixing, run the project's own checks for what you touched (the `justfile`, `package.json` scripts, or CI workflow show the real commands, including any environment flags CI sets).
 
 ### 4) Post a summary comment on the PR (optional but recommended)
 
 ```bash
-PR=171
+PR=<number>
 gh pr comment "$PR" --body 'Addressed: <bullet summary> / Related commits: <short SHA>'
 ```
 
@@ -94,9 +86,9 @@ If there are several, repeat the above (or loop in the shell).
 ### 6) Confirm there are zero unresolved threads
 
 ```bash
-OWNER=ango-ya
-NAME=crescent-uniswapx-quoter
-PR=171
+OWNER="$(gh repo view --json owner --jq .owner.login)"
+NAME="$(gh repo view --json name --jq .name)"
+PR=<number>
 
 gh api graphql -f query='
 query($owner:String!,$name:String!,$number:Int!){
@@ -112,7 +104,7 @@ query($owner:String!,$name:String!,$number:Int!){
 ### 7) Check CI
 
 ```bash
-PR=171
+PR=<number>
 gh pr checks "$PR"
 gh pr checks "$PR" --watch --interval 25
 ```
