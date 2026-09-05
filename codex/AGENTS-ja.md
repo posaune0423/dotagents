@@ -1,23 +1,23 @@
 # グローバル指示
 
-## ルール
+## 進め方
 
-- skillとsubagentを積極的に使い、main threadのcontextをcleanに保つ。
-  - **Skill**: 専門知識が必要なタスクでは、作業開始前に該当skill直下の`SKILL.md`（例: `skills/<name>/SKILL.md`）を読み、手順と制約をそのまま適用する。使用を宣言するだけで終わらせない。
-  - **Subagent**: 独立したcontextや並列実行が有効で、利用中のhostに適切なsubagentがある場合に委任する。
-    - `architect`: 設計、trade-off、責務境界、実装計画を整理する。
-    - `browser-debugger`: browserで問題を再現し、console、network、DOM、screenshotから証拠を集める。
-    - `docs-researcher`: 公式documentationからAPI、既定値、version差分を確認する。
-    - `light-worker`: formatting、lint、type check、testなどの機械的な検証を担当する。
-      - `light-worker`をspawnするときは`fork_turns="none"`を既定とし、必要な直近contextだけが不可欠な場合に限り必要最小限の正整数を使う。`fork_turns="all"`は使わない。
-      - 委任promptを自己完結させ、目的、作業directory、対象file・command、変更可否、完了条件を含める。
-    - `web-operator`: ログイン済みbrowser経由でNotion、Slack、X、社内SaaSのページを取得し、要点のみ返す。
+- 完了条件は「実装し、動かし、結果を確認し、壊れたものを直す」まで。最初の実装で止めてレビューを待たない。途中で止めるべき場合はユーザーがそう指示する。
+- 曖昧な点は、可逆な作業なら仮定を明示して進める。質問は、解釈によって成果物が大きく変わる点か、破壊的・外部公開・課金を伴う操作の前に限り、質問中も依存しない作業は続ける。
+- ローカルのtest・lint・format・typecheck・build、fileの読み取り、`git status`・`git diff`・`git log`は、都度の承認なしに実行してよい。
+- 独立したtool call（検索、読み取り、checkの実行）は1つのmessageにまとめて並列に出す。依存関係のあるものだけ順に実行する。
+- 既存fileは該当箇所の差分編集で変更し、file全体を書き直さない。
+
+## Skillとsubagent
+
+- 専門知識が必要なタスクでは、作業開始前に該当skillの`SKILL.md`を読み、手順と制約をそのまま適用する。使用を宣言するだけで終わらせない。
+- 独立したcontextや並列実行が有効なときだけsubagentに委任する。委任promptは自己完結させ、目的、作業directory、対象file・command、変更可否、完了条件を含める。
+- `light-worker`をspawnするときは`fork_turns="none"`を既定とし、必要な直近contextだけが不可欠な場合に限り必要最小限の正整数を使う。`fork_turns="all"`は使わない。
 
 ## 開発スタイル
 
-TDD（探索 → Red → Green → Refactoring）で開発する。
-KPIやcoverage目標が与えられた場合は、達成するまで反復する。
-曖昧な指示は質問して明確にする。
+- 挙動を変えるcodeはTDD（探索 → Red → Green → Refactoring）で進める。設定file、docs、使い捨てscript、生成codeは対象外。
+- KPIやcoverage目標が与えられた場合は、達成するまで反復する。
 
 ### Git branch
 
@@ -32,9 +32,7 @@ KPIやcoverage目標が与えられた場合は、達成するまで反復する
 
 ### コード設計
 
-- 関心を分離する。
 - 状態とlogicを分離する。
-- 可読性と保守性を優先する。
 - contract layer（API・型）を厳密に定義し、implementation layerは再生成可能に保つ。
 - 静的に検査できるルールはpromptではなく、対象環境のlinterまたはast-grepで表現する。
 

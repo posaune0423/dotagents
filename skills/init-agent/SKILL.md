@@ -1,11 +1,9 @@
 ---
 name: init-agent
-description: >
-  Bootstraps shared agent layout at the repository root: creates symlinks so
-  `.agents/skills`, `.agents/commands`, and `.agents/rules` appear under
-  `.cursor`, `.claude`, and `.codex`, and adds `CLAUDE.md` as a symlink to
-  `AGENTS.md`. Use when initializing a repo, after cloning, or when the user
-  says init-agent, agent symlink setup, or unify Cursor/Codex/Claude agent files.
+description: >-
+  Bootstrap the shared `.agents` layout in a repository: symlink `.agents/{skills,commands,rules}`
+  under `.cursor`, `.claude`, and `.codex`, and link `CLAUDE.md` to `AGENTS.md`. Use after cloning
+  or when asked to unify Cursor, Codex, and Claude agent files.
 ---
 
 # init-agent

@@ -24,11 +24,11 @@ apps = false
 
 # ===================== Features =====================
 # apps はトップレベルでは `[apps.<name>]` テーブル扱いなので、無効化はフィーチャーフラグ側で行う。
+# `codex features list` で removed / 未知になった flag はここに残さない（読まれないまま warning だけ出る）。
 [features]
 apps = false
 goals = true
 browser_use = true
-child_agents_md = true
 hooks = true
 multi_agent = true
 multi_agent_v2 = true
@@ -36,27 +36,18 @@ memories = true
 chronicle = true
 image_generation = true
 in_app_browser = true
-js_repl = true
-js_repl_tools_only = false
 prevent_idle_sleep = true
 realtime_conversation = true
-remote_control = true
 request_permissions_tool = true
 runtime_metrics = false
 shell_snapshot = true
 shell_tool = true
 shell_zsh_fork = false
-skill_env_var_dependency_prompt = true
 skill_mcp_dependency_install = true
 tool_call_mcp_elicitation = true
-tool_search = true
-tool_search_always_defer_mcp_tools = true
 tool_suggest = true
-unavailable_dummy_tools = true
-undo = true
 unified_exec = true
 workspace_dependencies = true
-workspace_owner_usage_nudge = true
 
 [tui.model_availability_nux]
 "gpt-5.6-terra" = 4
