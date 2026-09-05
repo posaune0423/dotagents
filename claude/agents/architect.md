@@ -7,7 +7,7 @@ description: >-
   auto-delegation, because design work belongs in the main thread unless you want a deeper reasoning
   pass on a hard call. For a routine implementation plan the built-in Plan agent is faster.
 tools: Read, Glob, Grep, WebFetch, WebSearch, TodoWrite
-model: fable
+model: claude-fable-5-1
 effort: xhigh
 color: cyan
 ---

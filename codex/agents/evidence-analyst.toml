@@ -1,6 +1,6 @@
 name = "evidence-analyst"
 description = "Use for read-only causal decomposition, comparison, sensitivity analysis, or alternative hypotheses based on supplied or inspected evidence."
-model = "gpt-5.6-sol"
+model = "gpt-6-astra"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """
