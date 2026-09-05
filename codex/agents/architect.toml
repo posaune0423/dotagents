@@ -1,6 +1,6 @@
 name = "architect"
 description = "Use for technical design, trade-offs, boundaries, and implementation plans before large or ambiguous changes."
-model = "gpt-5.6-sol"
+model = "gpt-6-astra"
 model_reasoning_effort = "high"
 personality = "pragmatic"
 developer_instructions = """

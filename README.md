@@ -55,18 +55,18 @@
 
 `claude/agents/*.md` に定義し、`just link-global` で `~/.claude/agents` に symlink されます。
 
-| agent              | 用途                                                                              | model  | effort |
-| ------------------ | --------------------------------------------------------------------------------- | ------ | ------ |
-| `architect`        | 設計・トレードオフ・契約・実装順序の決定（**`@agent-architect` で明示呼び出し**） | fable  | xhigh  |
-| `impl-worker`      | 仕様が確定した実装を1件担当。並列実装を main thread から切り離す                  | opus   | medium |
-| `browser-debugger` | 実ブラウザで再現手順と証拠（console / network / DOM / screenshot）                | opus   | medium |
-| `light-worker`     | format / lint / typecheck / test / build の実行ループ                             | sonnet | low    |
-| `docs-researcher`  | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認              | sonnet | low    |
-| `researcher`       | 一次資料・repository・dataなど、独立したEvidence laneをread-onlyで調査            | sonnet | medium |
-| `evidence-analyst` | 原因分解・比較・感度・代替仮説をread-onlyで分析                                   | opus   | high   |
-| `evidence-auditor` | 重要claimのsupport・coverage・source品質・scopeをread-onlyで監査                  | opus   | high   |
-| `pr-runner`        | PR 作成・更新、CI 監視、レビューコメント対応                                      | sonnet | low    |
-| `web-operator`     | ログイン済みブラウザ経由で Notion / Slack / X / 社内 SaaS のページを取得          | sonnet | medium |
+| agent              | 用途                                                                              | model              | effort |
+| ------------------ | --------------------------------------------------------------------------------- | ------------------ | ------ |
+| `architect`        | 設計・トレードオフ・契約・実装順序の決定（**`@agent-architect` で明示呼び出し**） | `claude-fable-5-1` | xhigh  |
+| `impl-worker`      | 仕様が確定した実装を1件担当。並列実装を main thread から切り離す                  | opus               | medium |
+| `browser-debugger` | 実ブラウザで再現手順と証拠（console / network / DOM / screenshot）                | opus               | medium |
+| `light-worker`     | format / lint / typecheck / test / build の実行ループ                             | sonnet             | low    |
+| `docs-researcher`  | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認              | sonnet             | low    |
+| `researcher`       | 一次資料・repository・dataなど、独立したEvidence laneをread-onlyで調査            | sonnet             | medium |
+| `evidence-analyst` | 原因分解・比較・感度・代替仮説をread-onlyで分析                                   | opus               | high   |
+| `evidence-auditor` | 重要claimのsupport・coverage・source品質・scopeをread-onlyで監査                  | opus               | high   |
+| `pr-runner`        | PR 作成・更新、CI 監視、レビューコメント対応                                      | sonnet             | low    |
+| `web-operator`     | ログイン済みブラウザ経由で Notion / Slack / X / 社内 SaaS のページを取得          | sonnet             | medium |
 
 委譲の仕組み（実測と一次情報で確認したもの）:
 
