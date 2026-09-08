@@ -12,6 +12,8 @@
       - When spawning `light-worker`, default to `fork_turns="none"`; use the smallest positive integer only when recent context is essential. Never use `fork_turns="all"`.
       - Make the delegated prompt self-contained with the objective, working directory, exact files or commands, whether edits are allowed, and acceptance criteria.
     - `web-operator`: Retrieves Notion, Slack, X, and internal SaaS pages through an already-logged-in browser and returns only what matters.
+  - **Waiting for subagents**: When `wait_agent` is available and used to wait, set `timeout_ms` to twice the estimated remaining time, with a minimum of 120,000 ms and no more than the tool's maximum. If the remaining time is unknown, use 120,000 ms. Completion notifications return early, so do not repeat short timeouts or status checks.
+    - Use the availability of parallel work to decide whether to wait; once waiting, apply the same timeout rule.
 
 ## Development Style
 

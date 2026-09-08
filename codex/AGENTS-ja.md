@@ -12,6 +12,8 @@
       - `light-worker`をspawnするときは`fork_turns="none"`を既定とし、必要な直近contextだけが不可欠な場合に限り必要最小限の正整数を使う。`fork_turns="all"`は使わない。
       - 委任promptを自己完結させ、目的、作業directory、対象file・command、変更可否、完了条件を含める。
     - `web-operator`: ログイン済みbrowser経由でNotion、Slack、X、社内SaaSのページを取得し、要点のみ返す。
+  - **Subagentの待機**: `wait_agent`が利用可能で待機する場合、`timeout_ms`は推定残り時間の2倍を指定し、最短120,000ms、toolの上限以下に収める。残り時間を見積もれない場合は120,000msを指定する。完了通知で早期復帰するため、短周期のtimeoutや状態確認を繰り返さない。
+    - 並行して進められる作業の有無は待機に入るかの判断に使い、待機を選んだ後は同じ時間指定ルールを適用する。
 
 ## 開発スタイル
 
