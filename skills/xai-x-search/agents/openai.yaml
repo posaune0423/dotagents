@@ -2,3 +2,5 @@ interface:
   display_name: "xAI X Search"
   short_description: "xAI (Grok) + x_search で任意テーマのX/Web情報を調査し、根拠URL付きで保存する"
   default_prompt: '$xai-x-search を使って、調べたい内容を1文で受け取り、`bun skills/xai-x-search/scripts/xai_x_search.ts --query "..."` を実行して結果を `data/xai-x-search` に保存して。'
+policy:
+  allow_implicit_invocation: false

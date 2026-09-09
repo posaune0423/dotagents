@@ -20,6 +20,10 @@ test-links:
 test-agent-routing:
     ./scripts/tests/codex-agent-routing.test.sh
 
+# Validate skill frontmatter: allowed keys, name/dir match, and description budget
+test-skills:
+    ./scripts/tests/skills-frontmatter.test.sh
+
 # Validate provider-neutral scheduled-task definitions
 test-schedules:
     ./scripts/tests/schedules.test.sh
@@ -64,7 +68,7 @@ lint:
     bun run lint
 
 check:
-    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-agent-routing && just test-evidence-work
+    bun run check && just test-skills && just test-schedules && just test-cleanup && just test-hooks && just test-agent-routing && just test-evidence-work
 
 # Validate evidence-work routing and the A/B evaluation harness without model calls
 test-evidence-work:

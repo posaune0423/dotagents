@@ -1,6 +1,8 @@
 ---
 name: code-review
-description: "AI-powered code review using CodeRabbit. Default code-review skill. Trigger for any explicit review request AND autonomously when the agent thinks a review is needed (code/PR/quality/security)."
+description: >-
+  Review local code changes with the CodeRabbit CLI and group findings by severity. Use when asked
+  to review changes or a PR, or before opening a PR when a review pass is warranted.
 ---
 
 # CodeRabbit Code Review

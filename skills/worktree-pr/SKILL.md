@@ -1,10 +1,9 @@
 ---
 name: worktree-pr
 description: >-
-  Migrates changes from a Git worktree to a new branch cut from main (or a
-  specified base), commits in logical groups, pushes, and opens a PR with gh.
-  Use when the user asks for worktree-pr, moving worktree changes to a PR, or
-  branching from base with current changes for a pull request.
+  Move changes from a Git worktree onto a new branch cut from main or a given base, commit in
+  logical groups, push, and open a PR with gh. Use when asked to turn worktree changes into a
+  pull request.
 ---
 
 # Worktree PR
