@@ -2,7 +2,7 @@
 # ローカルでは ~/.codex/config.toml とマージするか、notify / projects / MCP のパスを環境に合わせて追記してください。
 
 model = "gpt-6-astra"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 model_context_window = 1050000
 model_auto_compact_token_limit = 735000
 tool_output_token_limit = 12000
@@ -31,7 +31,9 @@ browser_use = true
 child_agents_md = true
 hooks = true
 multi_agent = true
-multi_agent_v2 = true
+multi_agent_v2.enabled = true
+multi_agent_v2.min_wait_timeout_ms = 120000
+multi_agent_v2.default_wait_timeout_ms = 120000
 memories = true
 chronicle = true
 image_generation = true
