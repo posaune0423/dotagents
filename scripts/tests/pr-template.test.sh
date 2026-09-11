@@ -109,6 +109,20 @@ else
 	ok
 fi
 
+# --name is a basename only: traversal and non-Markdown names are rejected.
+printf 'secret\n' >"${repo}/.github/secret.txt"
+for bad in "../secret.txt" "../../PULL_REQUEST_TEMPLATE/feature.md" "feature.txt" "." ".."; do
+	set +e
+	out="$(cd "${repo}" && bash "${SCRIPT}" --name "${bad}" 2>/dev/null)"
+	code=$?
+	set -e
+	if [[ ${code} -eq 0 || -n "${out}" ]]; then
+		fail_msg "--name ${bad} must be rejected (exit ${code}, out: ${out})"
+	else
+		ok
+	fi
+done
+
 # A single file inside the directory needs no --name.
 repo="$(new_repo multi-one)"
 mkdir -p "${repo}/.github/PULL_REQUEST_TEMPLATE"

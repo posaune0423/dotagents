@@ -69,6 +69,11 @@ if [[ -z "${template}" ]]; then
 	tpl_dir="$(find "${root}/.github" -maxdepth 1 -type d -iname 'pull_request_template' 2>/dev/null | sed -n 1p || true)"
 	if [[ -n "${tpl_dir}" ]]; then
 		if [[ -n "${name}" ]]; then
+			# Basename only, so --name cannot read files outside the template dir.
+			[[ "${name}" != */* && "${name}" == *.md ]] || {
+				echo "--name must be a Markdown filename inside ${tpl_dir}" >&2
+				exit 1
+			}
 			[[ -f "${tpl_dir}/${name}" ]] || {
 				echo "No template named ${name} in ${tpl_dir}" >&2
 				exit 1
