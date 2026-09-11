@@ -1,105 +1,107 @@
 ---
 name: create-pr
 description: >-
-  Create or update a PR from current branch to main, watch CI, and address
-  feedback. Use skills/resolve-review-comments/SKILL.md for review comments;
-  fix failing checks separately (logs, CI config).
+  Create or update a PR from the current branch to main with a reviewer-first
+  body that follows the repo's PR template, then watch CI and address feedback.
+  Review threads go through skills/resolve-review-comments/SKILL.md; failing
+  checks are fixed from logs and CI config.
 ---
 
-The user likes the state of the code.
+Uncommitted changes: $`git status --porcelain | wc -l | tr -d ' '`. Branch: $`git branch --show-current` → origin/main.
+Upstream: $`git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"`.
+Existing PR: $`gh pr view --json number,title,url --jq '"#\(.number): \(.title) - \(.url)"' 2>/dev/null || echo "None"`.
+PR template: $`./.agents/skills/create-pr/scripts/pr-template.sh --path 2>/dev/null || echo "none"`.
 
-There are $`git status --porcelain | wc -l | tr -d ' '` uncommitted changes.
-The current branch is $`git branch --show-current`.
-The target branch is origin/main.
+Scripts below live in `./.agents/skills/create-pr/scripts/`.
 
-$`git rev-parse --abbrev-ref @{upstream} 2>/dev/null && echo "Upstream branch exists." || echo "There is no upstream branch yet."`
+## 1. Review, commit, push
 
-**Existing PR:** $`gh pr view --json number,title,url --jq '"#\(.number): \(.title) - \(.url)"' 2>/dev/null || echo "None"`
+Review the change first: test coverage, silent failures, stale comments, new types, general quality. Fix what you find. Then `git diff`, commit per the user's instructions and `rules/commit-style.mdc`, and push (`git push -u origin HEAD` when there is no upstream).
 
-The user requested a PR.
+## 2. Write the PR body for the reviewer
 
-Follow these exact steps:
+Read the whole PR, not the last commit: `git diff origin/main...` and `git log origin/main..`.
 
-## Phase 1: Review the code
+The reader has ten minutes and no context. Every sentence must save them time or it goes.
 
-1. Review test coverage
-2. Check for silent failures
-3. Verify code comments are accurate
-4. Review any new types
-5. General code review
+- **Template first.** If a template exists, `pr-template.sh` prints it. Keep every heading, in order. Replace each HTML comment with content or `N/A: <reason>`. Tick a checkbox only when it is true. Never add or drop sections. Without a template, use the layout below and drop only the optional sections that do not apply.
+- **Why before what.** Open with the problem in one or two sentences and link the issue or spec (`Closes #N`).
+- **Behavior, not files.** Say what changes for users and callers. The diff already lists files.
+- **Show, don't narrate.** A before/after table beats a paragraph. A Mermaid diagram (`sequenceDiagram` for request or event flows, `flowchart` for branching or state) earns its place only when the change alters a flow across three or more components; otherwise leave it out.
+- **Screenshots for UI.** Any visible change gets a before/after table. Capture them yourself when the app can run locally (a project skill such as `pr-ui-screenshot` first, then Playwright). If you cannot, leave `TODO(author)` cells and say so in the report.
+- **Review guide.** Where to start, which hunks carry the risk, what looks odd but is intentional, and what to skip (generated, moved, renamed). Telling the reviewer what to ignore saves the most time.
+- **Verification as evidence.** One row per check with its result; separate local, CI, and manual. Claim only what you ran.
+- **Risk and rollout.** Breaking changes, migrations, config or env, flags, rollback. `None` when there is none.
+- **Out of scope.** Name known gaps and follow-ups so the reviewer does not raise them.
+- Under roughly 300 words beyond the template. No marketing tone, no diff narration, no empty headings.
 
-## Phase 2: Create/Update PR
+Default layout when no template exists (sections marked _optional_ are dropped when empty):
 
-6. Run `git diff` to review uncommitted changes
-7. Commit them. Follow any instructions the user gave you about writing commit messages.
-8. Push to origin.
-9. Use `git diff origin/main...` to review the full PR diff
-10. Check if a PR already exists for this branch:
+````markdown
+## Why
 
-- **If PR exists**:
-  - Draft/update the description in a temp file (e.g. `/tmp/pr-body.txt`).
-  - Update the PR body using the non-deprecated script:
-    - `./.agents/skills/create-pr/scripts/pr-body-update.sh --file /tmp/pr-body.txt`
-  - Re-fetch the body with `gh pr view --json body --jq .body` to confirm it changed.
-  - Apply assignees and labels from `./.agents/skills/create-pr/pr-defaults.env` (override with env vars if needed). Labels: use `CREATE_PR_LABELS` when set; otherwise infer one label from the branch prefix using GitHub's stock defaults (`scripts/infer-github-default-label.sh`); set `CREATE_PR_NO_LABEL=1` to skip labels.
-    - `./.agents/skills/create-pr/scripts/pr-meta-sync.sh`
-- **If no PR exists**: Create the PR with assignees and labels using the wrapper (reads the same `pr-defaults.env`):
-  - `./.agents/skills/create-pr/scripts/gh-pr-create-with-meta.sh --base main ...` (pass `--title`, `--body` or `--body-file`, etc., as you would to `gh pr create`).
-  - Defaults: assignee `@me` when `CREATE_PR_ASSIGNEES` is unset; comma-separated logins when set; empty string skips assignees. Labels follow the same rule as above (infer `bug` / `documentation` / `enhancement` / `question` / etc. from the branch prefix, or override with `CREATE_PR_LABELS`). Stock labels must exist on the repo (GitHub adds them by default on new repositories).
-  - Keep the title under 80 characters and the description under five sentences.
+<1–2 sentences: problem, who hits it, link `Closes #N`.>
 
-The PR description should summarize ALL commits in the PR, not just the latest changes.
+## What changed
 
-## Phase 3: Monitor CI and Address Issues
+| Area | Before | After |
+| ---- | ------ | ----- |
 
-**Review comments vs CI:** Failing checks and review feedback are **two tracks**. For **inline reviews, bot suggestions, and reviewer requests**, always open and follow **`skills/resolve-review-comments/SKILL.md`** (collect → triage → implement → push → optional reply). Do not treat “green CI” as sufficient if open review threads remain. Run that workflow whenever `poll-pr` / `triage-pr` surfaces new comments, not only when CI fails.
+## How it works <!-- optional: only when a flow across 3+ components changed -->
 
-Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN` or `GITHUB_TOKEN` is set in CI.
+```mermaid
+sequenceDiagram
+```
 
-11. Watch CI status and feedback using the polling script (instead of running `gh` in a loop):
+## Screenshots <!-- required for any visible UI change -->
 
-- Run `./.agents/skills/create-pr/scripts/poll-pr.sh --triage-on-change --exit-when-green` (polls every 15s for 10 mins).
-- If checks fail, use `gh pr checks` or `gh run list` to find the failing run id, then:
-  - Fetch the failed check logs using `gh run view <run-id> --log-failed`
-  - Analyze the failure and fix the issue
-  - Commit and push the fix
-  - Continue polling until all checks pass
+| Before | After |
+| ------ | ----- |
 
-12. Check for merge conflicts:
+## Review guide
 
-- Run `git fetch origin main && git merge origin/main`
-- If conflicts exist, resolve them sensibly
-- Commit the merge resolution and push
+1. Start at `<file>`: <what it decides>.
+2. Risk: <hunk and why>.
+3. Skip: <generated / moved / renamed>.
 
-13. Use the polling script output to notice new reviews and comments (avoid direct polling via `gh`):
+## Verification
 
-- If you need a full snapshot, run `./.agents/skills/create-pr/scripts/triage-pr.sh` once.
-- If you need full context after the script reports a new item, fetch details once with `gh pr view --comments` or `gh api ...`.
-- **Address review feedback** using **`skills/resolve-review-comments/SKILL.md`** end-to-end (not ad-hoc bullets here). Re-run that skill on each new batch of comments after you push.
+| Check | How | Result |
+| ----- | --- | ------ |
 
-## Phase 4: Merge and Cleanup
+## Risk / rollout
 
-14. Once CI passes and the PR is approved, ask the user if they want to merge the PR.
+None
 
-15. If the user confirms, merge the PR:
-    - Use `gh pr merge --merge --delete-branch` to merge with a merge commit and delete the remote branch
+## Out of scope <!-- optional -->
+````
 
-16. After successful merge, check if we're in a git worktree:
-    - Run: `[ "$(git rev-parse --git-common-dir)" != "$(git rev-parse --git-dir)" ]`
-    - **If in a worktree**: Use the ask user question tool (`request_user_input`) to ask if they want to clean up the worktree. If yes:
-      1. In Claude Code, use the `ExitWorktree` tool with `action: "remove"`. It removes the worktree and returns the session to the main checkout, so no path bookkeeping is needed.
-      2. Without that tool, capture the main worktree and branch first, because the current directory stops existing once the worktree is deleted: `MAIN_WORKTREE="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"` and `BRANCH="$(git branch --show-current)"`. Then run `git -C "$MAIN_WORKTREE" worktree remove <worktree-path>` followed by `git -C "$MAIN_WORKTREE" branch -d "$BRANCH"`. Both already refuse to discard work: `remove` stops on a dirty worktree and `branch -d` on an unmerged branch. Escalate to `--force` or `-D` only when the user confirms discarding it.
-      3. Run every later command against the captured path (`git -C "$MAIN_WORKTREE" ...`); a shell `cd` does not persist between tool calls.
-    - **If not in a worktree**: Just switch back to main with `git checkout main && git pull`
+Title: at most 72 characters, `${emoji} ${type}(${scope}): ${summary}` per `rules/commit-style.mdc`.
 
-## Completion
+## 3. Create or update the PR
 
-Report the final PR status to the user, including:
+Write the body to a temp file, then:
 
-- PR URL
-- Assignees and labels applied (from `pr-defaults.env` or overrides)
-- CI status (passed/merged)
-- Any unresolved review comments that need user attention
-- Cleanup status (worktree removed or branch switched)
+- **Existing PR:** `pr-body-update.sh --file <file>` (writes via GraphQL and verifies the result), then `pr-meta-sync.sh`.
+- **New PR:** `gh-pr-create-with-meta.sh --base main --title "<title>" --body-file <file>`. Never use `--fill`; it bypasses the template and the rules above.
+- Assignees and labels come from `pr-defaults.env` (`CREATE_PR_ASSIGNEES`, `CREATE_PR_LABELS`, `CREATE_PR_NO_LABEL=1`). Without `CREATE_PR_LABELS`, one GitHub stock label is inferred from the branch prefix; it must exist on the repo.
 
-If any step fails in a way you cannot resolve, ask the user for help.
+## 4. CI and review feedback
+
+Failing checks and review feedback are two tracks. Green CI is not done while review threads stay open.
+
+1. `poll-pr.sh --triage-on-change --exit-when-green` (15 s × 10 min). On a failure: `gh run view <run-id> --log-failed`, fix the root cause, commit, push, poll again.
+2. `git fetch origin main && git merge origin/main`; resolve conflicts, commit, push.
+3. For any review comment, bot suggestion, or reviewer request, run `skills/resolve-review-comments/SKILL.md` end to end, once per new batch. `triage-pr.sh` gives a one-shot snapshot.
+
+Keep `gh` non-interactive; CI needs `GH_TOKEN` or `GITHUB_TOKEN`.
+
+## 5. Merge and cleanup
+
+Merge only after CI is green, the PR is approved, and the user confirms: `gh pr merge --merge --delete-branch`.
+
+Then, if `[ "$(git rev-parse --git-common-dir)" != "$(git rev-parse --git-dir)" ]` (a worktree), ask whether to clean up. Prefer the `ExitWorktree` tool with `action: "remove"`. Without it, capture `MAIN_WORKTREE="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"` and `BRANCH="$(git branch --show-current)"` first, since the current directory disappears; then `git -C "$MAIN_WORKTREE" worktree remove <path>` and `git -C "$MAIN_WORKTREE" branch -d "$BRANCH"`. Escalate to `--force` or `-D` only when the user confirms discarding work, and keep using `git -C "$MAIN_WORKTREE"` because `cd` does not persist between tool calls. Not in a worktree: `git checkout main && git pull`.
+
+## Report
+
+PR URL, assignees and labels, CI state, review threads still needing the user, cleanup state. Ask the user when a step cannot be resolved.
