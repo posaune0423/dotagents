@@ -29,3 +29,7 @@ skills/.system/
 # Codex writes its approved-command allowlist here (~/.codex/rules -> rules/).
 # Machine-local: contains absolute paths and per-project approvals.
 rules/default.rules
+
+# create-pr: per-repo PR language (owner or owner/repo -> lang). Machine-local:
+# names internal orgs. Default is English, so only overrides are stored.
+skills/create-pr/pr-lang.local
