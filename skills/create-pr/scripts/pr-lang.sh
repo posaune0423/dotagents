@@ -64,6 +64,15 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
+if [[ -n "${target}" && -z "${set_lang}" ]]; then
+	echo "--for only applies with --set; use --repo to look up another repository." >&2
+	exit 1
+fi
+if [[ -n "${target}" && -n "${repo}" ]]; then
+	echo "Pass either --for (key to store) or --repo (repository to look up), not both." >&2
+	exit 1
+fi
+
 # owner/repo from the origin remote; empty when there is none.
 detect_repo() {
 	local url

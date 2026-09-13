@@ -78,6 +78,16 @@ assert_eq "$(cd "${ssh_repo}" && bash "${SCRIPT}")" "ko" "--set replacement is r
 assert_eq "$(cd "${https_repo}" && bash "${SCRIPT}" --repo posaune0423/anything)" "ja" "--for owner applies to that owner; --repo overrides detection"
 assert_eq "$(cd "${other_repo}" && bash "${SCRIPT}")" "en" "--for does not touch the current repo"
 
+# --- option combinations that would silently do the wrong thing are rejected ----
+for bad_args in "--for posaune0423" "--set ja --for posaune0423 --repo posaune0423/dotagents"; do
+	set +e
+	# shellcheck disable=SC2086 # intentional word splitting of the argument list
+	out="$(cd "${ssh_repo}" && bash "${SCRIPT}" ${bad_args} 2>/dev/null)"
+	code=$?
+	set -e
+	assert_eq "${code}:${out}" "1:" "'${bad_args}' must exit 1 without output"
+done
+
 # --- invalid input ------------------------------------------------------------
 set +e
 (cd "${ssh_repo}" && bash "${SCRIPT}" --set "ja; rm -rf" 2>/dev/null)

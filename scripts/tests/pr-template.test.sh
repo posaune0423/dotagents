@@ -116,8 +116,8 @@ for bad in "../secret.txt" "../../PULL_REQUEST_TEMPLATE/feature.md" "feature.txt
 	out="$(cd "${repo}" && bash "${SCRIPT}" --name "${bad}" 2>/dev/null)"
 	code=$?
 	set -e
-	if [[ ${code} -eq 0 || -n "${out}" ]]; then
-		fail_msg "--name ${bad} must be rejected (exit ${code}, out: ${out})"
+	if [[ ${code} -ne 1 || -n "${out}" ]]; then
+		fail_msg "--name ${bad} must be rejected with exit 1 (exit ${code}, out: ${out})"
 	else
 		ok
 	fi
