@@ -160,42 +160,17 @@ Create a pull request using `gh pr create`.
 - If there are multiple commits: craft a title that summarizes all changes
 - Format: `${emoji} ${type}(${scope}): ${summary}` (same format as commit messages)
 
-#### PR Body Template
+#### PR Body
 
-```markdown
-## Summary
-
-<1-3 bullet points summarizing the overall changes>
-
-## Changes
-
-<List major changes by file/module>
-
-### ${scope1}
-
-- ${change1}
-- ${change2}
-
-### ${scope2}
-
-- ${change3}
-
-## Test plan
-
-- [ ] <test item 1>
-- [ ] <test item 2>
-```
+Follow **Step 2 of `skills/create-pr/SKILL.md`**: use the repo PR template when `./.agents/skills/create-pr/scripts/pr-template.sh` finds one, otherwise its default layout (Why / What changed / How it works / Screenshots / Review guide / Verification / Risk / Out of scope). Write the body to a temp file and pass it with `--body-file`; never use `--fill`.
 
 #### Command
 
 ```bash
-gh pr create \
+./.agents/skills/create-pr/scripts/gh-pr-create-with-meta.sh \
   --base ${base_branch} \
   --title "${pr_title}" \
-  --body "$(cat <<'EOF'
-${pr_body}
-EOF
-)"
+  --body-file /tmp/pr-body.md
 ```
 
 ### 7. Final Verification

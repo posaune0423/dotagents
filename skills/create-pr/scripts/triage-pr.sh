@@ -97,7 +97,7 @@ if [[ -n "$failed_checks" ]]; then
 	done <<<"$failed_checks"
 fi
 
-review_line=$(gh api --paginate --slurp "repos/$repo/pulls/$pr/reviews?per_page=100" --jq '
+review_line=$(gh api --paginate --slurp "repos/$repo/pulls/$pr/reviews?per_page=100" 2>/dev/null | jq -r '
   [ .[][] | select(.submitted_at != null) ] |
   if length == 0 then "" else
     (max_by(.submitted_at)) | "\(.state)\t\(.user.login)\t\(.submitted_at)\t\(.html_url)"
@@ -108,7 +108,7 @@ if [[ -n "$review_line" ]]; then
 	echo "REVIEW: $r_state $r_user $r_time $r_url"
 fi
 
-issue_line=$(gh api --paginate --slurp "repos/$repo/issues/$pr/comments?per_page=100" --jq '
+issue_line=$(gh api --paginate --slurp "repos/$repo/issues/$pr/comments?per_page=100" 2>/dev/null | jq -r '
   [ .[][] ] |
   if length == 0 then "" else
     (max_by(.created_at)) | "\(.user.login)\t\(.created_at)\t\(.html_url)\t\(.body | gsub("\\n"; " ") | gsub("\\t"; " ") | .[0:200])"
@@ -119,7 +119,7 @@ if [[ -n "$issue_line" ]]; then
 	echo "COMMENT: conversation $c_user $c_time $c_url $c_body"
 fi
 
-review_comment_line=$(gh api --paginate --slurp "repos/$repo/pulls/$pr/comments?per_page=100" --jq '
+review_comment_line=$(gh api --paginate --slurp "repos/$repo/pulls/$pr/comments?per_page=100" 2>/dev/null | jq -r '
   [ .[][] ] |
   if length == 0 then "" else
     (max_by(.created_at)) | "\(.user.login)\t\(.created_at)\t\(.html_url)\t\(.body | gsub("\\n"; " ") | gsub("\\t"; " ") | .[0:200])"

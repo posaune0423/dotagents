@@ -1,0 +1,11 @@
+# PR language per owner (user or org) or per repository. Copy to pr-lang.local
+# (gitignored) next to this file; `pr-lang.sh --set <lang> [--for <owner>]`
+# writes it for you.
+#
+# Format: <owner> <lang>  or  <owner>/<repo> <lang>
+# - Matching is case-insensitive; a repo line wins over its owner line.
+# - Default is en, so list only what differs.
+#
+# my-org ja
+# my-org/legacy-service en
+# someone/side-project zh-TW

@@ -193,7 +193,7 @@ for i in $(seq 1 "$iterations"); do
 		last_failed_signature="$failed_signature"
 	fi
 
-	issue_line=$(gh api --paginate --slurp "repos/$repo/issues/$pr/comments?per_page=100" --jq '
+	issue_line=$(gh api --paginate --slurp "repos/$repo/issues/$pr/comments?per_page=100" 2>/dev/null | jq -r '
     [ .[][] ] |
     if length == 0 then "" else
       (max_by(.created_at)) | "\(.id)\t\(.created_at)\t\(.user.login)\t\(.html_url)\t\(.body | gsub("\\n"; " ") | gsub("\\t"; " ") | .[0:200])"
@@ -208,7 +208,7 @@ for i in $(seq 1 "$iterations"); do
 		fi
 	fi
 
-	review_comment_line=$(gh api --paginate --slurp "repos/$repo/pulls/$pr/comments?per_page=100" --jq '
+	review_comment_line=$(gh api --paginate --slurp "repos/$repo/pulls/$pr/comments?per_page=100" 2>/dev/null | jq -r '
     [ .[][] ] |
     if length == 0 then "" else
       (max_by(.created_at)) | "\(.id)\t\(.created_at)\t\(.user.login)\t\(.html_url)\t\(.body | gsub("\\n"; " ") | gsub("\\t"; " ") | .[0:200])"
@@ -223,7 +223,7 @@ for i in $(seq 1 "$iterations"); do
 		fi
 	fi
 
-	review_line=$(gh api --paginate --slurp "repos/$repo/pulls/$pr/reviews?per_page=100" --jq '
+	review_line=$(gh api --paginate --slurp "repos/$repo/pulls/$pr/reviews?per_page=100" 2>/dev/null | jq -r '
     [ .[][] | select(.submitted_at != null) ] |
     if length == 0 then "" else
       (max_by(.submitted_at)) | "\(.id)\t\(.submitted_at)\t\(.user.login)\t\(.html_url)\t\(.state)\t\(.body | gsub("\\n"; " ") | gsub("\\t"; " ") | .[0:200])"
