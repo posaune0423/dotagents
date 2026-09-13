@@ -3,7 +3,7 @@
   "permissions": {
     "allow": []
   },
-  "model": "opus",
+  "model": "claude-fable-5-1[1m]",
   "enabledPlugins": {
     "lua-lsp@claude-plugins-official": true,
     "coderabbit@coderabbit": true,
