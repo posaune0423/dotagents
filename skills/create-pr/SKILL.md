@@ -25,7 +25,7 @@ Read the whole PR, not the last commit: `git diff origin/main...` and `git log o
 
 The reader has ten minutes and no context. Every sentence must save them time or it goes.
 
-- **Language.** Write the title and body in the PR language above (default `en`). Template headings, code, and commands stay as they are. When the user asks to remember a language for a repo or org, run `pr-lang.sh --set <lang> [--for owner]`; it persists in the gitignored `pr-lang.local`.
+- **Language.** Write the title and body in the PR language above (default `en`). Template headings, code, and commands stay as they are. When the user asks to remember a language for a repo or org, run `pr-lang.sh --set <lang> [--for owner]`; it persists in the gitignored `pr-lang.local` (format: `pr-lang.local.example`).
 - **Template first.** If a template exists, `pr-template.sh` prints it. Keep every heading, in order. Replace each HTML comment with content or `N/A: <reason>`. Tick a checkbox only when it is true. Never add or drop sections. Without a template, use the layout below and drop only the optional sections that do not apply.
 - **Why before what.** Open with the problem in one or two sentences and link the issue or spec (`Closes #N`).
 - **Behavior, not files.** Say what changes for users and callers. The diff already lists files.
