@@ -44,6 +44,14 @@ test-pr-poll:
 test-pr-lang:
     ./scripts/tests/pr-lang.test.sh
 
+# Validate the free-tier piggyback router, provider adapters, and piggyback-worker contract
+test-piggyback:
+    ./scripts/tests/piggyback.test.sh
+
+# Measure whether a host agent routes work to the piggyback skill (spends host budget, no provider quota)
+eval-piggyback-routing *args:
+    ./skills/piggyback/scripts/eval-routing.sh {{args}}
+
 # Remove ~/.codex/commands and symlink ~/.codex/prompts -> ~/.agents/commands
 link-codex-prompts:
     ./scripts/relink-codex-prompts.sh
@@ -76,7 +84,7 @@ lint:
     bun run lint
 
 check:
-    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-pr-template && just test-pr-poll && just test-pr-lang && just test-agent-routing && just test-evidence-work
+    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-pr-template && just test-pr-poll && just test-pr-lang && just test-agent-routing && just test-piggyback && just test-evidence-work
 
 # Validate evidence-work routing and the A/B evaluation harness without model calls
 test-evidence-work:
