@@ -100,6 +100,10 @@ config_file = "agents/docs-researcher.toml"
 description = "Local Qwen worker via custom LM Studio provider."
 config_file = "agents/qwen_worker.toml"
 
+[agents.piggyback-worker]
+description = "Rides free tiers: runs one self-contained task on Groq, Antigravity, Cursor, or another free provider instead of this session's budget."
+config_file = "agents/piggyback-worker.toml"
+
 [agents.reviewer]
 description = "Reviewer role for PR-style review focused on correctness, security, behavior regressions, and missing tests."
 config_file = "agents/reviewer.toml"
