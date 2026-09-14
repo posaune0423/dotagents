@@ -8,6 +8,10 @@
     - `architect`: 設計、trade-off、責務境界、実装計画を整理する。
     - `browser-debugger`: browserで問題を再現し、console、network、DOM、screenshotから証拠を集める。
     - `docs-researcher`: 公式documentationからAPI、既定値、version差分を確認する。
+    - `piggyback-worker`: 自己完結したtaskを無料枠provider（Groq、Antigravity、Cursorなど）のchainで実行し、結果だけを返す。host側の枠が尽きたとき、または温存したいときに使う。
+      - 委任promptを自己完結させる。provider側は呼び出し元のcontextを一切共有しない。
+      - 編集を伴うtaskには`agentic`、テキスト入出力だけのtaskには`inference`を指定する。取り違えると、実際には行っていない編集を行ったと報告される。
+      - chainが全滅した場合は`BLOCKED:`を返させ、代わりに自分で実行させない。自分の枠を使ってやり直すかは呼び出し側が判断する。
     - `light-worker`: formatting、lint、type check、testなどの機械的な検証を担当する。
       - `light-worker`をspawnするときは`fork_turns="none"`を既定とし、必要な直近contextだけが不可欠な場合に限り必要最小限の正整数を使う。`fork_turns="all"`は使わない。
       - 委任promptを自己完結させ、目的、作業directory、対象file・command、変更可否、完了条件を含める。
