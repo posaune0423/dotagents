@@ -29,6 +29,6 @@
   },
   "skipDangerousModePermissionPrompt": true,
   "effortLevel": "high",
-  "remoteControlAtStartup": false,
+  "remoteControlAtStartup": true,
   "hooks": {}
 }
