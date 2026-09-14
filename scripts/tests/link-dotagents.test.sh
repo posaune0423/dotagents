@@ -84,12 +84,12 @@ assert_link "${ROOT}/claude/CLAUDE.md" "../codex/AGENTS.md"
 assert_link "${ROOT}/gemini/GEMINI.md" "../codex/AGENTS.md"
 
 review_rc=0
-jq -e '.env == {} and .remoteControlAtStartup == false' "${ROOT}/claude/settings.template.json" >/dev/null || {
-	echo "FAIL: Claude settings template must be valid JSON with an empty env and opt-in Remote Control" >&2
+jq -e '.env == {} and .remoteControlAtStartup == true' "${ROOT}/claude/settings.template.json" >/dev/null || {
+	echo "FAIL: Claude settings template must be valid JSON with an empty env and Remote Control on at startup" >&2
 	review_rc=1
 }
-jq -e '.remoteControlAtStartup == false' "${ROOT}/claude/settings.json" >/dev/null || {
-	echo "FAIL: Claude reference settings must not start Remote Control automatically" >&2
+jq -e '.remoteControlAtStartup == true' "${ROOT}/claude/settings.json" >/dev/null || {
+	echo "FAIL: Claude reference settings must start Remote Control automatically" >&2
 	review_rc=1
 }
 jq -e '
