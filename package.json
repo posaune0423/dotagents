@@ -9,7 +9,7 @@
     "lint": "bunx eslint .",
     "bash:format": "fd -H -t f -e sh . scripts skills schedules codex claude -X shfmt -w",
     "bash:format:check": "fd -H -t f -e sh . scripts skills schedules codex claude -X shfmt -d",
-    "bash:lint": "fd -H -t f -e sh . scripts skills schedules codex claude -X shellcheck",
+    "bash:lint": "fd -H -t f -e sh . scripts skills schedules codex claude -X shellcheck -x",
     "check": "bun run lint && bun run format:check && bun run bash:lint && bun run bash:format:check"
   },
   "devDependencies": {
