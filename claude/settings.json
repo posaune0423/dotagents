@@ -1,5 +1,7 @@
 {
-  "env": {},
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70"
+  },
   "permissions": {
     "allow": []
   },
@@ -28,6 +30,8 @@
     }
   },
   "effortLevel": "high",
+  "autoCompactEnabled": true,
+  "autoCompactWindow": 1000000,
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "remoteControlAtStartup": true,
