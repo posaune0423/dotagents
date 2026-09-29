@@ -84,10 +84,20 @@ assert_link "${ROOT}/claude/CLAUDE.md" "../codex/AGENTS.md"
 assert_link "${ROOT}/gemini/GEMINI.md" "../codex/AGENTS.md"
 
 review_rc=0
-jq -e '.env == {} and .remoteControlAtStartup == true' "${ROOT}/claude/settings.template.json" >/dev/null || {
-	echo "FAIL: Claude settings template must be valid JSON with an empty env and Remote Control on at startup" >&2
+jq -e '.env == {"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70"} and .remoteControlAtStartup == true' "${ROOT}/claude/settings.template.json" >/dev/null || {
+	echo "FAIL: Claude settings template must be valid JSON with only the auto-compact env and Remote Control on at startup" >&2
 	review_rc=1
 }
+for settings in "${ROOT}/claude/settings.json" "${ROOT}/claude/settings.template.json"; do
+	jq -e '
+		.autoCompactEnabled == true
+		and .env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE == "70"
+		and .autoCompactWindow == 1000000
+	' "${settings}" >/dev/null || {
+		echo "FAIL: ${settings#"${ROOT}/"} must auto-compact at 70% of the model's full context window" >&2
+		review_rc=1
+	}
+done
 jq -e '.remoteControlAtStartup == true' "${ROOT}/claude/settings.json" >/dev/null || {
 	echo "FAIL: Claude reference settings must start Remote Control automatically" >&2
 	review_rc=1

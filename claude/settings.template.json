@@ -1,5 +1,7 @@
 {
-  "env": {},
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70"
+  },
   "permissions": {
     "allow": ["mcp__pencil"]
   },
@@ -29,6 +31,8 @@
   },
   "skipDangerousModePermissionPrompt": true,
   "effortLevel": "high",
+  "autoCompactEnabled": true,
+  "autoCompactWindow": 1000000,
   "remoteControlAtStartup": true,
   "hooks": {}
 }
