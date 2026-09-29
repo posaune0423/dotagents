@@ -8,6 +8,10 @@
     - `architect`: Clarifies architecture, trade-offs, responsibility boundaries, and implementation plans.
     - `browser-debugger`: Reproduces browser issues and gathers evidence from the console, network, DOM, and screenshots.
     - `docs-researcher`: Verifies APIs, defaults, and version differences against official documentation.
+    - `piggyback-worker`: Runs a self-contained task on a chain of free-tier providers (Groq, Antigravity, Cursor, and others) and returns only the result. Use it when the host's own allowance is exhausted, or to conserve it.
+      - Make the delegated prompt self-contained. The provider side shares none of the caller's context.
+      - Specify `agentic` for tasks that edit files and `inference` for text-in/text-out work. Getting this wrong yields a report of edits that were never made.
+      - When the whole chain is exhausted, have it return `BLOCKED:` instead of doing the work itself. Whether to redo the task on your own allowance is the caller's decision.
     - `light-worker`: Handles mechanical checks such as formatting, linting, type checking, and tests.
       - When spawning `light-worker`, default to `fork_turns="none"`; use the smallest positive integer only when recent context is essential. Never use `fork_turns="all"`.
       - Make the delegated prompt self-contained with the objective, working directory, exact files or commands, whether edits are allowed, and acceptance criteria.

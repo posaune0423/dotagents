@@ -61,6 +61,7 @@
 | `impl-worker`      | 仕様が確定した実装を1件担当。並列実装を main thread から切り離す                  | opus               | medium |
 | `browser-debugger` | 実ブラウザで再現手順と証拠（console / network / DOM / screenshot）                | opus               | medium |
 | `light-worker`     | format / lint / typecheck / test / build の実行ループ                             | sonnet             | low    |
+| `piggyback-worker` | 自己完結したタスクを無料枠プロバイダのチェーンで実行し、結果だけを返す            | sonnet             | low    |
 | `docs-researcher`  | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認              | sonnet             | low    |
 | `researcher`       | 一次資料・repository・dataなど、独立したEvidence laneをread-onlyで調査            | sonnet             | medium |
 | `evidence-analyst` | 原因分解・比較・感度・代替仮説をread-onlyで分析                                   | opus               | high   |
@@ -87,6 +88,25 @@
 - **共有 instruction は短く保つ。** 非 fork の subagent は**呼び出しごとに** CLAUDE.md 階層全体を読み直します（`Explore` / `Plan` だけが省略し、変更手段はありません）。セッション単位より強い動機でここを削る価値があります。公式の目標値は 1 ファイル 200 行未満で、`@path` import は整理には役立つがコンテキストは減りません（launch 時に読まれる）。
 
 プロンプトは共通スケルトン（役割1文 → `Working mode` → `Constraints` → `Stop conditions` → `Return` → `When NOT to use`）に揃えています。`claude/agents/` 直下には YAML frontmatter 付きの agent 定義 `.md` 以外を置かないこと（frontmatter が無いファイルは読み込みで警告になります）。
+
+### 無料枠への相乗り（`piggyback-worker` / `piggyback`）
+
+別の agent の CLI へ、**仕事に合ったモデルを選んで**タスクを渡すための統一インターフェースです。Codex の `gpt-5.3-codex-spark` のような「安い階層を手で選ぶ」作業を、profile という名前付きの判断に置き換えます。個々の無料枠は小さいので、**枯れたら次へ倒すチェーン**としても束ねています。
+
+- **profile が用途とモデルを対応付けます**: `fast`（仕分け・抽出・整形）/ `reasoning`（強いモデルに値する分析）/ `long-context`（1Mトークン級）/ `code`・`review`（workspace が要る作業）。`--list-profiles` で一覧、定義は [skills/piggyback/profiles.conf](skills/piggyback/profiles.conf)
+- 契約は [skills/piggyback/SKILL.md](skills/piggyback/SKILL.md) が SSoT。境界と構造の図は [skills/piggyback/README.md](skills/piggyback/README.md)
+- 実行は必ず [skills/piggyback/scripts/piggyback.sh](skills/piggyback/scripts/piggyback.sh) 経由。provider の CLI を直接叩かないこと
+- **終了コードが契約の本体**: `0` 成功 / `3` 枠切れ・`4` 未認証・`5` 未導入や使えないモデルID・`6` timeout や provider の不調（**次の provider へ倒す**）/ `1` タスク自体の失敗（既定2回まで倒す）/ `7` チェーン全滅。`7` は terminal で、リトライも「代わりに自分でやる」も禁止です
+- **失敗の分類器が実効性能を決めます。** provider の stderr を `stale-model` / `auth` / `quota` / `unavailable` / `failed` に振り分け、最初の4つは「倒す理由」として扱います。実測で `IneligibleTierError`（提供終了した Gemini CLI）や `410 github_models_retirement_brownout`（GitHub Models）が `failed` に落ちてチェーンを止めたため、パターンは adapter ではなく分類器側に集約しています
+- **capability class が安全装置**: `agentic`（workspace を読み書きできる: antigravity / cursor / copilot）⊇ `inference`（テキスト入出力のみ: groq / openrouter / mistral）。編集タスクを inference 専用へ流すと「やっていない作業をやったと報告する」ので、router が front で弾きます
+- **cooldown 状態を持ちます**: 枯れた provider は `${XDG_STATE_HOME:-~/.local/state}/piggyback/` に失効時刻を記録し、既定1時間はチェーンから外します。モデル固有の失敗は provider 全体ではなくそのモデルだけを外します
+- **API キーは `skills/piggyback/.env`**（ルートの `.gitignore` が既に除外）。`.env.example` を複製して埋めます。source ではなくパースするので、設定ファイルに実行を許しません
+
+provider の追加は `skills/piggyback/scripts/providers/<name>.sh` に `capabilities` / `probe` / `run` の3verbを実装した実行ファイルを置くだけです。router は provider 名をハードコードしません。OpenAI 互換 API なら [lib/openai_provider.sh](skills/piggyback/scripts/lib/openai_provider.sh) を source して変数を4つ埋めるだけで済みます。
+
+```bash
+just test-piggyback
+```
 
 ## 使い方
 
