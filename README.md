@@ -117,6 +117,19 @@ just link-project /path/to/your-project
 
 - このとき、デフォルトで `~/.agents/{skills,commands,rules}` の中身を `<project>/.agents/{...}` に「足りない分だけ」symlink で取り込みます（**ローカルが優先**）。
 
+### Claude Code on the web
+
+クラウドのセッションにはローカルの `~/.claude` が渡らないため、claude.ai/code の環境の **Setup script** に次を書きます（root で、Claude Code の起動前に走る）。
+
+```bash
+git clone --depth 1 https://github.com/posaune0423/dotagents.git ~/dotagents && ~/dotagents/scripts/cloud-setup.sh
+```
+
+`link-dotagents.sh --home --all --tool-links` に加えて `~/.claude/{skills,commands,rules}` を `~/.agents` へ繋ぎ、
+`~/.claude/settings.json` に `cloud-setup.sh --refresh`（`git pull`）の SessionStart hook を登録します。
+環境は setup の結果を snapshot して以降のセッションで setup script を飛ばすため、更新はこの hook が取り込みます。
+Git に入っていない skill（`skills/projects/*` や `.git/info/exclude` のもの）とplugin（`enabledPlugins`）はクラウドには入りません。
+
 ### 同期（コピー）
 
 ※ symlink の運用が基本ですが、`<project>/.agents` へ **コピー** したい場合は次のいずれかです。
