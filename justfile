@@ -48,6 +48,10 @@ test-pr-poll:
 test-pr-lang:
     ./scripts/tests/pr-lang.test.sh
 
+# Integration tests for draft-by-default PR creation used by the create-pr skill (stub gh)
+test-pr-create:
+    ./scripts/tests/pr-create.test.sh
+
 # Remove ~/.codex/commands and symlink ~/.codex/prompts -> ~/.agents/commands
 link-codex-prompts:
     ./scripts/relink-codex-prompts.sh
@@ -80,7 +84,7 @@ lint:
     bun run lint
 
 check:
-    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-pr-template && just test-pr-poll && just test-pr-lang && just test-agent-routing && just test-evidence-work && just test-cloud-setup
+    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-pr-template && just test-pr-poll && just test-pr-lang && just test-pr-create && just test-agent-routing && just test-evidence-work && just test-cloud-setup
 
 # Validate evidence-work routing and the A/B evaluation harness without model calls
 test-evidence-work:
