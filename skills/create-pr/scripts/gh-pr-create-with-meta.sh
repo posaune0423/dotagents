@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Wraps `gh pr create` with assignees and labels from pr-defaults.env (optional env overrides).
+# New PRs open as drafts unless CREATE_PR_DRAFT=0.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,6 +23,10 @@ else
 fi
 
 create_args=()
+if [[ "${CREATE_PR_DRAFT:-1}" != "0" ]]; then
+	create_args+=(--draft)
+fi
+
 if [[ -n "$assignees_raw" ]]; then
 	IFS=',' read -ra parts <<<"$assignees_raw"
 	for p in "${parts[@]}"; do

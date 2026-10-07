@@ -85,7 +85,7 @@ Title: at most 72 characters, `${emoji} ${type}(${scope}): ${summary}` per `rule
 Write the body to a temp file, then:
 
 - **Existing PR:** `pr-body-update.sh --file <file>` (writes via GraphQL and verifies the result), then `pr-meta-sync.sh`.
-- **New PR:** `gh-pr-create-with-meta.sh --base main --title "<title>" --body-file <file>`. Never use `--fill`; it bypasses the template and the rules above.
+- **New PR:** `gh-pr-create-with-meta.sh --base main --title "<title>" --body-file <file>`. It opens the PR as a draft (`CREATE_PR_DRAFT=0` opts out). Never use `--fill`; it bypasses the template and the rules above.
 - Assignees and labels come from `pr-defaults.env` (`CREATE_PR_ASSIGNEES`, `CREATE_PR_LABELS`, `CREATE_PR_NO_LABEL=1`). Without `CREATE_PR_LABELS`, one GitHub stock label is inferred from the branch prefix; it must exist on the repo.
 
 ## 4. CI and review feedback
@@ -94,7 +94,8 @@ Failing checks and review feedback are two tracks. Green CI is not done while re
 
 1. `poll-pr.sh --triage-on-change --exit-when-green` (15 s × 10 min). On a failure: `gh run view <run-id> --log-failed`, fix the root cause, commit, push, poll again.
 2. `git fetch origin main && git merge origin/main`; resolve conflicts, commit, push.
-3. For any review comment, bot suggestion, or reviewer request, run `skills/resolve-review-comments/SKILL.md` end to end, once per new batch. `triage-pr.sh` gives a one-shot snapshot.
+3. Once CI is green, mark a draft ready for review with `gh pr ready`.
+4. For any review comment, bot suggestion, or reviewer request, run `skills/resolve-review-comments/SKILL.md` end to end, once per new batch. `triage-pr.sh` gives a one-shot snapshot.
 
 Keep `gh` non-interactive; CI needs `GH_TOKEN` or `GITHUB_TOKEN`.
 
