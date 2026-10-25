@@ -35,7 +35,8 @@ Use this order for the requested review scope:
 
 Move to the next reviewer only when the preceding reviewer is unavailable
 before completing its review, including a rate limit, authentication failure,
-missing installation, or runtime failure. Do not retry the same rate limit.
+missing installation, runtime failure, or terminal `review_skipped` and other
+terminal states indicating no review ran. Do not retry the same rate limit.
 Do not start a login flow, spend billing credits, or switch organization to
 recover an unavailable reviewer. Once the review itself is authorized, using
 the fallback needs no separate approval.
@@ -79,6 +80,9 @@ When user asks to:
 
 Before running CodeRabbit, read and follow the trusted-binary and execution
 boundary checks in [authentication and recovery](references/auth-recovery.md).
+For this skill, the fallback and retry rules here override the linked
+procedure's manual-login guidance and host-retry instructions. Host retries
+are permitted only after an explicit repair request.
 If the safe authentication check confirms that CodeRabbit is unavailable,
 use the next reviewer above instead of asking the user to log in.
 Resolve the trusted CLI to a quoted canonical absolute path, check authentication
