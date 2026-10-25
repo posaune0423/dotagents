@@ -21,6 +21,11 @@ when CodeRabbit is unavailable.
 
 ## Reviewer order and fallback
 
+When already acting as an active CodeRabbit, project team-review, or Codex
+dedicated reviewer, review the supplied diff directly. Do not start this fallback
+chain or invoke another reviewer; fallback orchestration belongs to the calling
+agent only.
+
 Use this order for the requested review scope:
 
 1. CodeRabbit CLI
