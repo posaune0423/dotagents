@@ -1,13 +1,14 @@
 ---
 name: code-review
-description: "Run CodeRabbit CLI reviews, retrieve saved local or GitHub PR fix prompts, and interpret CodeRabbit authentication and review output. Use for CodeRabbit review commands, committed/uncommitted or directory scopes, and CodeRabbit runbooks. Default code-review skill: also trigger for explicit code/PR/quality/security review requests or when a review is needed."
+description: "Run CodeRabbit CLI reviews, retrieve saved local or GitHub PR fix prompts, and interpret CodeRabbit authentication and review output. Falls back to an applicable project team-review, then Codex review when an earlier reviewer is unavailable. Use for code/PR/quality/security review requests."
 metadata:
   version: "0.1.0"
 ---
 
-# CodeRabbit Code Review
+# Code Review
 
-AI-powered code review using CodeRabbit. Enables developers to implement features, review code, and fix issues in autonomous cycles without manual intervention.
+Start with CodeRabbit, then use the project reviewer or Codex's dedicated review
+when CodeRabbit is unavailable.
 
 ## Capabilities
 
@@ -15,6 +16,47 @@ AI-powered code review using CodeRabbit. Enables developers to implement feature
 - Preserves finding severities: critical, major, minor, trivial, info, and none
 - Reviews tracked changes by default and supports committed, uncommitted, base branch/commit, and directory scopes
 - Uses `--agent` output for agent-readable review results and fix guidance
+- Preserves the selected diff scope through reviewer fallback when the next
+  reviewer supports it
+
+## Reviewer order and fallback
+
+Use this order for the requested review scope:
+
+1. CodeRabbit CLI
+2. The project's `team-review`, when it is installed and applicable to that
+   project and scope
+3. Codex's dedicated `codex review`
+
+Move to the next reviewer only when the preceding reviewer is unavailable
+before completing its review, including a rate limit, authentication failure,
+missing installation, or runtime failure. Do not retry the same rate limit.
+Do not start a login flow, spend billing credits, or switch organization to
+recover an unavailable reviewer. Once the review itself is authorized, using
+the fallback needs no separate approval.
+
+Preserve the requested diff scope. For Codex, use `--base <ref>` for a
+branch/base comparison, `--uncommitted` for the working copy, and `--commit
+<sha>` for one explicit commit. Do not add a prompt: these scope flags and a
+prompt are mutually exclusive. If the next reviewer cannot represent the
+requested scope, report it as unavailable and continue only with a later
+reviewer that can.
+
+Report each unavailable reviewer and its reason, plus the reviewer that ran.
+A completed review means the review process ended; it does not mean findings
+have been resolved.
+
+For a project gate that needs machine-readable evidence, use the equivalent
+Codex command with `--json`, such as:
+
+```bash
+codex exec review --json --base origin/main
+codex exec review --json --uncommitted
+codex exec review --json --commit <sha>
+```
+
+Treat only a completed `turn.completed` event as review evidence. A
+`thread.started` event, partial output, or error is not enough.
 
 ## When to Use
 
@@ -30,7 +72,10 @@ When user asks to:
 
 ### 1. Check CLI and Authentication
 
-Before running a review, read and follow [authentication and recovery](references/auth-recovery.md).
+Before running CodeRabbit, read and follow the trusted-binary and execution
+boundary checks in [authentication and recovery](references/auth-recovery.md).
+If the safe authentication check confirms that CodeRabbit is unavailable,
+use the next reviewer above instead of asking the user to log in.
 Resolve the trusted CLI to a quoted canonical absolute path, check authentication
 in the approved review execution context, and proceed only on `authenticated: true`.
 Never start login automatically or access credentials yourself. Examples below
@@ -52,9 +97,10 @@ Use `--agent` for output optimized for AI agents:
 ```
 
 Use the same approved context as the auth check. On a pre-review authentication
-failure, follow the linked recovery procedure before asking for login. Only a
-failed sandbox attempt with confirmed host authentication qualifies for one host
-retry; preserve its directory and all arguments. Never retry after review work starts.
+failure, record CodeRabbit as unavailable and use the fallback order above.
+Only when the user explicitly asks to repair CodeRabbit may the linked recovery
+procedure's single host retry apply; preserve its directory and all arguments.
+Never retry after review work starts.
 
 If the user asks to review a specific directory, append `--dir <path>`. The directory must be inside an initialized Git working tree.
 
