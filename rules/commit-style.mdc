@@ -5,33 +5,46 @@ alwaysApply: false
 
 # Commit Style
 
-Use this format when committing changes (e.g. via `agent-commit-push`, the `worktree-pr` skill, or manual commits).
+Use this format when committing changes and when titling pull requests (e.g. via `agent-commit-push`, the `create-pr` / `worktree-pr` skills, or manual commits).
+It follows [Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/), the same as myfans-web's `.claude/commands/commit.md`.
+If the repository has its own commit command or rule (`.claude/commands/commit.md`, `.agents/commands/commit.md`, commitlint), that wins.
 
 ## Message Format
 
 ```
-${emoji} ${type}(${scope}): ${summary}
+<type>(<scope>): <subject>
 
-- ${change_detail_1}
-- ${change_detail_2}
+<body>
+
+<footer>
 ```
 
-## Type → Emoji Mapping
+- **No emoji** anywhere in the subject or the PR title. Do not copy emoji from the existing `git log`; older commits may still have them.
+- **type** (required): one of the types below.
+- **scope** (optional): add it when the affected area is clear (e.g. `fix(payment): ...`, `feat(creator-dashboard): ...`). Without a scope, drop the parentheses too: `<type>: <subject>`, never `feat(): ...`. The same applies to the `${scope}` templates below and in the skills.
+- **subject** (required): what changed, briefly, in the repository's language (Japanese for getozinc repositories). End with the imperative form (「〜する」「〜を追加」「〜を修正」) and no trailing period (句点).
+- **body** (optional): why the change was made. What changed is readable from the diff, so keep it minimal.
+- **footer** (optional): references (`Refs: #1234`, `Closes: #5678`) or a breaking change (`BREAKING CHANGE: ...`).
 
-| type     | emoji | usage                       |
-| -------- | ----- | --------------------------- |
-| chore    | 🍱    | config, dependencies, build |
-| docs     | 📝    | documentation               |
-| style    | 💄    | formatting, UI              |
-| refactor | ♻️    | refactoring                 |
-| perf     | 🚀    | performance improvement     |
-| feat     | ✨    | new feature                 |
-| fix      | 🐛    | bug fix                     |
-| test     | 💚    | tests                       |
+## Types
+
+| type     | usage                                              |
+| -------- | -------------------------------------------------- |
+| feat     | new feature                                        |
+| fix      | bug fix                                            |
+| refactor | code cleanup that does not change behavior         |
+| perf     | performance improvement                            |
+| docs     | documentation only                                 |
+| test     | add or fix tests                                   |
+| build    | build or dependency changes (package.json, lockfiles) |
+| ci       | CI configuration                                   |
+| chore    | anything else                                      |
+| style    | formatting or whitespace that does not change meaning |
+| revert   | revert an earlier commit                           |
 
 ## Commit Order
 
-`chore → docs → style → refactor → perf → feat → fix → test`
+`chore → build → ci → docs → style → refactor → perf → feat → fix → test`
 
 ## Scope Guidelines
 
@@ -49,7 +62,7 @@ Set `GIT_AUTHOR_*` / `GIT_COMMITTER_*` to your agent identity before commit:
 
 ```bash
 git add -A -- <file1> <file2> <fileN>
-GIT_AUTHOR_NAME="..." GIT_AUTHOR_EMAIL="..." GIT_COMMITTER_NAME="..." GIT_COMMITTER_EMAIL="..." git commit -m "${emoji} ${type}(${scope}): ${summary}" -m "- ${detail1}\n- ${detail2}"
+GIT_AUTHOR_NAME="..." GIT_AUTHOR_EMAIL="..." GIT_COMMITTER_NAME="..." GIT_COMMITTER_EMAIL="..." git commit -m "${type}(${scope}): ${subject}" -m "${body}"
 ```
 
 ## Staging Rules
