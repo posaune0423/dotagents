@@ -19,6 +19,9 @@ Develop with TDD (Exploration -> Red -> Green -> Refactoring).
 If KPIs or coverage targets are provided, keep iterating until they are met.
 Ask questions to clarify ambiguous instructions.
 
+- When descriptions of the current implementation or coding conventions in documentation or instruction files conflict with existing code, inspect the relevant code and tests and follow the consistent conventions in the existing code. Do not rewrite working code to match documentation solely because they disagree.
+- Honor explicit new requirements, migration plans, and security constraints even when existing code differs. Ask only when it is unclear which source is outdated and the answer would materially change the work. In the final reply, briefly report each inconsistency found and how it was resolved.
+
 ### Git Branching
 
 - Never prefix branch names with an agent or tool name such as `codex/`.
