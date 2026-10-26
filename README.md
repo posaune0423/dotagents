@@ -154,10 +154,14 @@ just verify-global
 just verify-project /path/to/your-project
 ```
 
-## Hook（Claude Code）
+## Hook（Claude Code / Codex）
 
 `claude/hooks/*.sh` に置き、`just link-global` で `~/.claude/hooks` に symlink されます。登録は
 `~/.claude/settings.json` の `hooks` で行い、こちらは home 固有設定なので Git 管理しません。
+
+Codex のブランチ名ガードは `codex/hooks.json` から同じ `~/.claude/hooks/block-agent-branch-prefix.sh` を呼びます。
+標準の `--tool-links` 設定は Codex と Claude の hooks ディレクトリを両方 link するため、スクリプトを二重管理しません。
+Codex 側では新しいフックを `/hooks` で確認・承認してから使います。
 
 | hook                           | event                           | 役割                                                             |
 | ------------------------------ | ------------------------------- | ---------------------------------------------------------------- |
