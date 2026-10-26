@@ -78,7 +78,7 @@ None
 ## Out of scope <!-- optional -->
 ````
 
-Title: at most 72 characters, `${emoji} ${type}(${scope}): ${summary}` per `rules/commit-style.mdc`.
+Title: at most 72 characters, `${type}(${scope}): ${subject}` per `rules/commit-style.mdc`. No emoji. With squash merges the title becomes the commit on the base branch.
 
 ## 3. Create or update the PR
 

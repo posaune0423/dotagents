@@ -142,7 +142,7 @@ rm -f /tmp/worktree-pr.patch /tmp/worktree-pr-untracked.tar.gz
 
 ### 4. Commit in Logical Groups
 
-Based on the analysis from Step 2, commit changes in logical groups. **Follow `rules/commit-style.mdc`** for format, type/emoji, order, scope, and commands.
+Based on the analysis from Step 2, commit changes in logical groups. **Follow `rules/commit-style.mdc`** for format, type, order, scope, and commands (no emoji).
 
 ### 5. Push
 
@@ -158,7 +158,7 @@ Create a pull request using `gh pr create`.
 
 - If there is only 1 commit: use that commit message as-is
 - If there are multiple commits: craft a title that summarizes all changes
-- Format: `${emoji} ${type}(${scope}): ${summary}` (same format as commit messages)
+- Format: `${type}(${scope}): ${subject}` (same format as commit messages, no emoji)
 
 #### PR Body
 
