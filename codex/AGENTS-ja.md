@@ -19,6 +19,9 @@ TDD（探索 → Red → Green → Refactoring）で開発する。
 KPIやcoverage目標が与えられた場合は、達成するまで反復する。
 曖昧な指示は質問して明確にする。
 
+- documentationや指示fileにある現状説明・実装慣例が既存codeと食い違う場合は、関連codeとtestを確認し、既存codeで一貫して使われている慣例に従う。食い違いだけを根拠に、動いている既存codeをdocumentationに合わせて書き換えない。
+- 明示された新しい要件・移行方針・security制約は、既存codeと異なっていても優先する。どちらが古いか判断できず、対応が大きく変わる場合だけ確認する。見つけた食い違いと採用した判断は、最終回答ですべて簡潔に報告する。
+
 ### Git branch
 
 - branch名に`codex/`などのagent名やtool名をprefixとして付けない。
