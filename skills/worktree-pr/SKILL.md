@@ -158,7 +158,7 @@ Create a pull request using `gh pr create`.
 
 - If there is only 1 commit: use that commit message as-is
 - If there are multiple commits: craft a title that summarizes all changes
-- Format: `${type}(${scope}): ${subject}` (same format as commit messages, no emoji)
+- Format: `${type}(${scope}): ${subject}`, or `${type}: ${subject}` without a scope (same format as commit messages, no emoji)
 
 #### PR Body
 

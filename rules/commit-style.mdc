@@ -21,7 +21,7 @@ If the repository has its own commit command or rule (`.claude/commands/commit.m
 
 - **No emoji** anywhere in the subject or the PR title. Do not copy emoji from the existing `git log`; older commits may still have them.
 - **type** (required): one of the types below.
-- **scope** (optional): add it when the affected area is clear (e.g. `fix(payment): ...`, `feat(creator-dashboard): ...`).
+- **scope** (optional): add it when the affected area is clear (e.g. `fix(payment): ...`, `feat(creator-dashboard): ...`). Without a scope, drop the parentheses too: `<type>: <subject>`, never `feat(): ...`. The same applies to the `${scope}` templates below and in the skills.
 - **subject** (required): what changed, briefly, in the repository's language (Japanese for getozinc repositories). End with the imperative form (「〜する」「〜を追加」「〜を修正」) and no trailing period (句点).
 - **body** (optional): why the change was made. What changed is readable from the diff, so keep it minimal.
 - **footer** (optional): references (`Refs: #1234`, `Closes: #5678`) or a breaking change (`BREAKING CHANGE: ...`).
