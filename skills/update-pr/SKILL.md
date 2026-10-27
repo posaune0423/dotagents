@@ -98,7 +98,7 @@ Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN
 
 ## Phase 4: Merge and cleanup (if the user wants to merge)
 
-Once CI passes, the PR is approved, and every merge gate the repository's own docs set is met (for example, QA sign-off before merge), or the user asks to merge, confirm with the user. Then merge with the method the repository allows:
+Once CI passes, the PR is approved, and every merge gate the repository's own docs set is met (for example, QA sign-off before merge), confirm with the user. A merge request from the user does not skip a gate that is still open: name the open gate and merge only if the user then explicitly says to merge anyway. Then merge with the method the repository allows:
 
 ```bash
 gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,deleteBranchOnMerge
@@ -114,7 +114,7 @@ After a successful merge, check if we're in a git worktree:
   1. In Claude Code, use the `ExitWorktree` tool with `action: "remove"`. It removes the worktree and returns the session to the main checkout, so no path bookkeeping is needed.
   2. Without that tool, capture the main worktree and branch first, because the current directory stops existing once the worktree is deleted: `MAIN_WORKTREE="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"` and `BRANCH="$(git branch --show-current)"`. Then run `git -C "$MAIN_WORKTREE" worktree remove <worktree-path>` followed by `git -C "$MAIN_WORKTREE" branch -d "$BRANCH"`. Both already refuse to discard work: `remove` stops on a dirty worktree and `branch -d` on an unmerged branch. Escalate to `--force` or `-D` only when the user confirms discarding it.
   3. Run every later command against the captured path (`git -C "$MAIN_WORKTREE" ...`); a shell `cd` does not persist between tool calls.
-- **If not in a worktree**: Switch back to main with `git checkout main && git pull`
+- **If not in a worktree**: Switch back to main with `git checkout main && git pull`, then delete the local branch (`git branch -D <branch>` once the PR is `MERGED`), since a repository that deletes the head branch on merge only removes the remote one.
 
 ## Handling common review requests
 
