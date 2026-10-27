@@ -101,7 +101,9 @@ Keep `gh` non-interactive; CI needs `GH_TOKEN` or `GITHUB_TOKEN`.
 
 ## 5. Merge and cleanup
 
-Merge only after CI is green, the PR is approved, and the user confirms: `gh pr merge --merge --delete-branch`.
+Merge only after CI is green, the PR is approved, every merge gate the repository's own docs set is met (for example, QA sign-off before merge), and the user confirms. Use the merge method the repository allows: read `gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,deleteBranchOnMerge`, pass the matching `--squash`, `--merge`, or `--rebase`, and add `--delete-branch` only when `deleteBranchOnMerge` is false.
+
+A squash or rebase merge leaves the local branch looking unmerged, so `git branch -d` below refuses it; once `gh pr view --json state` reports `MERGED`, `-D` is safe for that branch.
 
 Then, if `[ "$(git rev-parse --git-common-dir)" != "$(git rev-parse --git-dir)" ]` (a worktree), ask whether to clean up. Prefer the `ExitWorktree` tool with `action: "remove"`. Without it, capture `MAIN_WORKTREE="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"` and `BRANCH="$(git branch --show-current)"` first, since the current directory disappears; then `git -C "$MAIN_WORKTREE" worktree remove <path>` and `git -C "$MAIN_WORKTREE" branch -d "$BRANCH"`. Escalate to `--force` or `-D` only when the user confirms discarding work, and keep using `git -C "$MAIN_WORKTREE"` because `cd` does not persist between tool calls. Not in a worktree: `git checkout main && git pull`.
 

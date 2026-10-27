@@ -98,11 +98,14 @@ Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN
 
 ## Phase 4: Merge and cleanup (if the user wants to merge)
 
-Once CI passes and the PR is approved (or the user asks to merge), confirm with the user, then:
+Once CI passes, the PR is approved, and every merge gate the repository's own docs set is met (for example, QA sign-off before merge), or the user asks to merge, confirm with the user. Then merge with the method the repository allows:
 
 ```bash
-gh pr merge --merge --delete-branch
+gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,deleteBranchOnMerge
+gh pr merge --squash   # or --merge / --rebase, whichever is allowed; add --delete-branch only when deleteBranchOnMerge is false
 ```
+
+A squash or rebase merge leaves the local branch looking unmerged, so `git branch -d` below refuses it; once `gh pr view --json state` reports `MERGED`, `-D` is safe for that branch.
 
 After a successful merge, check if we're in a git worktree:
 
