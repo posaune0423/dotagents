@@ -47,7 +47,7 @@ Run `ntn api --help` for full syntax. Quick summary:
 ntn api v1/users page_size==100
 
 # POST with inline body fields
-ntn api v1/pages parent[page_id]=abc123
+ntn api v1/pages 'parent[page_id]=abc123'
 
 # POST with JSON body
 ntn api v1/pages -d '{"parent":{"page_id":"abc123"}}'
