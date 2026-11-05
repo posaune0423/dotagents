@@ -51,6 +51,18 @@
 - **Hook**: hook scriptは `claude/hooks/` と `codex/hooks/` でGit管理し、`just link-global` で `~/.claude/hooks` と `~/.codex/hooks` へsymlinkする。hookの登録先（`~/.claude/settings.json` の `hooks`、`codex/hooks.json`）は起動側の設定なので、Claude側はhome固有設定として扱う
 - **Cursorのglobal rule**: file symlinkではなくCursorの Customize → Rules で管理する。root `AGENTS.md` はproject ruleとして利用できる
 
+## 外部スキルの管理
+
+Git管理している外部由来のスキルは、[skills-lock.json](skills-lock.json) に取得元と取り込み後の内容を記録します。
+自作スキルと、ローカル専用の未追跡スキルは対象外です。
+
+- `source` / `sourceType` / `skillPath`: 上流リポジトリと、その中の `SKILL.md` のパス。
+- `ref`: 取り込み元、または取り込んだ内容と一致する上流コミットを確認できる場合に記録します。不明な場合は推測で埋めません。
+- `computedHash`: Skills CLIと同じ方式で、スキル配下の全ファイルの相対パスと内容から計算するSHA-256です（パス順に整列し、`.git` / `node_modules` を除外）。ローカル修正も含みます。
+
+外部スキルを追加・更新したらlockも更新します。上流の更新を取り込む際は、既存のローカル修正を確認してから差分を反映します。
+`ref` がない既存項目は内容の追跡用であり、取得元のコミットまで固定した記録ではありません。
+
 ## Subagent（Claude Code）
 
 `claude/agents/*.md` に定義し、`just link-global` で `~/.claude/agents` に symlink されます。
