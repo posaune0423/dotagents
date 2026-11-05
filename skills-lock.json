@@ -1,23 +1,69 @@
 {
   "version": 1,
   "skills": {
+    "code-review": {
+      "source": "git@github.com:coderabbitai/skills.git",
+      "sourceType": "git",
+      "skillPath": "skills/code-review/SKILL.md",
+      "computedHash": "e0be8a913b4a1a1857af6f316ed044a3503c70a2f5780499463d59b19c684614"
+    },
     "defuddle": {
       "source": "git@github.com:kepano/obsidian-skills.git",
       "sourceType": "git",
       "skillPath": "skills/defuddle/SKILL.md",
-      "computedHash": "5ae2d9f2d5de3f27adb5b4d0a752c16be38f1a2d6316721a74ab721866d5fb2e"
+      "computedHash": "a2b69665d670584365f26f28db97193a82f134aaf0370a6fb647db492888fb48"
+    },
+    "eli5": {
+      "source": "git@github.com:anthropics/claude-plugins-community.git",
+      "sourceType": "git",
+      "ref": "794af9e63d07fad17087dcab61f21f44cb48effd",
+      "skillPath": "eli5/skills/eli5/SKILL.md",
+      "computedHash": "6c626392eca359b7408fc25073ccd47ca07c7442ab5548df79e43bafc85a1818"
+    },
+    "find-docs": {
+      "source": "git@github.com:upstash/context7.git",
+      "sourceType": "git",
+      "skillPath": "skills/find-docs/SKILL.md",
+      "computedHash": "d17495efac34b08eb5a94bfaf82c218f03f57cb4f8cd7e42e10cbcf1f1064264"
+    },
+    "find-skills": {
+      "source": "git@github.com:vercel-labs/skills.git",
+      "sourceType": "git",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "86896167e9de6e2da1e25599da052940eeec4a4079138d2fa3b5dd08d46d31e6"
+    },
+    "grill-me": {
+      "source": "git@github.com:mattpocock/skills.git",
+      "sourceType": "git",
+      "ref": "fcf0071560d32913c9d4f820e0d7ca467c881619",
+      "skillPath": "skills/productivity/grill-me/SKILL.md",
+      "computedHash": "9cdbb4b8f7a3aeaef82e6230c9e823500d4a8a1214c726cf342cf9829d34fc7d"
+    },
+    "grilling": {
+      "source": "git@github.com:mattpocock/skills.git",
+      "sourceType": "git",
+      "ref": "85f83d3fde1d3a90d5c9a657f6998c79a6c37308",
+      "skillPath": "skills/productivity/grilling/SKILL.md",
+      "computedHash": "4dd886b0196bf43729d954ae326016f2bd9f5f79d892500b407c33a753362f14"
     },
     "json-canvas": {
       "source": "git@github.com:kepano/obsidian-skills.git",
       "sourceType": "git",
       "skillPath": "skills/json-canvas/SKILL.md",
-      "computedHash": "56cbac74a93e4fba97f4d44bccfdeaae89e545b223f47df392c7705e01e6c543"
+      "computedHash": "33acdf01f0bed19f3fc881a1e46f92a8ad9793d320c333f72bafd1a84ae12b47"
+    },
+    "notion-cli": {
+      "source": "git@github.com:makenotion/skills.git",
+      "sourceType": "git",
+      "ref": "10e976aa591995fd60c75ef13beba1a8aa827fcc",
+      "skillPath": "skills/notion-cli/SKILL.md",
+      "computedHash": "ff504e00e373feb44bc8c56068980845f590ffdf410522db49286ebea4ba092d"
     },
     "obsidian-bases": {
       "source": "git@github.com:kepano/obsidian-skills.git",
       "sourceType": "git",
       "skillPath": "skills/obsidian-bases/SKILL.md",
-      "computedHash": "65db029661f38daadc8b8eb755bd7b96011336f49bdc11e966ec7fd157d8f125"
+      "computedHash": "cafbe516bfe8f1b8d3039b4cb5317386e3a4ac2f58331ebf965a53a7db35fb89"
     },
     "obsidian-cli": {
       "source": "git@github.com:kepano/obsidian-skills.git",
@@ -29,7 +75,32 @@
       "source": "git@github.com:kepano/obsidian-skills.git",
       "sourceType": "git",
       "skillPath": "skills/obsidian-markdown/SKILL.md",
-      "computedHash": "0f47297035d7824e7bf0f1984e8145a59a123e2258b5d54c9ac9642f9f77e177"
+      "computedHash": "aa81685c82310196cc40e70a3b99051e305024e3d98477051fa54166e6babe58"
+    },
+    "playwright-cli": {
+      "source": "git@github.com:microsoft/playwright-cli.git",
+      "sourceType": "git",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "ac10b75b4d0f7f516fb95ad1b3bc1111c76ca2a20f8a240b6d2adfa45481b01b"
+    },
+    "shadcn": {
+      "source": "git@github.com:shadcn-ui/ui.git",
+      "sourceType": "git",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "f11752afe167097fa01e8e04feffc869099792f05bf56fd6ff0367da002c7587"
+    },
+    "tdd": {
+      "source": "git@github.com:obra/superpowers.git",
+      "sourceType": "git",
+      "skillPath": "skills/test-driven-development/SKILL.md",
+      "computedHash": "d6b3f0f2559f80950cb653419c1e17ca9a5e2d2172b0663a9003403f3ed81481"
+    },
+    "you-might-not-need-an-effect": {
+      "source": "git@github.com:ryoppippi/dotfiles.git",
+      "sourceType": "git",
+      "ref": "5327db223d5ebfb6ab2000259a625ebc5efd7dcd",
+      "skillPath": "agents/skills/you-might-not-need-an-effect/SKILL.md",
+      "computedHash": "1e643ff477c54847c71719f20be414cefd4a4dead0087cbb86338f227a0d1dc5"
     }
   }
 }
