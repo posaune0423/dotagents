@@ -13,6 +13,13 @@
       "skillPath": "skills/json-canvas/SKILL.md",
       "computedHash": "56cbac74a93e4fba97f4d44bccfdeaae89e545b223f47df392c7705e01e6c543"
     },
+    "notion-cli": {
+      "source": "git@github.com:makenotion/skills.git",
+      "sourceType": "git",
+      "ref": "10e976aa591995fd60c75ef13beba1a8aa827fcc",
+      "skillPath": "skills/notion-cli/SKILL.md",
+      "computedHash": "ff504e00e373feb44bc8c56068980845f590ffdf410522db49286ebea4ba092d"
+    },
     "obsidian-bases": {
       "source": "git@github.com:kepano/obsidian-skills.git",
       "sourceType": "git",
