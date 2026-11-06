@@ -2,11 +2,11 @@
 
 Current Nano Banana lineup in the Gemini API, verified against the Google AI for Developers docs on **2026-04-23**:
 
-| Alias | Model ID | Product name | Notes |
-| --- | --- | --- | --- |
-| `nanobanana` | `gemini-2.5-flash-image` | Nano Banana | Fast, efficient default for high-volume image generation and editing |
-| `nanobanana-2` | `gemini-3.1-flash-image-preview` | Nano Banana 2 | High-efficiency Gemini 3 image model, optimized for speed and volume |
-| `nanobanana-pro` | `gemini-3-pro-image-preview` | Nano Banana Pro | Highest-fidelity image model, optimized for professional asset production |
+| Alias            | Model ID                         | Product name    | Notes                                                                     |
+| ---------------- | -------------------------------- | --------------- | ------------------------------------------------------------------------- |
+| `nanobanana`     | `gemini-2.5-flash-image`         | Nano Banana     | Fast, efficient default for high-volume image generation and editing      |
+| `nanobanana-2`   | `gemini-3.1-flash-image-preview` | Nano Banana 2   | High-efficiency Gemini 3 image model, optimized for speed and volume      |
+| `nanobanana-pro` | `gemini-3-pro-image-preview`     | Nano Banana Pro | Highest-fidelity image model, optimized for professional asset production |
 
 The official image-generation docs describe Nano Banana as a family of three models, not a single endpoint flavor. This skill accepts the aliases above and resolves them to the exact model IDs.
 

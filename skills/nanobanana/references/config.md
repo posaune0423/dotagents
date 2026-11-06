@@ -2,21 +2,21 @@
 
 Environment variables consumed by `scripts/nanobanana.py`:
 
-| Variable | Required | Default | Purpose |
-| --- | --- | --- | --- |
-| `GEMINI_API_KEY` | yes | none | API key for the Gemini-compatible endpoint |
-| `GEMINI_BASE_URL` | no | `https://generativelanguage.googleapis.com/v1beta` | Base URL root before `/models/...` |
-| `GEMINI_MODEL` | no | `nanobanana` | Default model alias or exact model ID |
-| `GEMINI_TIMEOUT` | no | `300` | HTTP timeout in seconds |
-| `GEMINI_AUTH_MODE` | no | `auto` | `auto`, `x-goog-api-key`, or `bearer` |
-| `GEMINI_ASPECT_RATIO` | no | unset | Example: `1:1`, `16:9`, `4:5` |
-| `GEMINI_IMAGE_SIZE` | no | unset | `512`, `1K`, `2K`, or `4K` on supported models |
-| `GEMINI_USE_SEARCH` | no | `false` | Add the `google_search` tool |
-| `GEMINI_OUTPUT_DIR` | no | `./nanobanana-images` | Default directory when `generate` has no explicit `--output`, and the base directory for `batch` |
-| `GEMINI_BATCH_PREFIX` | no | `image` | Default filename prefix for `batch` |
-| `GEMINI_BATCH_COUNT` | no | `10` | Default number of batch requests |
-| `GEMINI_BATCH_DELAY` | no | `3.0` | Delay between sequential batch requests |
-| `GEMINI_BATCH_PARALLEL` | no | `1` | Parallel worker count for `batch` |
+| Variable                | Required | Default                                            | Purpose                                                                                          |
+| ----------------------- | -------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `GEMINI_API_KEY`        | yes      | none                                               | API key for the Gemini-compatible endpoint                                                       |
+| `GEMINI_BASE_URL`       | no       | `https://generativelanguage.googleapis.com/v1beta` | Base URL root before `/models/...`                                                               |
+| `GEMINI_MODEL`          | no       | `nanobanana`                                       | Default model alias or exact model ID                                                            |
+| `GEMINI_TIMEOUT`        | no       | `300`                                              | HTTP timeout in seconds                                                                          |
+| `GEMINI_AUTH_MODE`      | no       | `auto`                                             | `auto`, `x-goog-api-key`, or `bearer`                                                            |
+| `GEMINI_ASPECT_RATIO`   | no       | unset                                              | Example: `1:1`, `16:9`, `4:5`                                                                    |
+| `GEMINI_IMAGE_SIZE`     | no       | unset                                              | `512`, `1K`, `2K`, or `4K` on supported models                                                   |
+| `GEMINI_USE_SEARCH`     | no       | `false`                                            | Add the `google_search` tool                                                                     |
+| `GEMINI_OUTPUT_DIR`     | no       | `./nanobanana-images`                              | Default directory when `generate` has no explicit `--output`, and the base directory for `batch` |
+| `GEMINI_BATCH_PREFIX`   | no       | `image`                                            | Default filename prefix for `batch`                                                              |
+| `GEMINI_BATCH_COUNT`    | no       | `10`                                               | Default number of batch requests                                                                 |
+| `GEMINI_BATCH_DELAY`    | no       | `3.0`                                              | Delay between sequential batch requests                                                          |
+| `GEMINI_BATCH_PARALLEL` | no       | `1`                                                | Parallel worker count for `batch`                                                                |
 
 Resolution order:
 
