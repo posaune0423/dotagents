@@ -32,6 +32,12 @@
       "skillPath": "skills/find-skills/SKILL.md",
       "computedHash": "86896167e9de6e2da1e25599da052940eeec4a4079138d2fa3b5dd08d46d31e6"
     },
+    "genmedia-image-artist": {
+      "source": "GoogleCloudPlatform/genmedia-creative-studio",
+      "sourceType": "github",
+      "skillPath": "experiments/mcp-genmedia/skills/genmedia-image-artist/SKILL.md",
+      "computedHash": "d7b0f8d3fe24eed5747001e597ae90ad3966b5093dd066f9886dccbedfd07788"
+    },
     "grill-me": {
       "source": "git@github.com:mattpocock/skills.git",
       "sourceType": "git",
