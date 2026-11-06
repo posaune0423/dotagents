@@ -52,6 +52,12 @@
       "skillPath": "skills/json-canvas/SKILL.md",
       "computedHash": "33acdf01f0bed19f3fc881a1e46f92a8ad9793d320c333f72bafd1a84ae12b47"
     },
+    "nanobanana": {
+      "source": "gargantuax/openskills",
+      "sourceType": "github",
+      "skillPath": "skills/nanobanana/SKILL.md",
+      "computedHash": "d5b643f94a7024ed15e91bcb0a8c50f2004bc6f1e1ad95fee42e556b4c26dd76"
+    },
     "notion-cli": {
       "source": "git@github.com:makenotion/skills.git",
       "sourceType": "git",
