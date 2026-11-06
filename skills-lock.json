@@ -32,6 +32,12 @@
       "skillPath": "skills/find-skills/SKILL.md",
       "computedHash": "86896167e9de6e2da1e25599da052940eeec4a4079138d2fa3b5dd08d46d31e6"
     },
+    "genmedia-image-artist": {
+      "source": "GoogleCloudPlatform/genmedia-creative-studio",
+      "sourceType": "github",
+      "skillPath": "experiments/mcp-genmedia/skills/genmedia-image-artist/SKILL.md",
+      "computedHash": "d7b0f8d3fe24eed5747001e597ae90ad3966b5093dd066f9886dccbedfd07788"
+    },
     "grill-me": {
       "source": "git@github.com:mattpocock/skills.git",
       "sourceType": "git",
@@ -51,12 +57,6 @@
       "sourceType": "git",
       "skillPath": "skills/json-canvas/SKILL.md",
       "computedHash": "33acdf01f0bed19f3fc881a1e46f92a8ad9793d320c333f72bafd1a84ae12b47"
-    },
-    "nanobanana": {
-      "source": "gargantuax/openskills",
-      "sourceType": "github",
-      "skillPath": "skills/nanobanana/SKILL.md",
-      "computedHash": "d5b643f94a7024ed15e91bcb0a8c50f2004bc6f1e1ad95fee42e556b4c26dd76"
     },
     "notion-cli": {
       "source": "git@github.com:makenotion/skills.git",
