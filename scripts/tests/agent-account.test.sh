@@ -74,7 +74,8 @@ assert_eq "$(resolve "${work_https}")" "${rise_out}" "https remote, owner case d
 # --- a subdirectory and a linked worktree outside the owner folder ---------------
 mkdir -p "${work_ssh}/apps/api"
 assert_eq "$(resolve "${work_ssh}/apps/api")" "${rise_out}" "subdirectory of a mapped repo"
-git -C "${work_ssh}" commit -q --allow-empty -m init
+# CI runners have no git identity; give this throwaway commit one.
+git -C "${work_ssh}" -c user.name=test -c user.email=test@example.invalid commit -q --allow-empty -m init
 git -C "${work_ssh}" worktree add -q "${TMP}/elsewhere/be-2" -b be-2
 assert_eq "$(resolve "${TMP}/elsewhere/be-2")" "${rise_out}" "worktree outside the owner folder"
 
