@@ -1,9 +1,30 @@
 #!/usr/bin/env bash
-# Links .agents/{skills,commands,rules} into .cursor, .claude, and .codex via symlinks,
-# and creates CLAUDE.md -> AGENTS.md. Pass the project root or run from it.
+# Scaffolds missing project files (AGENTS.md, docs/) from the skill's templates, links
+# .agents/{skills,commands,rules} into .cursor, .claude, and .codex, and creates
+# CLAUDE.md -> AGENTS.md. Existing files are never overwritten.
+# Usage: init-agent.sh [--links-only] [project-root]   (default root: current directory)
 set -euo pipefail
 
-ROOT="$(cd "${1:-.}" && pwd)"
+TEMPLATES="$(cd "$(dirname "${BASH_SOURCE[0]}")/../assets/templates" && pwd)"
+scaffold=1
+root="."
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	--links-only) scaffold=0 ;;
+	-h | --help)
+		echo "Usage: init-agent.sh [--links-only] [project-root]"
+		exit 0
+		;;
+	-*)
+		echo "init-agent: unknown option: $1" >&2
+		exit 1
+		;;
+	*) root="$1" ;;
+	esac
+	shift
+done
+
+ROOT="$(cd "$root" && pwd)"
 cd "$ROOT"
 
 err() {
@@ -59,6 +80,23 @@ link_claude_md() {
 	ln -s "$agents" "$claude"
 	echo "created: ${claude} -> ${agents}"
 }
+
+# Copy each template whose destination does not exist yet; keep everything else.
+scaffold_files() {
+	local template rel
+	while IFS= read -r -d '' template; do
+		rel="${template#"${TEMPLATES}/"}"
+		if [[ -e "$rel" || -L "$rel" ]]; then
+			echo "kept: ${rel}"
+			continue
+		fi
+		mkdir -p "$(dirname "$rel")"
+		cp "$template" "$rel"
+		echo "created: ${rel}"
+	done < <(find "$TEMPLATES" -type f -print0 | sort -z)
+}
+
+[[ "$scaffold" -eq 0 ]] || scaffold_files
 
 for sub in skills commands rules; do
 	mkdir -p ".agents/${sub}"
