@@ -140,8 +140,39 @@ assert_allowed 'printf "%s" "git switch -c codex/bar"'
 assert_allowed "$(printf 'cat > doc.md <<%s\ngit checkout -b claude/foo\nEOF\n' "'EOF'")"
 assert_allowed "$(printf 'cat > s.sh <<-%s\n\tgit switch -c codex/bar\n\tEOF\n' "'EOF'")"
 
+branch_pass="${pass}"
+
+# --- PR attribution footer ---------------------------------------------------
+HOOK="${ROOT}/claude/hooks/block-pr-attribution.sh"
+[[ -x "${HOOK}" ]] || {
+	echo "FAIL: hook is missing or not executable: ${HOOK}" >&2
+	exit 1
+}
+TMP="$(mktemp -d)"
+trap 'rm -rf "${TMP}"' EXIT
+footer='🤖 Generated with [Claude Code](https://claude.com/claude-code)'
+printf '## Why\n\nFix.\n\n%s\n' "${footer}" >"${TMP}/attributed.md"
+printf '## Why\n\nFix.\n' >"${TMP}/clean.md"
+
+assert_denied "gh pr create --title t --body \"Fix.
+
+${footer}\""
+assert_denied "cd repo && gh pr edit 1 --body \"${footer}\""
+assert_denied "GH_REPO=o/r gh pr create --body \"${footer}\""
+assert_denied "gh pr create --title t --body-file ${TMP}/attributed.md"
+assert_denied "gh api repos/o/r/pulls/1 -X PATCH -F body=@${TMP}/attributed.md -f title=t --input ${TMP}/attributed.md"
+# create-pr helpers run gh themselves, so the command never contains `gh pr create`.
+assert_denied "bash skills/create-pr/scripts/gh-pr-create-with-meta.sh --title t --body-file ${TMP}/attributed.md"
+assert_denied "bash skills/create-pr/scripts/pr-body-update.sh --pr 1 --file ${TMP}/attributed.md"
+
+assert_allowed "gh pr create --title t --body-file ${TMP}/clean.md"
+assert_allowed "bash skills/create-pr/scripts/pr-body-update.sh --pr 1 --file ${TMP}/clean.md"
+# Text that only mentions the command and the footer is not a PR body.
+assert_allowed "git commit -m \"Block gh pr create when the body has ${footer}\""
+assert_allowed "rg 'Generated with Claude Code' claude/hooks"
+
 if [[ "${fail}" -ne 0 ]]; then
 	echo "FAIL: ${fail} case(s) failed, ${pass} passed" >&2
 	exit 1
 fi
-echo "PASS: ${pass} branch-name hook case(s)"
+echo "PASS: ${branch_pass} branch-name hook case(s), $((pass - branch_pass)) PR attribution hook case(s)"
