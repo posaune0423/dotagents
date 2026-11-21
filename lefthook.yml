@@ -4,6 +4,9 @@
 #   https://lefthook.dev/configuration/
 #
 
+# `**/*.ts` must also match root files such as eslint.config.ts.
+glob_matcher: doublestar
+
 # Pre-commit: Prettier (JS/MD/CSS/JSON), ESLint, and shell format/lint on staged files only.
 # Never format or lint the whole tree here: it rewrites untracked skills and live worktrees.
 pre-commit:
