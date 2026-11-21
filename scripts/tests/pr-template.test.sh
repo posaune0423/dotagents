@@ -37,12 +37,18 @@ new_repo() {
 	exit 1
 }
 
-# --- no template ------------------------------------------------------------
+# --- no repository template: use the skill default ---------------------------
 repo="$(new_repo none)"
-if out="$(cd "${repo}" && bash "${SCRIPT}" 2>/dev/null)"; then
-	fail_msg "expected non-zero exit when no template exists"
-elif [[ -n "${out}" ]]; then
-	fail_msg "expected empty stdout when no template exists (got: ${out})"
+if ! out="$(cd "${repo}" && bash "${SCRIPT}")"; then
+	fail_msg "expected skill default when no repository template exists"
+elif [[ "${out}" != *"## Why"* || "${out}" != *"## Verification"* ]]; then
+	fail_msg "expected default PR sections (got: ${out})"
+else
+	ok
+fi
+path_out="$(cd "${repo}" && bash "${SCRIPT}" --path)" || path_out="<exit $?>"
+if [[ "${path_out}" != "${ROOT}/skills/create-pr/assets/default-pr-template.md" ]]; then
+	fail_msg "expected absolute path to the skill default (got: ${path_out})"
 else
 	ok
 fi

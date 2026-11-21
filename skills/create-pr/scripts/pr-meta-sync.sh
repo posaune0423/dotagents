@@ -58,19 +58,15 @@ fi
 repo_args=()
 [[ -n "${repo:-}" ]] && repo_args=(--repo "$repo")
 
-if [[ -z "${CREATE_PR_ASSIGNEES+x}" ]]; then
-	assignees_raw='@me'
-else
-	assignees_raw="$CREATE_PR_ASSIGNEES"
-fi
+assignees_raw="${CREATE_PR_ASSIGNEES:-}"
 
-edit_args=()
+edit_args=(--add-assignee '@me')
 if [[ -n "$assignees_raw" ]]; then
 	IFS=',' read -ra parts <<<"$assignees_raw"
 	for p in "${parts[@]}"; do
 		p="${p#"${p%%[![:space:]]*}"}"
 		p="${p%"${p##*[![:space:]]}"}"
-		[[ -z "$p" ]] && continue
+		[[ -z "$p" || "$p" == '@me' ]] && continue
 		edit_args+=(--add-assignee "$p")
 	done
 fi
@@ -93,8 +89,6 @@ if [[ "${CREATE_PR_NO_LABEL:-}" != "1" ]]; then
 	fi
 fi
 
-if [[ ${#edit_args[@]} -eq 0 ]]; then
-	exit 0
-fi
-
-gh pr edit "$pr" "${repo_args[@]}" "${edit_args[@]}"
+gh pr edit "$pr" ${repo_args[@]+"${repo_args[@]}"} "${edit_args[@]}"
+pr_url="$(gh pr view "$pr" ${repo_args[@]+"${repo_args[@]}"} --json url --jq .url)"
+bash "${SCRIPT_DIR}/pr-verify.sh" "$pr_url"
