@@ -60,6 +60,10 @@ test-agent-account:
 test-account-router:
     node --test orca/plugins/account-router/src/routing.test.js
 
+# Integration tests for project-local agent links without copying the shared skill
+test-init-agent:
+    bash scripts/tests/init-agent.test.sh
+
 # Remove ~/.codex/commands and symlink ~/.codex/prompts -> ~/.agents/commands
 link-codex-prompts:
     ./scripts/relink-codex-prompts.sh
@@ -92,7 +96,7 @@ lint:
     bun run lint
 
 check:
-    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-pr-template && just test-pr-poll && just test-pr-lang && just test-pr-create && just test-agent-account && just test-account-router && just test-agent-routing && just test-evidence-work && just test-cloud-setup
+    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-pr-template && just test-pr-poll && just test-pr-lang && just test-pr-create && just test-agent-account && just test-account-router && just test-init-agent && just test-agent-routing && just test-evidence-work && just test-cloud-setup
 
 # Validate evidence-work routing and the A/B evaluation harness without model calls
 test-evidence-work:

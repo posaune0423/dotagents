@@ -1,57 +1,60 @@
 ---
 name: init-agent
 description: >
-  Bootstraps shared agent layout at the repository root: creates symlinks so
-  `.agents/skills`, `.agents/commands`, and `.agents/rules` appear under
-  `.cursor`, `.claude`, and `.codex`, and adds `CLAUDE.md` as a symlink to
-  `AGENTS.md`. Use when initializing a repo, after cloning, or when the user
-  says init-agent, agent symlink setup, or unify Cursor/Codex/Claude agent files.
+  Initialize a repository for agents: scaffold AGENTS.md and docs/
+  (PRD, STRUCTURE, TECHNOLOGY, specs/ph01) from templates, link
+  .agents/{skills,commands,rules} into .cursor, .claude, and .codex, and link
+  CLAUDE.md to AGENTS.md. Use for init-agent requests or agent setup in a checkout.
 ---
 
 # init-agent
 
-## When to use
+## 1. Run the script
 
-- New checkout or new repo: wire one canonical tree (`.agents/...`) into tool-specific folders.
-- User asks to run **init-agent** or to symlink `.agents` into `.cursor` / `.claude` / `.codex`.
-- Duplicated rules or skills drift: prefer a single source under `.agents` and symlinks into each tool.
-
-## Preconditions
-
-- Current working directory is the **repository root** (the directory that contains `.agents` and `AGENTS.md`).
-- These directories exist (create empty dirs if needed before running):
-  - `.agents/skills`
-  - `.agents/commands`
-  - `.agents/rules`
-- **Unix-like OS** (macOS, Linux). Symlinks on Windows may require Developer Mode or elevated permissions; the script does not support that path.
-
-## What it does
-
-From repo root, run:
+Run it from this skill's installed location, passing the project root:
 
 ```bash
-bash .agents/skills/init-agent/scripts/init-agent.sh
+bash /path/to/init-agent/scripts/init-agent.sh /path/to/project
 ```
 
-The script:
+Do not copy or install this skill into the target repository.
+The script copies each file under [assets/templates/](assets/templates/) that does
+not exist yet (`AGENTS.md`, `docs/PRD.md`, `docs/STRUCTURE.md`,
+`docs/TECHNOLOGY.md`, `docs/specs/ph01.md`), creates `.agents/{skills,commands,rules}`,
+links each under `.cursor`, `.claude`, and `.codex`, and links `CLAUDE.md` to
+`AGENTS.md`. It prints `created:` or `kept:` per file and never overwrites one.
+Pass `--links-only` when the user wants only the links; the project must then
+already have `AGENTS.md`.
 
-1. Ensures `.agents/skills`, `.agents/commands`, and `.agents/rules` exist.
-2. For each of `.cursor`, `.claude`, and `.codex`:
-   - Creates `skills`, `commands`, and `rules` as **symlinks** to `../.agents/skills`, `../.agents/commands`, and `../.agents/rules` respectively (paths relative to each symlink).
-3. Creates `CLAUDE.md` → `AGENTS.md` at the repo root if `CLAUDE.md` is absent.
+Existing correct links are reused. Conflicting real files/directories and links
+to other targets are preserved and stop the script; inspect and reconcile them
+before rerunning. Keep empty source directories in Git with `.gitkeep` when needed.
 
-The script **refuses** to replace an existing real file or directory at a target path. If a symlink already points to the expected target, it is left as-is.
+## 2. Fill the created files
 
-## After running
+Only files the script reported as `created:` are yours to fill. Leave `kept:` files
+alone unless the user asks to revise them.
 
-- **Cursor**: skills under `.cursor/skills`, rules under `.cursor/rules` (may require reload).
-- **Claude Code**: skills/commands/rules under `.claude/*`.
-- **Codex**: mirrored under `.codex/*` for project-local tooling; Codex also discovers `.agents/skills` per [Agent Skills](https://developers.openai.com/codex/skills) — symlinks keep one source tree.
+Inspect the README, task runner (`justfile`, `package.json`, `Makefile`), CI config,
+lockfiles, and directory layout, then fill each created file from what is actually
+there. Ask the user only for what the repository cannot tell you, such as product
+goals for `docs/PRD.md` or the scope of the first phase in `docs/specs/ph01.md`.
 
-If something does not pick up, restart the IDE or Codex/Claude session.
+- `AGENTS.md` follows the layout of Orca's AGENTS.md: Checks, Repo Rules, Docs,
+  Code Style, First Class Citizens, Footguns. Replace the gate and iteration
+  commands with the repository's real ones. Delete any section or bullet that
+  does not apply rather than leaving a placeholder. Keep long detail in
+  `docs/` and link to it.
+- In `docs/`, write only what you verified. Mark unknowns under 未決事項 instead
+  of guessing.
+- Remove every `init-agent:` comment. `rg -n 'init-agent:' AGENTS.md docs` must
+  print nothing when you finish.
 
-## Troubleshooting
+Do not copy global or session instructions, subagent catalogs, or skill tutorials
+into `AGENTS.md`. Encode mechanically enforceable rules in existing tooling when
+that is in scope.
 
-- **"exists and is not a symlink"**: Remove or rename the conflicting path, then re-run.
-- **Wrong symlink target**: Delete the symlink and re-run; the script will recreate it.
-- **Missing `.agents/...`**: Create the missing folder (can be empty), then re-run.
+## 3. Verify
+
+All links resolve, a second run prints no `created:` lines, and no `init-agent:`
+comments remain.
