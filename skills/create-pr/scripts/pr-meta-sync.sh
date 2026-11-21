@@ -89,6 +89,6 @@ if [[ "${CREATE_PR_NO_LABEL:-}" != "1" ]]; then
 	fi
 fi
 
-gh pr edit "$pr" "${repo_args[@]}" "${edit_args[@]}"
-pr_url="$(gh pr view "$pr" "${repo_args[@]}" --json url --jq .url)"
+gh pr edit "$pr" ${repo_args[@]+"${repo_args[@]}"} "${edit_args[@]}"
+pr_url="$(gh pr view "$pr" ${repo_args[@]+"${repo_args[@]}"} --json url --jq .url)"
 bash "${SCRIPT_DIR}/pr-verify.sh" "$pr_url"

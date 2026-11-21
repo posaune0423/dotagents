@@ -13,7 +13,7 @@ if grep -qE 'Generated with \[?Claude Code\]?|claude\.com/claude-code' "$body_fi
 	echo 'PR body must not contain the "Generated with Claude Code" footer; remove that line.' >&2
 	exit 1
 fi
-template="$(bash "${SCRIPT_DIR}/pr-template.sh" --path "${template_args[@]}")"
+template="$(bash "${SCRIPT_DIR}/pr-template.sh" --path ${template_args[@]+"${template_args[@]}"})"
 is_default=0
 [[ "$template" != "${SCRIPT_DIR%/scripts}/assets/default-pr-template.md" ]] || is_default=1
 

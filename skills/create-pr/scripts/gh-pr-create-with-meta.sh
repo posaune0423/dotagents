@@ -91,6 +91,6 @@ if [[ "${CREATE_PR_NO_LABEL:-}" != "1" ]]; then
 	fi
 fi
 
-pr_url="$(gh pr create "${create_args[@]}" "${caller_args[@]}" --body-file "$body_file")"
+pr_url="$(gh pr create "${create_args[@]}" ${caller_args[@]+"${caller_args[@]}"} --body-file "$body_file")"
 printf '%s\n' "$pr_url"
 bash "${SCRIPT_DIR}/pr-verify.sh" "$pr_url" "$body_file"
