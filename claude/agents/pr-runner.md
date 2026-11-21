@@ -7,7 +7,7 @@ description: >-
   conversation. Do not use it to design or implement the change itself.
 tools: Bash, BashOutput, KillShell, Read, Edit, Glob, Grep, Skill
 model: sonnet
-effort: low
+effort: medium
 maxTurns: 25
 color: yellow
 ---

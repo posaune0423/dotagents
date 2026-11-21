@@ -89,7 +89,7 @@ function parseArgs(argv: string[]): Args {
     dryRun: false,
     caseIds: [],
     forcedCases: [],
-    model: "gpt-5.6-sol",
+    model: "gpt-6-astra",
     reasoning: "high",
     outDir: path.join(repoRoot, "data", "evaluations", "evidence-work"),
     codexBin: "codex",

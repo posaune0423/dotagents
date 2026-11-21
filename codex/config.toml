@@ -3,11 +3,9 @@
 
 model = "gpt-6-astra"
 model_reasoning_effort = "medium"
-model_context_window = 1050000
-model_auto_compact_token_limit = 735000
+model_context_window = 872000
+model_auto_compact_token_limit = 610000
 tool_output_token_limit = 12000
-personality = "pragmatic"
-web_search = "cached"
 suppress_unstable_features_warning = true
 plan_mode_reasoning_effort = "high"
 oss_provider = "lmstudio"
@@ -28,8 +26,6 @@ apps = false
 apps = false
 goals = true
 browser_use = true
-child_agents_md = true
-hooks = true
 multi_agent = true
 multi_agent_v2.enabled = true
 multi_agent_v2.min_wait_timeout_ms = 120000
@@ -38,67 +34,41 @@ memories = true
 chronicle = true
 image_generation = true
 in_app_browser = true
-js_repl = true
-js_repl_tools_only = false
 prevent_idle_sleep = true
-realtime_conversation = true
-remote_control = true
 request_permissions_tool = true
 runtime_metrics = false
 shell_snapshot = true
 shell_tool = true
-shell_zsh_fork = false
-skill_env_var_dependency_prompt = true
 skill_mcp_dependency_install = true
 tool_call_mcp_elicitation = true
-tool_search = true
-tool_search_always_defer_mcp_tools = true
 tool_suggest = true
-unavailable_dummy_tools = true
-undo = true
 unified_exec = true
 workspace_dependencies = true
-workspace_owner_usage_nudge = true
-
-[tui.model_availability_nux]
-"gpt-5.6-terra" = 4
 
 [notice]
 fast_default_opt_out = true
 
 # ===================== Agents =====================
 
-[agents.default]
-description = "Default built-in subagent role."
-config_file = "agents/default.toml"
-
 [agents.explorer]
-description = "Built-in exploration role."
+description = "Read-only codebase scan that returns file locations with one-line explanations."
 config_file = "agents/explorer.toml"
 
-[agents.worker]
-description = "Built-in implementation role."
-config_file = "agents/worker.toml"
-
-[agents.monitor]
-description = "Built-in monitoring role."
-config_file = "agents/monitor.toml"
-
 [agents.light-worker]
-description = "Light worker for format, lint, typecheck, test, and similar repetitive/simple tasks. Escalate complex or architectural work to worker."
+description = "Light worker for format, lint, typecheck, test, and similar repetitive/simple tasks. Escalate complex or architectural work to impl-worker."
 config_file = "agents/light-worker.toml"
-
-[agents.browser-debugger]
-description = "Browser debugger role for browser-based reproduction, UI evidence gathering, or client-side debugging through a browser MCP server."
-config_file = "agents/browser-debugger.toml"
 
 [agents.docs-researcher]
 description = "Docs researcher role for documentation-backed verification of APIs, version-specific behavior, or framework options."
 config_file = "agents/docs-researcher.toml"
 
-[agents.qwen_worker]
-description = "Local Qwen worker via custom LM Studio provider."
-config_file = "agents/qwen_worker.toml"
+[agents.impl-worker]
+description = "Implementation worker for one already-specified change: files, intended behavior, and acceptance check are known. Use for parallel independent edits or one large mechanical edit."
+config_file = "agents/impl-worker.toml"
+
+[agents.pr-runner]
+description = "PR mechanics: open or update a PR, watch CI until green, and apply minimal fixes for review comments. Not for designing or implementing the change."
+config_file = "agents/pr-runner.toml"
 
 [agents.reviewer]
 description = "Reviewer role for PR-style review focused on correctness, security, behavior regressions, and missing tests."
@@ -119,22 +89,6 @@ config_file = "agents/evidence-analyst.toml"
 [agents.evidence-auditor]
 description = "Read-only auditor for evidence support, coverage, source quality, freshness, and scope."
 config_file = "agents/evidence-auditor.toml"
-
-[agents.frontend_developer]
-description = "Frontend developer role for scoped frontend implementation or UI bug fixes with production-level behavior and quality."
-config_file = "agents/frontend_developer.toml"
-
-[agents.backend_developer]
-description = "Backend developer role for scoped backend implementation or backend bug fixes after the owning path is known."
-config_file = "agents/backend_developer.toml"
-
-[agents.fullstack_developer]
-description = "Fullstack developer role for one bounded feature or bug spans frontend and backend and a single worker should own the entire path."
-config_file = "agents/fullstack_developer.toml"
-
-[agents.web-operator]
-description = "Web operator role for retrieving a page that only exists behind someone's login: Notion, Slack, X, or an internal SaaS screen reached through an already-authenticated browser."
-config_file = "agents/web-operator.toml"
 
 # 以下は環境ごとに ~/.codex/config.toml で設定することを想定:
 # - [projects."..."] trust_level

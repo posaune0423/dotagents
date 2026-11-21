@@ -7,6 +7,7 @@ tools: Read, Glob, Grep, WebFetch, WebSearch, Skill
 permissionMode: plan
 model: sonnet
 effort: medium
+omitClaudeMd: true
 color: blue
 ---
 

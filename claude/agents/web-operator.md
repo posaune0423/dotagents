@@ -9,6 +9,7 @@ description: >-
 disallowedTools: Agent, Task, Workflow
 model: sonnet
 effort: medium
+omitClaudeMd: true
 maxTurns: 20
 color: cyan
 ---

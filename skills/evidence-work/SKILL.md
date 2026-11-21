@@ -42,6 +42,8 @@ Use a read-only subagent only when it owns an evidence lane that is independent 
 - `evidence-analyst` for independent comparisons, causal decomposition, sensitivity, or alternative hypotheses.
 - `evidence-auditor` for a high-impact claim's support, coverage, source quality, or scope.
 
+When the host does not define one of these agents, keep that lane in the main thread.
+
 Do not delegate routine specialist explanations merely to appear thorough. Do not hand personal or business recommendations to a subagent: it may supply evidence and analysis, but the main agent owns the user's context, trade-offs, and final recommendation.
 
 Give every delegated lane a bounded brief: objective, exact lane, permitted sources/tools, exclusions, required evidence packet, and stop condition. Integrate the returned material under the evidence contract rather than treating it as a conclusion.
