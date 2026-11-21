@@ -56,5 +56,5 @@ Keep it under 30 lines, and include only the code the caller needs.
 ## When NOT to use
 
 - The question is about this repository's own code -> use the built-in `Explore` agent
-- The behavior needs observing in a browser -> use `browser-debugger`
+- The behavior needs observing in a browser -> report back; the parent reproduces it with Playwright
 - The answer is known and code needs writing -> use `impl-worker`

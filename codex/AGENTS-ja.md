@@ -2,16 +2,22 @@
 
 ## ルール
 
-- skillとsubagentを積極的に使い、main threadのcontextをcleanに保つ。
-  - **Skill**: 専門知識が必要なタスクでは、作業開始前に該当skill直下の`SKILL.md`（例: `skills/<name>/SKILL.md`）を読み、手順と制約をそのまま適用する。使用を宣言するだけで終わらせない。
-  - **Subagent**: 独立したcontextや並列実行が有効で、利用中のhostに適切なsubagentがある場合に委任する。
-    - `architect`: 設計、trade-off、責務境界、実装計画を整理する。
-    - `browser-debugger`: browserで問題を再現し、console、network、DOM、screenshotから証拠を集める。
-    - `docs-researcher`: 公式documentationからAPI、既定値、version差分を確認する。
-    - `light-worker`: formatting、lint、type check、testなどの機械的な検証を担当する。
-      - `light-worker`をspawnするときは`fork_turns="none"`を既定とし、必要な直近contextだけが不可欠な場合に限り必要最小限の正整数を使う。`fork_turns="all"`は使わない。
-      - 委任promptを自己完結させ、目的、作業directory、対象file・command、変更可否、完了条件を含める。
-    - `web-operator`: ログイン済みbrowser経由でNotion、Slack、X、社内SaaSのページを取得し、要点のみ返す。
+- **Skill**: 専門知識が必要なタスクでは、作業開始前に該当skill直下の`SKILL.md`（例: `skills/<name>/SKILL.md`）を読み、手順と制約をそのまま適用する。使用を宣言するだけで終わらせない。
+- **Subagent**: 各spawnは空のcontextから始まり、時間とtokenがかかる。次のどれかに当たるときだけ使う。
+  - 互いに独立した作業を並列に進める。
+  - test・lint・CIのlogや大量のdocumentation・web pageなど、長い出力をmain threadに入れない。
+  - 実装を見ていない立場でreviewする。
+  - 往復の多い作業、数回のtool呼び出しで終わる変更、待ち時間が問題になる作業はmain threadで行う。
+  - 委任promptは自己完結させ、目的、作業directory、対象file・command、変更可否、完了条件、返す内容を含める。
+  - 利用中のhostに定義があるagentだけを使う。
+    - `light-worker`: format、lint、type check、test、buildを実行して結果だけ返す。直すのは機械的な失敗だけ。
+      - spawnするときは`fork_turns="none"`を既定とし、直近のcontextが不可欠な場合に限り必要最小限の正整数を使う。`fork_turns="all"`は使わない。
+    - `docs-researcher`: 外部library・CLIの公式documentationで、API、既定値、version差分を確認する。
+    - `researcher`: 一次資料、repository、dataなど、独立した調査laneを読み取り専用で担当する。
+    - `impl-worker`: 対象file、挙動、完了条件が決まっている実装を担当する。
+    - `pr-runner`: PRの作成・更新、CIの監視、review commentへの対応を担当する。
+    - `web-operator`（Claude Code）: ログイン済みbrowserでNotion、Slack、X、社内SaaSのページを取得し、要点だけ返す。
+    - `architect`、`reviewer`、`evidence-analyst`、`evidence-auditor`（Codex）: 設計判断、独立したcode review、根拠の分析と監査を担当する。
 
 ## 開発スタイル
 

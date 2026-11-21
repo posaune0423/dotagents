@@ -117,18 +117,6 @@ jq -e '
 	echo "FAIL: Codex UserPromptSubmit hook must register the proactive-context command" >&2
 	review_rc=1
 }
-rg -Fq 'links ~/.claude/agents -> <repo>/claude/agents;' "${ROOT}/claude/agents/architect.md" || {
-	echo "FAIL: Claude architect example must document the home-to-repository link direction" >&2
-	review_rc=1
-}
-rg -Fq 'Writes and file edits are unsupported, even when explicitly requested.' "${ROOT}/codex/agents/qwen_worker.toml" || {
-	echo "FAIL: Qwen worker must document its read-only sandbox boundary" >&2
-	review_rc=1
-}
-rg -Fq 'return `BLOCKED:`' "${ROOT}/codex/agents/qwen_worker.toml" || {
-	echo "FAIL: Qwen worker must block tasks that require modifications" >&2
-	review_rc=1
-}
 # Codex discovers a subagent only through its [agents.*] entry, so a TOML file
 # added without one is silently unavailable.
 for agent_toml in "${ROOT}"/codex/agents/*.toml; do

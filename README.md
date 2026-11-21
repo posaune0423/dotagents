@@ -63,40 +63,35 @@ Git管理している外部由来のスキルは、[skills-lock.json](skills-loc
 外部スキルを追加・更新したらlockも更新します。上流の更新を取り込む際は、既存のローカル修正を確認してから差分を反映します。
 `ref` がない既存項目は内容の追跡用であり、取得元のコミットまで固定した記録ではありません。
 
-## Subagent（Claude Code）
+## Subagent
 
-`claude/agents/*.md` に定義し、`just link-global` で `~/.claude/agents` に symlink されます。
+Claude Code は `claude/agents/*.md`、Codex は `codex/agents/*.toml`（`codex/config.toml` の `[agents.*]` に登録）に定義し、`just link-global` でそれぞれ `~/.claude/agents` / `~/.codex/agents` に symlink されます。
+共通の役割は同じ名前にそろえ、使われていない agent や役割が重なる agent は置きません（2026-11 時点で直近 30 日の spawn 実績を見て整理）。
 
-| agent              | 用途                                                                              | model              | effort |
-| ------------------ | --------------------------------------------------------------------------------- | ------------------ | ------ |
-| `architect`        | 設計・トレードオフ・契約・実装順序の決定（**`@agent-architect` で明示呼び出し**） | `claude-fable-5-1` | xhigh  |
-| `impl-worker`      | 仕様が確定した実装を1件担当。並列実装を main thread から切り離す                  | opus               | medium |
-| `browser-debugger` | 実ブラウザで再現手順と証拠（console / network / DOM / screenshot）                | opus               | medium |
-| `light-worker`     | format / lint / typecheck / test / build の実行ループ                             | sonnet             | low    |
-| `docs-researcher`  | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認              | sonnet             | low    |
-| `researcher`       | 一次資料・repository・dataなど、独立したEvidence laneをread-onlyで調査            | sonnet             | medium |
-| `evidence-analyst` | 原因分解・比較・感度・代替仮説をread-onlyで分析                                   | opus               | high   |
-| `evidence-auditor` | 重要claimのsupport・coverage・source品質・scopeをread-onlyで監査                  | opus               | high   |
-| `pr-runner`        | PR 作成・更新、CI 監視、レビューコメント対応                                      | sonnet             | low    |
-| `web-operator`     | ログイン済みブラウザ経由で Notion / Slack / X / 社内 SaaS のページを取得          | sonnet             | medium |
+| agent              | 用途                                                                    | Claude Code       | Codex                 |
+| ------------------ | ----------------------------------------------------------------------- | ----------------- | --------------------- |
+| `light-worker`     | format / lint / typecheck / test / build を実行し、結果だけ返す         | `haiku` / low     | `gpt-6-luna` / medium |
+| `docs-researcher`  | 外部ライブラリの公式ドキュメントで API・既定値・バージョン差分を確認    | `sonnet` / low    | `gpt-6-luna` / high   |
+| `researcher`       | 一次資料・repository・data など、独立した調査 lane を read-only で担当  | `sonnet` / medium | `gpt-6-luna` / high   |
+| `impl-worker`      | 対象 file・挙動・完了条件が決まった実装を1件担当                        | `opus` / medium   | 親を継承 / medium     |
+| `pr-runner`        | PR 作成・更新、CI 監視、レビューコメント対応                            | `sonnet` / low    | 親を継承 / low        |
+| `web-operator`     | ログイン済みブラウザで Notion / Slack / X / 社内 SaaS のページを取得    | `sonnet` / medium | —                     |
+| `architect`        | 設計・トレードオフ・実装順序の判断                                      | —                 | 親を継承 / high       |
+| `reviewer`         | 正しさ・セキュリティ・回帰・テスト漏れに絞った PR レビュー              | —                 | 親を継承 / high       |
+| `evidence-analyst` | 原因分解・比較・感度・代替仮説を read-only で分析（`evidence-work` 用） | —                 | 親を継承 / high       |
+| `evidence-auditor` | 重要 claim の根拠・網羅性・情報源の質を read-only で監査（同上）        | —                 | 親を継承 / high       |
+| `explorer`         | Codex 組み込みの探索 role の model だけを上書き                         | —                 | `gpt-6-luna` / medium |
 
-委譲の仕組み（実測と一次情報で確認したもの）:
+整理の方針（契約は `scripts/tests/codex-agent-routing.test.sh` で検査）:
 
-- **自動委譲は best effort。** Claude は「リクエスト中のタスク記述」「各 agent の `description`」「現在のコンテキスト」の 3 つで判断します。加えてセッションによっては「ユーザーに言われない限り agent を spawn するな」というシステムプロンプト側の指示が載るため、`description` をどう書いても発火が保証されません。**確実に走らせる手段は `@agent-<name>` だけです。**
-- **`description` は「主題」ではなく「吸収する使い捨て出力の量」で書く。** モデルはコンテキスト隔離の価値で判断しており、タスクの分野では判断していません。実測では出力の長い`light-worker`が発火しました。`architect`は明示呼び出しとし、`docs-researcher`は外部documentationを大量に読む調査を隔離します。
-- **小文字の `use proactively` は実際に配線されています。** Agent ツールの説明に「description が proactively に使うべきと述べていれば、ユーザーに言われる前に使うよう最善を尽くせ」という指示が入っています（バイナリで確認）。一方 **`MUST BE USED` はバイナリにも公式ドキュメントにも存在しない folklore**、**全大文字 `PROACTIVELY` も無意味**（バイナリ内の該当箇所は無関係な認証ライブラリの定数）。
-- **設計判断はmain thread、独立した設計reviewは`architect`。** 頻繁な往復や複数phaseでcontextを共有する設計判断はmain threadで扱い、独立した評価が必要なときだけ`architect`を明示呼び出しします。外部documentationの大量取得は`docs-researcher`へ隔離します。
-- **subagent には自動起動を強制/禁止する frontmatter フィールドがありません。** skill にある `when_to_use` / `disable-model-invocation` / `paths` に相当するものは無く、禁止側は permission で `Agent(<name>)` を deny するしかありません。
-
-設計の原則:
-
-- **model は「必要な知能」、effort は「速度ダイヤル」。** モデル階層を下げて速くするのではなく `effort` を役割ごとに下げる。Claude Code は全モデルが同じ使用量枠を共有するため、Codex の `gpt-5.3-codex-spark` のような「別枠だから安いモデルを使う」動機が存在しない。よって Haiku は使わない。
-- **`effort` を省略するとセッション側の設定を継承する。** つまり省略は「速度を指定しない」ではなく「呼び出し元と同じ思考量で走る」こと。このリポジトリの想定は Opus + high なので、機械的な作業ほど明示的に下げる価値が大きい（実際の既定値はモデルと設定に依存するため、ここでは特定の値を前提にしない）。
-- **組み込みとプラグインと重複させない。** 組み込みの `Explore` / `Plan` / `general-purpose` と、有効化済み plugin の `code-architect` / `code-explorer` / `code-reviewer` / `codex-rescue` が担う役割は作らない。とくに探索は組み込み `Explore` が速い（カスタム subagent は呼び出しごとに CLAUDE.md 階層と git status を再読み込みするが、`Explore` はこれをスキップする）。
-- **数を増やさない。** 各 agent の `name` と `description` は毎セッション main thread の system prompt に載る。増やすと誤ルーティングが増え、失敗1回ごとに委譲の往復が丸ごと無駄になる。
-- **`skills:` は「ほぼ毎回使うもの」だけ。** 挙げたスキルは全文が起動時に system prompt へ注入される。使うかどうかが呼び出しごとに変わるものは挙げず、`Skill` ツールでオンデマンドに取らせる。
-- **`tools` はコンテキスト削減ではなく安全性のため。** Claude Code には Codex の `sandbox_mode` に相当する設定が無いので、書き込み禁止を表現する手段は `tools` allowlist だけ。
-- **共有 instruction は短く保つ。** 非 fork の subagent は**呼び出しごとに** CLAUDE.md 階層全体を読み直します（`Explore` / `Plan` だけが省略し、変更手段はありません）。セッション単位より強い動機でここを削る価値があります。公式の目標値は 1 ファイル 200 行未満で、`@path` import は整理には役立つがコンテキストは減りません（launch 時に読まれる）。
+- **spawn には毎回コストがかかる。** 非 fork の subagent は空の context から始まり、CLAUDE.md 階層を読み直します。並列化、長い出力の隔離、実装を見ていない立場での review に限って使い、往復の多い作業や短い変更は main thread で行います。
+- **Claude Code は自分からはほとんど spawn しない。** 最近の版では Agent ツールの説明に「ユーザーに頼まれない限り spawn しない」という指示が入っており、自動委譲はあてになりません。確実に走らせるには `@agent-<name>` で呼ぶか、skill の手順から呼びます。Codex も、直接頼まれたときか `AGENTS.md` / skill が委譲を指示したときに spawn します。
+- **model は最新を追う側に寄せる。** Claude Code は `opus` / `sonnet` / `haiku` / `fable` の alias を使います（alias は最新版を指し続ける）。Codex は軽い scan 系だけ `gpt-6-luna` に固定し、それ以外は `model` を書かずに親（`config.toml` の `model`）を継承させます。model の更新は `config.toml` の1か所で済みます。
+- **軽い作業には軽い model。** 公式ドキュメントは単純な作業に Haiku を勧めているので、`light-worker` は `haiku` で動かします。
+- **`effort` は必ず書く。** main と別の model で動く subagent はセッションの effort を継承しないため、役割ごとに明示します。
+- **組み込みとプラグインと重複させない。** Claude Code の `Explore` / `Plan` / `general-purpose` と、有効化済み plugin の `code-architect` / `code-explorer` / `code-reviewer` / `codex-rescue` が担う役割は作りません。探索は組み込み `Explore` が速い（CLAUDE.md の読み直しを省く）。
+- **`description` には「吸収する出力の量」を書く。** model は context を隔離する価値で委譲を判断します。小文字の `use proactively` は公式に案内されている書き方ですが、発火は保証されません。
+- **`tools` は安全のために絞る。** Claude Code には Codex の `sandbox_mode` に当たる設定が無いので、書き込みを禁じる手段は `tools` allowlist だけです。`skills:` には毎回使うものだけを挙げます（全文が起動時に注入される）。
 
 プロンプトは共通スケルトン（役割1文 → `Working mode` → `Constraints` → `Stop conditions` → `Return` → `When NOT to use`）に揃えています。`claude/agents/` 直下には YAML frontmatter 付きの agent 定義 `.md` 以外を置かないこと（frontmatter が無いファイルは読み込みで警告になります）。
 

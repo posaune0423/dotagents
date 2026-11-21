@@ -27,12 +27,13 @@ for agent in researcher evidence-analyst evidence-auditor; do
 	rg -Fq "[agents.${agent}]" "${CODEX_CONFIG}" || fail "missing Codex registration for ${agent}"
 	rg -Fq "config_file = \"agents/${agent}.toml\"" "${CODEX_CONFIG}" ||
 		fail "wrong Codex config path for ${agent}"
-	rg -Fq 'permissionMode: plan' "${ROOT}/claude/agents/${agent}.md" ||
-		fail "Claude ${agent} must enforce plan permission mode"
-	if rg -q '^tools:.*\bBash\b' "${ROOT}/claude/agents/${agent}.md"; then
-		fail "Claude ${agent} must not expose unrestricted Bash"
-	fi
 done
+# Claude keeps only the researcher lane; analysis and audit lanes stay in the main thread there.
+rg -Fq 'permissionMode: plan' "${ROOT}/claude/agents/researcher.md" ||
+	fail "Claude researcher must enforce plan permission mode"
+if rg -q '^tools:.*\bBash\b' "${ROOT}/claude/agents/researcher.md"; then
+	fail "Claude researcher must not expose unrestricted Bash"
+fi
 
 JUST_LIST="$(just --list --unsorted)"
 for recipe in test-evidence-work eval-evidence-work-smoke eval-evidence-work-full eval-evidence-work-forced eval-evidence-work-hook; do

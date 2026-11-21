@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2016 # Markdown backticks below are intentional literals.
+# Contract for the shared subagent set: which agents exist, how Codex registers
+# them, and which models they may pin. Agents inherit the parent model unless a
+# lighter one is deliberate, so model upgrades happen in one place.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -9,38 +11,49 @@ fail() {
 	exit 1
 }
 
-assert_contains() {
-	local file="$1"
-	local expected="$2"
-	local message="$3"
+names() { find "$1" -maxdepth 1 -name "*.$2" -exec basename {} ".$2" \; | sort | tr '\n' ' '; }
 
-	rg -Fq -- "${expected}" "${file}" || fail "${message}"
-}
+# Only agents that recent sessions actually spawn, with no duplicate roles.
+expected_codex='architect docs-researcher evidence-analyst evidence-auditor explorer impl-worker light-worker pr-runner researcher reviewer '
+expected_claude='docs-researcher impl-worker light-worker pr-runner researcher web-operator '
+[[ "$(names "${ROOT}/codex/agents" toml)" == "${expected_codex}" ]] ||
+	fail "unexpected Codex agents: $(names "${ROOT}/codex/agents" toml)"
+[[ "$(names "${ROOT}/claude/agents" md)" == "${expected_claude}" ]] ||
+	fail "unexpected Claude agents: $(names "${ROOT}/claude/agents" md)"
 
-assert_not_contains() {
-	local file="$1"
-	local unexpected="$2"
-	local message="$3"
+# Every Codex agent file is registered in config.toml, and nothing else is.
+registered="$(rg -o '^\[agents\.([a-z-]+)\]' -r '$1' "${ROOT}/codex/config.toml" | sort | tr '\n' ' ')"
+[[ "${registered}" == "${expected_codex}" ]] || fail "config.toml registers: ${registered}"
 
-	if rg -Fq -- "${unexpected}" "${file}"; then
-		fail "${message}"
+# Lightweight scans pin the fast model; everything else inherits the parent.
+for agent in explorer light-worker docs-researcher researcher; do
+	rg -Fxq 'model = "gpt-6-luna"' "${ROOT}/codex/agents/${agent}.toml" ||
+		fail "${agent} must run on gpt-6-luna"
+done
+for agent in architect reviewer evidence-analyst evidence-auditor impl-worker pr-runner; do
+	if rg -q '^model\s*=' "${ROOT}/codex/agents/${agent}.toml"; then
+		fail "${agent} must inherit the parent model"
 	fi
-}
-
-for agent in light-worker explorer monitor docs-researcher; do
-	assert_contains \
-		"${ROOT}/codex/agents/${agent}.toml" \
-		'model = "gpt-6-luna"' \
-		"${agent} must remain routed to GPT-6 Luna"
 done
 
-assert_not_contains \
-	"${ROOT}/codex/config.toml" \
-	'default_subagent_model' \
-	'Codex config must not override the model for unspecified subagents'
-assert_not_contains \
-	"${ROOT}/codex/config.toml" \
-	'default_subagent_reasoning_effort' \
-	'Codex config must not override the reasoning effort for unspecified subagents'
+# Claude agents use aliases that track the newest model, and always state effort
+# (a subagent on a different model does not inherit the session's effort).
+for file in "${ROOT}"/claude/agents/*.md; do
+	rg -q '^model: (opus|sonnet|haiku|fable|inherit)$' "${file}" || fail "$(basename "${file}") must use a model alias"
+	rg -q '^effort: (low|medium|high|xhigh|max)$' "${file}" || fail "$(basename "${file}") must set effort"
+done
 
-echo "PASS: Codex agent model routing contract"
+# Retired or legacy ids must not come back.
+legacy='gpt-5\.|codex-spark|claude-(fable|opus|sonnet|haiku)-[0-9]'
+if rg -n "${legacy}" "${ROOT}/codex/agents" "${ROOT}/codex/config.toml" "${ROOT}/claude/agents" "${ROOT}/claude/settings.json" "${ROOT}/claude/settings.template.json"; then
+	fail "legacy model ids found"
+fi
+
+if rg -Fq 'default_subagent_model' "${ROOT}/codex/config.toml"; then
+	fail 'Codex config must not override the model for unspecified subagents'
+fi
+if rg -Fq 'default_subagent_reasoning_effort' "${ROOT}/codex/config.toml"; then
+	fail 'Codex config must not override the reasoning effort for unspecified subagents'
+fi
+
+echo "PASS: subagent set and model routing contract"

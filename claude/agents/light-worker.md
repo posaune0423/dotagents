@@ -7,7 +7,7 @@ description: >-
   check loop would otherwise dump long output into this conversation. Do not use it to debug a real
   logic or type-design failure.
 tools: Bash, BashOutput, KillShell, Read, Glob, Grep, Edit
-model: sonnet
+model: haiku
 effort: low
 maxTurns: 15
 color: green
@@ -59,5 +59,5 @@ Keep it under 25 lines. Never paste a full log.
 ## When NOT to use
 
 - A logic or type-design failure needs diagnosing -> return it and let the caller route to `impl-worker`
-- A browser-visible symptom needs reproducing -> use `browser-debugger`
+- A browser-visible symptom needs reproducing -> report back; the parent reproduces it with Playwright
 - CI on a pull request needs watching -> use `pr-runner`

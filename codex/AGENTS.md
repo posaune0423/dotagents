@@ -2,16 +2,22 @@
 
 ## Rules
 
-- Actively use skills and subagents to keep the main thread context clean.
-  - **Skill**: For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` before starting work (for example, `skills/<name>/SKILL.md`), and apply its procedures and constraints exactly as written. Do not stop at merely declaring skill use.
-  - **Subagent**: Delegate work when an isolated context or parallel execution is useful and the active host provides an appropriate subagent.
-    - `architect`: Clarifies architecture, trade-offs, responsibility boundaries, and implementation plans.
-    - `browser-debugger`: Reproduces browser issues and gathers evidence from the console, network, DOM, and screenshots.
-    - `docs-researcher`: Verifies APIs, defaults, and version differences against official documentation.
-    - `light-worker`: Handles mechanical checks such as formatting, linting, type checking, and tests.
-      - When spawning `light-worker`, default to `fork_turns="none"`; use the smallest positive integer only when recent context is essential. Never use `fork_turns="all"`.
-      - Make the delegated prompt self-contained with the objective, working directory, exact files or commands, whether edits are allowed, and acceptance criteria.
-    - `web-operator`: Retrieves Notion, Slack, X, and internal SaaS pages through an already-logged-in browser and returns only what matters.
+- **Skill**: For tasks requiring specialized knowledge, read the relevant skill's `SKILL.md` before starting work (for example, `skills/<name>/SKILL.md`), and apply its procedures and constraints exactly as written. Do not stop at merely declaring skill use.
+- **Subagent**: Every spawn starts from an empty context and costs time and tokens. Use one only when at least one of these applies.
+  - Independent pieces of work can run in parallel.
+  - Long output, such as test, lint, or CI logs or large amounts of documentation or web pages, should stay out of the main thread.
+  - A review needs someone who has not seen the implementation.
+  - Keep back-and-forth work, changes that take a few tool calls, and latency-sensitive work in the main thread.
+  - Make the delegated prompt self-contained: objective, working directory, exact files or commands, whether edits are allowed, acceptance criteria, and what to return.
+  - Use only agents the active host defines.
+    - `light-worker`: Runs formatting, linting, type checks, tests, and builds, and returns only the result. Fixes mechanical failures only.
+      - When spawning it, default to `fork_turns="none"`; use the smallest positive integer only when recent context is essential. Never use `fork_turns="all"`.
+    - `docs-researcher`: Verifies APIs, defaults, and version differences against the official documentation of an external library or CLI.
+    - `researcher`: Owns one independent, read-only research lane, such as primary sources, a repository, or data.
+    - `impl-worker`: Implements a change whose files, behavior, and acceptance criteria are already decided.
+    - `pr-runner`: Opens or updates a PR, watches CI, and handles review comments.
+    - `web-operator` (Claude Code): Retrieves Notion, Slack, X, and internal SaaS pages through an already-logged-in browser and returns only what matters.
+    - `architect`, `reviewer`, `evidence-analyst`, `evidence-auditor` (Codex): Own design decisions, independent code review, and evidence analysis and auditing.
 
 ## Development Style
 
