@@ -58,6 +58,13 @@
       "skillPath": "skills/json-canvas/SKILL.md",
       "computedHash": "33acdf01f0bed19f3fc881a1e46f92a8ad9793d320c333f72bafd1a84ae12b47"
     },
+    "natural-japanese": {
+      "source": "coji/natural-japanese",
+      "sourceType": "github",
+      "ref": "840bd400cbcb64c8b64d492a144da54fc05776c5",
+      "skillPath": "skills/natural-japanese/SKILL.md",
+      "computedHash": "1610383114330e3c91ac69c72653e2a3907c45c540ae54edbaa197caeaf27e51"
+    },
     "notion-cli": {
       "source": "git@github.com:makenotion/skills.git",
       "sourceType": "git",
