@@ -30,8 +30,8 @@ assert_not_contains() {
 for agent in light-worker explorer monitor docs-researcher; do
 	assert_contains \
 		"${ROOT}/codex/agents/${agent}.toml" \
-		'model = "gpt-5.3-codex-spark"' \
-		"${agent} must remain routed to GPT-5.3-Codex-Spark"
+		'model = "gpt-6-luna"' \
+		"${agent} must remain routed to GPT-6 Luna"
 done
 
 assert_not_contains \
