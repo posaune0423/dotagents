@@ -1,20 +1,14 @@
 #!/usr/bin/env bash
 # Links .agents/{skills,commands,rules} into .cursor, .claude, and .codex via symlinks,
-# and creates CLAUDE.md -> AGENTS.md at repo root. Run from repository root.
+# and creates CLAUDE.md -> AGENTS.md. Pass the project root or run from it.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+ROOT="$(cd "${1:-.}" && pwd)"
 cd "$ROOT"
 
 err() {
 	echo "init-agent: $*" >&2
 	exit 1
-}
-
-require_source_dir() {
-	local name="$1"
-	local path=".agents/${name}"
-	[[ -d "$path" ]] || err "missing source directory: ${path} (create it or run from repo root)"
 }
 
 symlink_agent_subdir() {
@@ -67,7 +61,7 @@ link_claude_md() {
 }
 
 for sub in skills commands rules; do
-	require_source_dir "$sub"
+	mkdir -p ".agents/${sub}"
 done
 
 for parent in .cursor .claude .codex; do
