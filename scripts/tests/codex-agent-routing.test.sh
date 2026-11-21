@@ -25,6 +25,23 @@ expected_claude='docs-researcher impl-worker light-worker pr-runner researcher w
 registered="$(rg -o '^\[agents\.([a-z-]+)\]' -r '$1' "${ROOT}/codex/config.toml" | sort | tr '\n' ' ')"
 [[ "${registered}" == "${expected_codex}" ]] || fail "config.toml registers: ${registered}"
 
+# Codex ignores an agent file without these keys ("malformed agent role definition"),
+# and `personality` / `sandbox_mode` in an agent file have no effect.
+for file in "${ROOT}"/codex/agents/*.toml; do
+	for key in name description developer_instructions; do
+		rg -q "^${key} = " "${file}" || fail "$(basename "${file}") must define ${key}"
+	done
+	if rg -q '^(personality|sandbox_mode) = ' "${file}"; then
+		fail "$(basename "${file}") sets a key that agent files cannot override"
+	fi
+done
+
+# Feature flags and keys the CLI has removed or deprecated must not come back.
+removed_keys='^(personality|js_repl|js_repl_tools_only|realtime_conversation|remote_control|shell_zsh_fork|skill_env_var_dependency_prompt|tool_search|tool_search_always_defer_mcp_tools|unavailable_dummy_tools|undo|workspace_owner_usage_nudge|child_agents_md) = '
+if rg -n "${removed_keys}" "${ROOT}/codex/config.toml"; then
+	fail "codex/config.toml sets removed or deprecated keys"
+fi
+
 # Lightweight scans pin the fast model; everything else inherits the parent.
 for agent in explorer light-worker docs-researcher researcher; do
 	rg -Fxq 'model = "gpt-6-luna"' "${ROOT}/codex/agents/${agent}.toml" ||

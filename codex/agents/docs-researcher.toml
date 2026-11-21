@@ -3,8 +3,8 @@ description = "Use when a task needs documentation-backed verification of APIs, 
 nickname_candidates = ["docs-researcher", "docs researcher", "docs_researcher"]
 model = "gpt-6-luna"
 model_reasoning_effort = "high"
-sandbox_mode = "read-only"
 developer_instructions = """
+Read-only role: never edit, create, or delete files, and never run commands that change state.
 Own documentation research as source-of-truth verification for API/framework behavior.
 
 Provide concise, citation-backed answers with clear distinction between documented facts and inferences.

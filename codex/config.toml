@@ -6,8 +6,6 @@ model_reasoning_effort = "medium"
 model_context_window = 872000
 model_auto_compact_token_limit = 610000
 tool_output_token_limit = 12000
-personality = "pragmatic"
-web_search = "cached"
 suppress_unstable_features_warning = true
 plan_mode_reasoning_effort = "high"
 oss_provider = "lmstudio"
@@ -28,8 +26,6 @@ apps = false
 apps = false
 goals = true
 browser_use = true
-child_agents_md = true
-hooks = true
 multi_agent = true
 multi_agent_v2.enabled = true
 multi_agent_v2.min_wait_timeout_ms = 120000
@@ -38,27 +34,16 @@ memories = true
 chronicle = true
 image_generation = true
 in_app_browser = true
-js_repl = true
-js_repl_tools_only = false
 prevent_idle_sleep = true
-realtime_conversation = true
-remote_control = true
 request_permissions_tool = true
 runtime_metrics = false
 shell_snapshot = true
 shell_tool = true
-shell_zsh_fork = false
-skill_env_var_dependency_prompt = true
 skill_mcp_dependency_install = true
 tool_call_mcp_elicitation = true
-tool_search = true
-tool_search_always_defer_mcp_tools = true
 tool_suggest = true
-unavailable_dummy_tools = true
-undo = true
 unified_exec = true
 workspace_dependencies = true
-workspace_owner_usage_nudge = true
 
 [notice]
 fast_default_opt_out = true
@@ -66,7 +51,7 @@ fast_default_opt_out = true
 # ===================== Agents =====================
 
 [agents.explorer]
-description = "Built-in exploration role."
+description = "Read-only codebase scan that returns file locations with one-line explanations."
 config_file = "agents/explorer.toml"
 
 [agents.light-worker]

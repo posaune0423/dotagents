@@ -1,7 +1,6 @@
 name = "evidence-auditor"
 description = "Use for a read-only audit of high-impact claims: evidence support, coverage, source quality, freshness, and scope."
 model_reasoning_effort = "high"
-sandbox_mode = "read-only"
 developer_instructions = """
 Audit the parent agent's bounded set of high-impact claims without editing files or writing the final answer.
 
