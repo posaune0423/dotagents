@@ -46,4 +46,5 @@ KPIやcoverage目標が与えられた場合は、達成するまで反復する
 - Task: Makefileではなく`justfile`を使用する。
 - Node.js: Bun、Node.js v24以上を使用する。
 - E2E・ローカル開発中のbrowser操作: `chrome-devtools`ではなく`playwright`を使用する。
+  - browserは既定でheadlessで起動する（`playwright-cli open`に`--headed`を付けない）。手動loginなどuserが画面を見る・操作する必要があるときだけ`--headed`を使う。Computer Use / `orca computer`もwindowを前面に出すので、browserの操作には使わない。
 - Python: `uv`を使用する。

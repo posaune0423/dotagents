@@ -46,4 +46,5 @@ Ask questions to clarify ambiguous instructions.
 - Task: Use `justfile` instead of Makefile.
 - Node.js: Use Bun and Node.js v24+.
 - E2E and browser work during local development: Use `playwright` instead of `chrome-devtools`.
+  - Run browsers headless by default (`playwright-cli open` without `--headed`). Use `--headed` only when the user must see or operate the window (e.g. manual login), and do not drive browsers through Computer Use / `orca computer`, because both bring the window to the front.
 - Python: `uv`.
