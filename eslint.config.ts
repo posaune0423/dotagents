@@ -6,6 +6,7 @@ export default [
     ignores: [
       ".git/**",
       ".claude/worktrees/**",
+      ".worktrees/**",
       "node_modules/**",
       ".github/**",
       "**/*.min.*",
