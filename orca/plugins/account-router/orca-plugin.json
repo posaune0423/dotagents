@@ -1,0 +1,18 @@
+{
+  "manifestVersion": 2,
+  "id": "account-router",
+  "name": "Account Router",
+  "version": "0.1.0",
+  "description": "Routes Claude Code and Codex to the account mapped for each repository owner.",
+  "engines": {
+    "orca": ">=1.4.248"
+  },
+  "execution": "trusted-worker",
+  "pluginApi": 1,
+  "main": "src/worker.js",
+  "capabilities": [{ "kind": "workspace:read" }],
+  "contributes": {
+    "hooks": [{ "event": "agent.launch.before" }],
+    "events": [{ "on": "workspace.changed" }]
+  }
+}

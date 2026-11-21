@@ -36,6 +36,7 @@
 | `codex/`     | 共通global instructionの日本語正典`AGENTS-ja.md`と英訳runtime`AGENTS.md`、Codex subagent、hook、共有ベース設定。`config.toml`はreferenceであり、`~/.codex/config.toml`はhome固有のまま管理する                                                                     |
 | `claude/`    | Claude Code用global instruction bridge、subagent定義、hook（`~/.claude/hooks` へlinkされる。空でもdirectoryは保持する）、共有設定のreference。`~/.claude/settings.json` は自動linkしない（hookを登録する場合は `claude/settings.template.json` の `hooks` に置く） |
 | `gemini/`    | Gemini CLI用global instruction bridge                                                                                                                                                                                                                              |
+| `orca/`      | Orca plugin。`plugins/account-router` は repository owner ごとに Claude Code / Codex のアカウントを切り替える                                                                                                                                                      |
 
 ## 設計
 
@@ -202,6 +203,41 @@ Codex 側では新しいフックを `/hooks` で確認・承認してから使�
   `cd /foo && git checkout -b claude/x` のように `git` で始まらない複合コマンドを取り逃す
 
 検証は `just test-hooks`（61 ケース。ブロックすべき形と、通すべき形の両方）。
+
+## アカウント切り替え（Claude Code / Codex）
+
+repository の owner（GitHub の user / org）ごとに、使う `CLAUDE_CONFIG_DIR` と `CODEX_HOME` を切り替えます。
+owner は origin remote から取るので、`~/orca/workspaces/` や `.worktrees/` にある worktree でも元の org で判定されます。
+remote が無いときは `<ghq root>/<host>/<owner>/` のパスで判定します。
+
+対応表は home 固有の `~/.config/agent-accounts/config` に置きます（Git 管理しない）。
+
+```text
+route getozinc rise          # owner -> account
+route * personal             # それ以外すべて
+dir rise claude /…/orca/claude-profiles/<id>/home
+dir rise codex /…/orca/codex-accounts/<id>/home
+dir personal claude /…/orca/claude-profiles/<id>/home
+dir personal codex /…/orca/codex-accounts/<id>/home
+```
+
+判定は `scripts/agent-account.sh` に一本化しています。呼び出し元は次の 3 つです。
+
+| 起動のしかた                         | 切り替える仕組み                                                                                                                        |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| shell で `claude` / `codex` を打つ   | dotfiles の `conf.d/06_agent_accounts.fish` が `cd` のたびに env を設定する                                                             |
+| Orca の terminal agent（新規タブ等） | `orca/plugins/account-router` の `agent.launch.before` hook が起動コマンドの前に env を付ける（hook の `env` だと Orca に上書きされる） |
+| Orca の chat（structured session）   | hook されないので、同 plugin が workspace の focus 変更時に `orca account select` を実行する                                            |
+
+chat の切り替えは Orca 全体のアカウント選択を書き換えます。workspace ごとに別の選択を保持するわけではないので、
+最後に focus した workspace のアカウントが、次に開く chat すべてに使われます。
+
+plugin の導入は `orca plugin install "$PWD/orca/plugins/account-router"`（承認が必要）。folder からの install は
+コピーなので、変更後は同じコマンドで入れ直します。コピー先からは repository 内の `scripts/agent-account.sh` を
+相対パスで辿れないため、`~/ghq/github.com/posaune0423/dotagents` 以外に clone している場合は、Orca を起動する
+環境で `AGENT_ACCOUNT_RESOLVER` に resolver の絶対パスを設定してください。見つからないときは
+`orca plugin logs local.account-router` にその旨が出ます。テストは `just test-agent-account` と
+`orca plugin test orca/plugins/account-router`（worker を含む全件）です。
 
 ## 開発（formatter / linter / hooks）
 

@@ -6,6 +6,7 @@ export default [
     ignores: [
       ".git/**",
       ".claude/worktrees/**",
+      ".worktrees/**",
       "node_modules/**",
       ".github/**",
       "**/*.min.*",
@@ -36,6 +37,16 @@ export default [
         process: "readonly",
         setTimeout: "readonly",
         window: "readonly",
+      },
+    },
+  },
+  {
+    // Orca plugin workers run in Node.
+    files: ["orca/plugins/**/*.js"],
+    languageOptions: {
+      globals: {
+        URL: "readonly",
+        process: "readonly",
       },
     },
   },
