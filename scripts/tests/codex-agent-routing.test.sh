@@ -60,6 +60,17 @@ for file in "${ROOT}"/claude/agents/*.md; do
 	rg -q '^effort: (low|medium|high|xhigh|max)$' "${file}" || fail "$(basename "${file}") must set effort"
 done
 
+# Read-only or command-running agents skip CLAUDE.md to save tokens on every spawn;
+# agents that edit code keep it so they follow the target repository's conventions.
+for agent in researcher docs-researcher web-operator light-worker; do
+	rg -Fxq 'omitClaudeMd: true' "${ROOT}/claude/agents/${agent}.md" || fail "${agent} must set omitClaudeMd"
+done
+for agent in impl-worker pr-runner; do
+	if rg -Fq 'omitClaudeMd' "${ROOT}/claude/agents/${agent}.md"; then
+		fail "${agent} edits code and must load CLAUDE.md"
+	fi
+done
+
 # Retired or legacy ids must not come back.
 legacy='gpt-5\.|codex-spark|claude-(fable|opus|sonnet|haiku)-[0-9]'
 if rg -n "${legacy}" "${ROOT}/codex/agents" "${ROOT}/codex/config.toml" "${ROOT}/claude/agents" "${ROOT}/claude/settings.json" "${ROOT}/claude/settings.template.json"; then

@@ -89,6 +89,7 @@ Claude Code は `claude/agents/*.md`、Codex は `codex/agents/*.toml`（`codex/
 - **model は最新を追う側に寄せる。** Claude Code は `opus` / `sonnet` / `haiku` / `fable` の alias を使います（alias は最新版を指し続ける）。Codex は軽い scan 系だけ `gpt-6-luna` に固定し、それ以外は `model` を書かずに親（`config.toml` の `model`）を継承させます。model の更新は `config.toml` の1か所で済みます。
 - **軽い作業には軽い model。** 公式ドキュメントは単純な作業に Haiku を勧めているので、`light-worker` は `haiku` で動かします。ただし `low` では Haiku・Sonnet が確認や検証を省きやすいので、effort は `medium` 以上にします。
 - **`effort` は必ず書く。** main と別の model で動く subagent はセッションの effort を継承しないため、役割ごとに明示します。
+- **CLAUDE.md を読まなくてよい agent は読ませない。** `researcher` / `docs-researcher` / `web-operator` / `light-worker` は `omitClaudeMd: true` にして、spawn のたびに CLAUDE.md 階層を読み込む token を省きます。コードを編集する `impl-worker` と `pr-runner` は、対象 repository の規約に従うため読み込みます。
 - **組み込みとプラグインと重複させない。** Claude Code の `Explore` / `Plan` / `general-purpose` と、有効化済み plugin の `code-architect` / `code-explorer` / `code-reviewer` / `codex-rescue` が担う役割は作りません。探索は組み込み `Explore` が速い（CLAUDE.md の読み直しを省く）。
 - **`description` には「吸収する出力の量」を書く。** model は context を隔離する価値で委譲を判断します。小文字の `use proactively` は公式に案内されている書き方ですが、発火は保証されません。
 - **`tools` は安全のために絞る。** Claude Code には Codex の `sandbox_mode` に当たる設定が無いので、書き込みを禁じる手段は `tools` allowlist だけです。`skills:` には毎回使うものだけを挙げます（全文が起動時に注入される）。

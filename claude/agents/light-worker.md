@@ -9,6 +9,7 @@ description: >-
 tools: Bash, BashOutput, KillShell, Read, Glob, Grep, Edit
 model: haiku
 effort: medium
+omitClaudeMd: true
 maxTurns: 15
 color: green
 ---

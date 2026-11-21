@@ -9,6 +9,7 @@ description: >-
 tools: Bash, BashOutput, Read, Glob, Grep, WebFetch, WebSearch, Skill
 model: sonnet
 effort: medium
+omitClaudeMd: true
 skills:
   - find-docs
 color: purple
