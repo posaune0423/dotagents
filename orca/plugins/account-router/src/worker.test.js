@@ -21,7 +21,9 @@ function stubs() {
 case "$2" in */myfans/*) printf 'account=rise\\nclaude=${RISE_CLAUDE}\\ncodex=${RISE_CODEX}\\n' ;; esac
 `,
   )
-  writeFileSync(cli, `#!/bin/sh\necho "$*" >> "${log}"\n`)
+  const failFlag = join(dir, "fail")
+  // Fails while the flag file exists, so a test can simulate `orca account select` erroring.
+  writeFileSync(cli, `#!/bin/sh\n[ -e "${failFlag}" ] && exit 1\necho "$*" >> "${log}"\n`)
   chmodSync(resolver, 0o755)
   chmodSync(cli, 0o755)
   process.env.AGENT_ACCOUNT_RESOLVER = resolver
@@ -33,7 +35,8 @@ case "$2" in */myfans/*) printf 'account=rise\\nclaude=${RISE_CLAUDE}\\ncodex=${
       return []
     }
   }
-  return { calls, cleanup: () => rmSync(dir, { recursive: true, force: true }) }
+  const failCli = on => (on ? writeFileSync(failFlag, "") : rmSync(failFlag, { force: true }))
+  return { calls, failCli, cleanup: () => rmSync(dir, { recursive: true, force: true }) }
 }
 
 const launch = (agent, workspaceId, command) => ({
@@ -98,6 +101,36 @@ test("selects the focused workspace's Orca accounts once per workspace", async (
   await focus("be-2", "fix/a")
   await focus("be-2", "fix/a", [{ id: "t1" }])
   await focus("app", "main")
+  assert.deepEqual(calls(), [
+    "account select --agent claude --account rise-id --json",
+    "account select --agent codex --account team-id --json",
+  ])
+  await worker.deactivate()
+  cleanup()
+})
+
+test("retries the selection for the same workspace after a failed select", async () => {
+  const { calls, failCli, cleanup } = stubs()
+  const host = mockHost({
+    capabilities: ["workspace:read"],
+    results: {
+      "workspace.list": {
+        truncated: false,
+        workspaces: [
+          { id: "a", kind: "worktree", name: "be-2", branch: "fix/a", path: "/w/myfans/be-2", hostId: null },
+        ],
+      },
+    },
+  })
+  const worker = await mountWorker(main, { host, events: ["workspace.changed"] })
+  const focus = () =>
+    worker.emit("workspace.changed", { context: { displayName: "be-2", branch: "fix/a", terminals: [] } })
+
+  failCli(true)
+  await focus()
+  assert.deepEqual(calls(), [])
+  failCli(false)
+  await focus()
   assert.deepEqual(calls(), [
     "account select --agent claude --account rise-id --json",
     "account select --agent codex --account team-id --json",

@@ -229,8 +229,14 @@ dir personal codex /…/orca/codex-accounts/<id>/home
 | Orca の terminal agent（新規タブ等） | `orca/plugins/account-router` の `agent.launch.before` hook が起動コマンドの前に env を付ける（hook の `env` だと Orca に上書きされる） |
 | Orca の chat（structured session）   | hook されないので、同 plugin が workspace の focus 変更時に `orca account select` を実行する                                            |
 
+chat の切り替えは Orca 全体のアカウント選択を書き換えます。workspace ごとに別の選択を保持するわけではないので、
+最後に focus した workspace のアカウントが、次に開く chat すべてに使われます。
+
 plugin の導入は `orca plugin install "$PWD/orca/plugins/account-router"`（承認が必要）。folder からの install は
-コピーなので、変更後は同じコマンドで入れ直します。テストは `just test-agent-account` と
+コピーなので、変更後は同じコマンドで入れ直します。コピー先からは repository 内の `scripts/agent-account.sh` を
+相対パスで辿れないため、`~/ghq/github.com/posaune0423/dotagents` 以外に clone している場合は、Orca を起動する
+環境で `AGENT_ACCOUNT_RESOLVER` に resolver の絶対パスを設定してください。見つからないときは
+`orca plugin logs local.account-router` にその旨が出ます。テストは `just test-agent-account` と
 `orca plugin test orca/plugins/account-router`（worker を含む全件）です。
 
 ## 開発（formatter / linter / hooks）

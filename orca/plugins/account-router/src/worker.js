@@ -38,9 +38,10 @@ function orcaCliPath() {
   ])
 }
 
+// Throws when the resolver is missing so callers log it instead of routing nothing silently.
 async function resolve(dir) {
   const resolver = resolverPath()
-  if (!resolver) return null
+  if (!resolver) throw new Error("agent-account.sh not found; set AGENT_ACCOUNT_RESOLVER to its path")
   const { stdout } = await run(resolver, ["--dir", dir], { timeout: RESOLVE_TIMEOUT_MS })
   return parseResolution(stdout)
 }
@@ -62,21 +63,25 @@ export default function activate(orca) {
     return next({ ...event, command })
   })
 
-  // Only act when the focused workspace itself changes, not on its terminal churn.
-  let focusedPath = null
+  // Skip terminal churn in the same workspace, but only once its selection fully succeeded:
+  // a failed resolve or select is retried on the next event for that workspace.
+  let selectedPath = null
   orca.events.on("workspace.changed", async ({ context }) => {
     try {
       const { workspaces } = await orca.host.call("workspace.list", {})
       const paths = matchWorkspacePaths(workspaces, context)
-      if (paths.length !== 1 || paths[0] === focusedPath) return
-      focusedPath = paths[0]
-      const resolution = await resolve(focusedPath)
-      const cli = orcaCliPath()
-      if (!resolution || !cli) return
-      for (const [agent, id] of Object.entries(accountIds(resolution))) {
-        await run(cli, ["account", "select", "--agent", agent, "--account", id, "--json"])
+      if (paths.length !== 1 || paths[0] === selectedPath) return
+      const path = paths[0]
+      const resolution = await resolve(path)
+      if (resolution) {
+        const cli = orcaCliPath()
+        if (!cli) throw new Error("orca CLI not found; set AGENT_ACCOUNT_ORCA_CLI to its path")
+        for (const [agent, id] of Object.entries(accountIds(resolution))) {
+          await run(cli, ["account", "select", "--agent", agent, "--account", id, "--json"])
+        }
+        orca.log(`focused ${path} -> ${resolution.account}`)
       }
-      orca.log(`focused ${focusedPath} -> ${resolution.account}`)
+      selectedPath = path
     } catch (error) {
       orca.log(`account select failed: ${error}`)
     }
