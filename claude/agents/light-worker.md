@@ -8,7 +8,7 @@ description: >-
   logic or type-design failure.
 tools: Bash, BashOutput, KillShell, Read, Glob, Grep, Edit
 model: haiku
-effort: low
+effort: medium
 maxTurns: 15
 color: green
 ---

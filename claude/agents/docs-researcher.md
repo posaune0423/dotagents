@@ -8,7 +8,7 @@ description: >-
   makes no edits.
 tools: Bash, BashOutput, Read, Glob, Grep, WebFetch, WebSearch, Skill
 model: sonnet
-effort: low
+effort: medium
 skills:
   - find-docs
 color: purple
