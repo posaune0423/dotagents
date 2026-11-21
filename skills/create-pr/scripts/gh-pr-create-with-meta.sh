@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Wraps `gh pr create` with assignees and labels from pr-defaults.env (optional env overrides).
+# Validates the template, assigns self plus configured assignees, and verifies the saved PR.
 # New PRs open as drafts unless CREATE_PR_DRAFT=0.
 set -euo pipefail
 
@@ -8,6 +8,47 @@ DEFAULTS_FILE="${SCRIPT_DIR}/../pr-defaults.env"
 # shellcheck disable=SC1091
 source "${SCRIPT_DIR}/infer-github-default-label.sh"
 
+body_file=""
+template_name=""
+caller_args=()
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	--body-file | -F | --template-name)
+		[[ $# -ge 2 && -n "$2" ]] || {
+			echo "Missing value for $1" >&2
+			exit 1
+		}
+		if [[ "$1" == --template-name ]]; then
+			template_name="$2"
+		else
+			body_file="$2"
+		fi
+		shift 2
+		;;
+	--body-file=*)
+		body_file="${1#*=}"
+		shift
+		;;
+	--body | --body=* | -b* | --fill* | --template | --template=* | -T* | --web | -w | --editor | -e | --dry-run)
+		echo "$1 is unsupported: use --body-file with the resolved PR template." >&2
+		exit 1
+		;;
+	--help | -h)
+		echo 'Usage: gh-pr-create-with-meta.sh --body-file <file> [--template-name <name.md>] [gh pr create options]'
+		exit 0
+		;;
+	*)
+		caller_args+=("$1")
+		shift
+		;;
+	esac
+done
+[[ -n "$body_file" ]] || {
+	echo "--body-file is required" >&2
+	exit 1
+}
+bash "${SCRIPT_DIR}/pr-body-validate.sh" "$body_file" "$template_name"
+
 if [[ -f "$DEFAULTS_FILE" ]]; then
 	set -a
 	# shellcheck disable=SC1090
@@ -15,14 +56,9 @@ if [[ -f "$DEFAULTS_FILE" ]]; then
 	set +a
 fi
 
-# Bash 3.2–compatible "is set" check (macOS /bin/bash).
-if [[ -z "${CREATE_PR_ASSIGNEES+x}" ]]; then
-	assignees_raw='@me'
-else
-	assignees_raw="$CREATE_PR_ASSIGNEES"
-fi
+assignees_raw="${CREATE_PR_ASSIGNEES:-}"
 
-create_args=()
+create_args=(--assignee '@me')
 if [[ "${CREATE_PR_DRAFT:-1}" != "0" ]]; then
 	create_args+=(--draft)
 fi
@@ -32,7 +68,7 @@ if [[ -n "$assignees_raw" ]]; then
 	for p in "${parts[@]}"; do
 		p="${p#"${p%%[![:space:]]*}"}"
 		p="${p%"${p##*[![:space:]]}"}"
-		[[ -z "$p" ]] && continue
+		[[ -z "$p" || "$p" == '@me' ]] && continue
 		create_args+=(--assignee "$p")
 	done
 fi
@@ -55,4 +91,6 @@ if [[ "${CREATE_PR_NO_LABEL:-}" != "1" ]]; then
 	fi
 fi
 
-exec gh pr create "${create_args[@]}" "$@"
+pr_url="$(gh pr create "${create_args[@]}" "${caller_args[@]}" --body-file "$body_file")"
+printf '%s\n' "$pr_url"
+bash "${SCRIPT_DIR}/pr-verify.sh" "$pr_url" "$body_file"

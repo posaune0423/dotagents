@@ -10,10 +10,19 @@ description: >-
 Uncommitted changes: $`git status --porcelain | wc -l | tr -d ' '`. Branch: $`git branch --show-current` → origin/main.
 Upstream: $`git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"`.
 Existing PR: $`gh pr view --json number,title,url --jq '"#\(.number): \(.title) - \(.url)"' 2>/dev/null || echo "None"`.
-PR template: $`./.agents/skills/create-pr/scripts/pr-template.sh --path 2>/dev/null || echo "none"`.
-PR language: $`./.agents/skills/create-pr/scripts/pr-lang.sh 2>/dev/null || echo "en"`.
 
-Scripts below live in `./.agents/skills/create-pr/scripts/`.
+Set `CREATE_PR_SKILL_DIR` to the absolute directory containing the **loaded copy of this SKILL.md**. Run its scripts by absolute path, keeping the working directory in the target repository. Do not assume that the repository has `.agents/skills/`.
+
+Resolve and read the template before writing the body:
+
+```bash
+bash "$CREATE_PR_SKILL_DIR/scripts/pr-template.sh"
+bash "$CREATE_PR_SKILL_DIR/scripts/pr-lang.sh"
+```
+
+The template resolver returns the repository template when one exists, otherwise [assets/default-pr-template.md](assets/default-pr-template.md). There is no template-free path. Errors must remain visible: never use `2>/dev/null || echo none`. For multiple repository templates, select the applicable file with `--name <file.md>` and pass the same choice as `--template-name <file.md>` when creating or updating the PR.
+
+All script names below refer to `$CREATE_PR_SKILL_DIR/scripts/`.
 
 ## 1. Review, commit, push
 
@@ -26,7 +35,7 @@ Read the whole PR, not the last commit: `git diff origin/main...` and `git log o
 The reader has ten minutes and no context. Every sentence must save them time or it goes.
 
 - **Language.** Write the title and body in the PR language above (default `en`). Template headings, code, and commands stay as they are. When the user asks to remember a language for a repo or org, run `pr-lang.sh --set <lang> [--for owner]`; it persists in the gitignored `pr-lang.local` (format: `pr-lang.local.example`).
-- **Template first.** If a template exists, `pr-template.sh` prints it. Keep every heading, in order. Replace each HTML comment with content or `N/A: <reason>`. Tick a checkbox only when it is true. Never add or drop sections. Without a template, use the layout below and drop only the optional sections that do not apply.
+- **Template first.** Use the body returned by `pr-template.sh`. For a repository template, keep every heading in order and never add or drop sections. Otherwise use the skill default, retaining its required headings in order and dropping only optional sections that do not apply. Replace HTML comments with content or `N/A: <reason>`. Tick a checkbox only when it is true.
 - **Why before what.** Open with the problem in one or two sentences and link the issue or spec (`Closes #N`).
 - **Behavior, not files.** Say what changes for users and callers. The diff already lists files.
 - **Show, don't narrate.** A before/after table beats a paragraph. A Mermaid diagram (`sequenceDiagram` for request or event flows, `flowchart` for branching or state) earns its place only when the change alters a flow across three or more components; otherwise leave it out.
@@ -37,46 +46,7 @@ The reader has ten minutes and no context. Every sentence must save them time or
 - **Out of scope.** Name known gaps and follow-ups so the reviewer does not raise them.
 - Under roughly 300 words beyond the template. No marketing tone, no diff narration, no empty headings.
 
-Default layout when no template exists (sections marked _optional_ are dropped when empty):
-
-````markdown
-## Why
-
-<1–2 sentences: problem, who hits it, link `Closes #N`.>
-
-## What changed
-
-| Area | Before | After |
-| ---- | ------ | ----- |
-
-## How it works <!-- optional: only when a flow across 3+ components changed -->
-
-```mermaid
-sequenceDiagram
-```
-
-## Screenshots <!-- required for any visible UI change -->
-
-| Before | After |
-| ------ | ----- |
-
-## Review guide
-
-1. Start at `<file>`: <what it decides>.
-2. Risk: <hunk and why>.
-3. Skip: <generated / moved / renamed>.
-
-## Verification
-
-| Check | How | Result |
-| ----- | --- | ------ |
-
-## Risk / rollout
-
-None
-
-## Out of scope <!-- optional -->
-````
+The default template's required sections are Why, What changed, Review guide, Verification, and Risk / rollout. Its conditional sections are How it works, Screenshots, and Out of scope; Screenshots is mandatory for visible UI changes. The template file is the source of truth for the layout. Scripts check required headings and order; the agent must also check the contents and conditional sections against the actual diff.
 
 Title: at most 72 characters, `${type}(${scope}): ${subject}` (or `${type}: ${subject}` without a scope) per `rules/commit-style.mdc`. No emoji. With squash merges the title becomes the commit on the base branch.
 
@@ -85,8 +55,9 @@ Title: at most 72 characters, `${type}(${scope}): ${subject}` (or `${type}: ${su
 Write the body to a temp file, then:
 
 - **Existing PR:** `pr-body-update.sh --file <file>` (writes via GraphQL and verifies the result), then `pr-meta-sync.sh`.
-- **New PR:** `gh-pr-create-with-meta.sh --base main --title "<title>" --body-file <file>`. It opens the PR as a draft (`CREATE_PR_DRAFT=0` opts out). Never use `--fill`; it bypasses the template and the rules above.
-- Assignees and labels come from `pr-defaults.env` (`CREATE_PR_ASSIGNEES`, `CREATE_PR_LABELS`, `CREATE_PR_NO_LABEL=1`). Without `CREATE_PR_LABELS`, one GitHub stock label is inferred from the branch prefix; it must exist on the repo.
+- **New PR:** `gh-pr-create-with-meta.sh --base main --title "<title>" --body-file <file>`. It validates required template headings before creating a draft (`CREATE_PR_DRAFT=0` opts out). Always use this wrapper, never plain `gh pr create`, `--fill`, or an alternative API that skips validation and assignment.
+- Creation and metadata sync always add `@me` (the authenticated GitHub user). `CREATE_PR_ASSIGNEES` in `pr-defaults.env` adds other assignees; leaving it empty cannot disable self-assignment. Labels still use `CREATE_PR_LABELS` / `CREATE_PR_NO_LABEL=1`; without an explicit label, one GitHub stock label is inferred from the branch prefix and must exist on the repo.
+- The helpers read back the saved body and assignees. A verification failure is not success: fix the existing PR at the reported URL and rerun verification with `pr-verify.sh <pr-url> <body-file>`. Never retry creation for a PR that already exists. Report the selected template path and verified assignees.
 
 ## 4. CI and review feedback
 

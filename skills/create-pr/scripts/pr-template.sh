@@ -3,8 +3,9 @@
 # can follow it. `gh pr create --body-file` bypasses GitHub's template
 # handling, so the skill has to read the template itself.
 #
-# Exit codes: 0 found, 1 none, 2 several candidates (pass --name to pick one).
+# Exit codes: 0 resolved (repository or skill default), 1 error, 2 ambiguous.
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 usage() {
 	cat <<'USAGE'
@@ -14,6 +15,7 @@ Prints the PR template content (or its absolute path with --path).
 Searches, in order: .github/, repository root, docs/ for
 PULL_REQUEST_TEMPLATE.md (case-insensitive), then .github/PULL_REQUEST_TEMPLATE/*.md.
 When that directory holds several templates, --name selects one.
+When no repository template exists, returns the skill's default template.
 USAGE
 }
 
@@ -95,7 +97,13 @@ if [[ -z "${template}" ]]; then
 	fi
 fi
 
-[[ -n "${template}" ]] || exit 1
+if [[ -z "${template}" ]]; then
+	template="$(cd "${SCRIPT_DIR}/../assets" && pwd)/default-pr-template.md"
+fi
+[[ -r "${template}" ]] || {
+	echo "Cannot read PR template: ${template}" >&2
+	exit 1
+}
 
 if [[ "${print_path}" == "1" ]]; then
 	printf '%s\n' "${template}"

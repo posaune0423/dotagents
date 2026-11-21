@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 body_file=""
 pr=""
 repo=""
+template_name=""
 
 usage() {
 	cat <<'USAGE'
-Usage: pr-body-update.sh --file <path> [--pr <number>] [--repo <owner/repo>]
+Usage: pr-body-update.sh --file <path> [--pr <number>] [--repo <owner/repo>] [--template-name <file.md>]
 
 Updates a PR body using the GraphQL updatePullRequest mutation and verifies the result.
 USAGE
@@ -42,6 +44,14 @@ while [[ $# -gt 0 ]]; do
 		repo="$2"
 		shift 2
 		;;
+	--template-name)
+		[[ $# -ge 2 && -n "$2" ]] || {
+			echo "Missing value for --template-name" >&2
+			exit 1
+		}
+		template_name="$2"
+		shift 2
+		;;
 	-h | --help)
 		usage
 		exit 0
@@ -68,6 +78,8 @@ if [[ ! -s "$body_file" ]]; then
 	echo "Body file is empty: $body_file" >&2
 	exit 1
 fi
+
+bash "${SCRIPT_DIR}/pr-body-validate.sh" "$body_file" "$template_name"
 
 if [[ -z "$pr" ]]; then
 	pr="$(gh pr view --json number --jq .number 2>/dev/null || true)"
