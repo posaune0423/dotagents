@@ -31,7 +31,7 @@ Use this order for the requested review scope:
 1. CodeRabbit CLI
 2. The project's `team-review`, when it is installed and applicable to that
    project and scope
-3. Codex's dedicated `codex review`
+3. Codex's dedicated review, run as `codex exec -s workspace-write review`
 
 Move to the next reviewer only when the preceding reviewer is unavailable
 before completing its review, including a rate limit, authentication failure,
@@ -43,7 +43,21 @@ the fallback needs no separate approval.
 
 Preserve the requested diff scope. For Codex, use `--base <ref>` for a
 branch/base comparison, `--uncommitted` for the working copy, and `--commit
-<sha>` for one explicit commit. Do not add a prompt: these scope flags and a
+<sha>` for one explicit commit. Put `-s workspace-write` before `review`
+(it is an `exec` option).
+
+Run Codex with `-s workspace-write`, not the default read-only sandbox. The
+read-only sandbox cannot create temp files, so linters and test runners fail
+before they start; with `workspace-write` the reviewer can run them (for
+example RuboCop) and report real results. Network stays off, so tests that
+need a database or other service still cannot run there; leave those to CI and
+say so instead of treating the review as test-verified. `/codex:review` from the
+Codex plugin always runs read-only and cannot be changed, so call the CLI
+directly when you want this.
+
+Because `workspace-write` lets the reviewer edit the repository, record
+`git status --short` before the run and compare it after. If the review left
+any change, report it and restore only those paths; do not keep reviewer edits. Do not add a prompt: these scope flags and a
 prompt are mutually exclusive. If the next reviewer cannot represent the
 requested scope, report it as unavailable and continue only with a later
 reviewer that can.
@@ -56,9 +70,9 @@ For a project gate that needs machine-readable evidence, use the equivalent
 Codex command with `--json`, such as:
 
 ```bash
-codex exec review --json --base origin/main
-codex exec review --json --uncommitted
-codex exec review --json --commit <sha>
+codex exec -s workspace-write review --json --base origin/main
+codex exec -s workspace-write review --json --uncommitted
+codex exec -s workspace-write review --json --commit <sha>
 ```
 
 Treat only a completed `turn.completed` event as review evidence. A
