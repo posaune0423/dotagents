@@ -39,5 +39,15 @@ export default [
       },
     },
   },
+  {
+    // Orca plugin workers run in Node.
+    files: ["orca/plugins/**/*.js"],
+    languageOptions: {
+      globals: {
+        URL: "readonly",
+        process: "readonly",
+      },
+    },
+  },
   prettier,
 ]
