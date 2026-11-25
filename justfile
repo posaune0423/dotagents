@@ -64,6 +64,10 @@ test-account-router:
 test-init-agent:
     bash scripts/tests/init-agent.test.sh
 
+# Integration tests for the Gemini rewrite wrapper around natural-japanese (stub curl and uv)
+test-natural-japanese-gemini:
+    ./scripts/tests/natural-japanese-gemini.test.sh
+
 # Remove ~/.codex/commands and symlink ~/.codex/prompts -> ~/.agents/commands
 link-codex-prompts:
     ./scripts/relink-codex-prompts.sh
@@ -96,7 +100,7 @@ lint:
     bun run lint
 
 check:
-    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-pr-template && just test-pr-poll && just test-pr-lang && just test-pr-create && just test-agent-account && just test-account-router && just test-init-agent && just test-agent-routing && just test-evidence-work && just test-cloud-setup
+    bun run check && just test-schedules && just test-cleanup && just test-hooks && just test-pr-template && just test-pr-poll && just test-pr-lang && just test-pr-create && just test-agent-account && just test-account-router && just test-init-agent && just test-natural-japanese-gemini && just test-agent-routing && just test-evidence-work && just test-cloud-setup
 
 # Validate evidence-work routing and the A/B evaluation harness without model calls
 test-evidence-work:

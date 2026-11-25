@@ -33,3 +33,6 @@ rules/default.rules
 # create-pr: per-repo PR language (owner or owner/repo -> lang). Machine-local:
 # names internal orgs. Default is English, so only overrides are stored.
 skills/create-pr/pr-lang.local
+
+# Python bytecode left behind when skill scripts run in place (uv run)
+__pycache__/
