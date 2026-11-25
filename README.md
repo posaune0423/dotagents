@@ -209,7 +209,7 @@ remote が無いときは `<ghq root>/<host>/<owner>/` のパスで判定しま�
 対応表は home 固有の `~/.config/agent-accounts/config` に置きます（Git 管理しない）。
 
 ```text
-route getozinc rise          # owner -> account
+route riseltd rise           # owner -> account
 route * personal             # それ以外すべて
 dir rise claude /…/orca/claude-profiles/<id>/home
 dir rise codex /…/orca/codex-accounts/<id>/home

@@ -4,7 +4,7 @@
 # in dotfiles and the Orca account-router plugin both call this, so the mapping
 # lives in one machine-local file:
 #
-#   route getozinc rise            # owner (GitHub user/org) -> account
+#   route riseltd rise             # owner (GitHub user/org) -> account
 #   route * personal               # every other directory
 #   dir rise claude /path/to/home  # account tool directory (rest of the line)
 #   dir rise codex /path/to/home
