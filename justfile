@@ -64,7 +64,7 @@ test-account-router:
 test-init-agent:
     bash scripts/tests/init-agent.test.sh
 
-# Integration tests for the Gemini rewrite wrapper around natural-japanese (stub curl and uv)
+# Integration tests for the Orca worker launcher that runs natural-japanese on Gemini (stub orca)
 test-natural-japanese-gemini:
     ./scripts/tests/natural-japanese-gemini.test.sh
 
