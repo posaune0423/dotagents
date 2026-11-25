@@ -4,10 +4,10 @@
 # in dotfiles and the Orca account-router plugin both call this, so the mapping
 # lives in one machine-local file:
 #
-#   route getozinc rise            # owner (GitHub user/org) -> account
+#   route acme client            # owner (GitHub user/org) -> account
 #   route * personal               # every other directory
-#   dir rise claude /path/to/home  # account tool directory (rest of the line)
-#   dir rise codex /path/to/home
+#   dir client claude /path/to/home  # account tool directory (rest of the line)
+#   dir client codex /path/to/home
 #
 # The owner comes from the origin remote, else from a <ghq root>/<host>/<owner>/
 # path. Owners match case-insensitively. Prints `account=`, `claude=` and

@@ -6,19 +6,19 @@ import { assert, mockHost, mountWorker, test } from "orca/testing"
 
 import * as main from "./worker.js"
 
-const RISE_CLAUDE = "/x/orca/claude-profiles/rise-id/home"
-const RISE_CODEX = "/x/orca/codex-accounts/team-id/home"
+const CLIENT_CLAUDE = "/x/orca/claude-profiles/client-id/home"
+const CLIENT_CODEX = "/x/orca/codex-accounts/team-id/home"
 
 function stubs() {
   const dir = mkdtempSync(join(tmpdir(), "account-router-"))
   const resolver = join(dir, "resolver.sh")
   const cli = join(dir, "orca")
   const log = join(dir, "cli.log")
-  // Routes any path containing /myfans/ to rise, everything else to nothing.
+  // Routes any path containing /widget/ to client, everything else to nothing.
   writeFileSync(
     resolver,
     `#!/bin/sh
-case "$2" in */myfans/*) printf 'account=rise\\nclaude=${RISE_CLAUDE}\\ncodex=${RISE_CODEX}\\n' ;; esac
+case "$2" in */widget/*) printf 'account=client\\nclaude=${CLIENT_CLAUDE}\\ncodex=${CLIENT_CODEX}\\n' ;; esac
 `,
   )
   const failFlag = join(dir, "fail")
@@ -50,14 +50,14 @@ const launch = (agent, workspaceId, command) => ({
 test("prefixes the routed account onto agent launches in a mapped workspace", async () => {
   const { cleanup } = stubs()
   const worker = await mountWorker(main, { hooks: ["agent.launch.before"] })
-  const event = launch("claude", "repo::/w/myfans/be-2", "claude '--chrome'")
+  const event = launch("claude", "repo::/w/widget/be-2", "claude '--chrome'")
   assert.deepEqual(await worker.hooks.fire("agent.launch.before", event), {
     kind: "continue",
     event: {
       ...event,
       command:
-        `CLAUDE_CONFIG_DIR='${RISE_CLAUDE}' ORCA_CLAUDE_INJECTED_CONFIG_DIR= ` +
-        `CODEX_HOME='${RISE_CODEX}' ORCA_CODEX_HOME='${RISE_CODEX}' claude '--chrome'`,
+        `CLAUDE_CONFIG_DIR='${CLIENT_CLAUDE}' ORCA_CLAUDE_INJECTED_CONFIG_DIR= ` +
+        `CODEX_HOME='${CLIENT_CODEX}' ORCA_CODEX_HOME='${CLIENT_CODEX}' claude '--chrome'`,
     },
   })
   await worker.deactivate()
@@ -70,7 +70,7 @@ test("passes launches it cannot route unchanged", async () => {
   for (const event of [
     launch("claude", "repo::/w/personal/app", "claude"),
     launch("claude", null, "claude"),
-    launch("opencode", "repo::/w/myfans/be-2", "opencode"),
+    launch("opencode", "repo::/w/widget/be-2", "opencode"),
   ]) {
     const result = await worker.hooks.fire("agent.launch.before", event)
     assert.equal(result.kind, "continue")
@@ -88,7 +88,7 @@ test("selects the focused workspace's Orca accounts once per workspace", async (
       "workspace.list": {
         truncated: false,
         workspaces: [
-          { id: "a", kind: "worktree", name: "be-2", branch: "fix/a", path: "/w/myfans/be-2", hostId: null },
+          { id: "a", kind: "worktree", name: "be-2", branch: "fix/a", path: "/w/widget/be-2", hostId: null },
           { id: "b", kind: "worktree", name: "app", branch: "main", path: "/w/personal/app", hostId: null },
         ],
       },
@@ -102,7 +102,7 @@ test("selects the focused workspace's Orca accounts once per workspace", async (
   await focus("be-2", "fix/a", [{ id: "t1" }])
   await focus("app", "main")
   assert.deepEqual(calls(), [
-    "account select --agent claude --account rise-id --json",
+    "account select --agent claude --account client-id --json",
     "account select --agent codex --account team-id --json",
   ])
   await worker.deactivate()
@@ -117,7 +117,7 @@ test("retries the selection for the same workspace after a failed select", async
       "workspace.list": {
         truncated: false,
         workspaces: [
-          { id: "a", kind: "worktree", name: "be-2", branch: "fix/a", path: "/w/myfans/be-2", hostId: null },
+          { id: "a", kind: "worktree", name: "be-2", branch: "fix/a", path: "/w/widget/be-2", hostId: null },
         ],
       },
     },
@@ -132,7 +132,7 @@ test("retries the selection for the same workspace after a failed select", async
   failCli(false)
   await focus()
   assert.deepEqual(calls(), [
-    "account select --agent claude --account rise-id --json",
+    "account select --agent claude --account client-id --json",
     "account select --agent codex --account team-id --json",
   ])
   await worker.deactivate()

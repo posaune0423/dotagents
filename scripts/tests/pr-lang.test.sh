@@ -37,7 +37,7 @@ new_repo() {
 }
 
 ssh_repo="$(new_repo git@github.com:posaune0423/dotagents.git)"
-https_repo="$(new_repo https://github.com/getozinc/myfans-web.git)"
+https_repo="$(new_repo https://github.com/acme/widget-web.git)"
 other_repo="$(new_repo https://github.com/someone/else)"
 no_remote="$(mktemp -d "${TMP}/bare.XXXXXX")"
 git -C "${no_remote}" init -q
@@ -56,12 +56,12 @@ printf 'posaune0423/dotagents en\nposaune0423 ja\n' >"${PR_LANG_FILE}"
 assert_eq "$(cd "${ssh_repo}" && bash "${SCRIPT}")" "en" "repo entry overrides owner entry"
 
 # --- owner (org) match is case-insensitive -------------------------------------
-org_repo="$(new_repo git@github.com:SushiTopMarketing/sushitopio_frontend.git)"
-printf 'sushitopmarketing ja\n' >"${PR_LANG_FILE}"
+org_repo="$(new_repo git@github.com:Globex/storefront.git)"
+printf 'globex ja\n' >"${PR_LANG_FILE}"
 assert_eq "$(cd "${org_repo}" && bash "${SCRIPT}")" "ja" "org entry matches regardless of case"
 
 # --- https remote, comments and blank lines tolerated ---------------------------
-printf '# comment\n\ngetozinc/myfans-web ja\n' >"${PR_LANG_FILE}"
+printf '# comment\n\nacme/widget-web ja\n' >"${PR_LANG_FILE}"
 assert_eq "$(cd "${https_repo}" && bash "${SCRIPT}")" "ja" "https remote parsed"
 
 # --- --set writes or replaces the entry for the current repo -------------------
