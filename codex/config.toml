@@ -26,7 +26,6 @@ apps = false
 apps = false
 goals = true
 browser_use = true
-multi_agent = true
 multi_agent_v2.enabled = true
 multi_agent_v2.min_wait_timeout_ms = 120000
 multi_agent_v2.default_wait_timeout_ms = 120000
@@ -48,47 +47,6 @@ workspace_dependencies = true
 [notice]
 fast_default_opt_out = true
 
-# ===================== Agents =====================
-
-[agents.explorer]
-description = "Read-only codebase scan that returns file locations with one-line explanations."
-config_file = "agents/explorer.toml"
-
-[agents.light-worker]
-description = "Light worker for format, lint, typecheck, test, and similar repetitive/simple tasks. Escalate complex or architectural work to impl-worker."
-config_file = "agents/light-worker.toml"
-
-[agents.docs-researcher]
-description = "Docs researcher role for documentation-backed verification of APIs, version-specific behavior, or framework options."
-config_file = "agents/docs-researcher.toml"
-
-[agents.impl-worker]
-description = "Implementation worker for one already-specified change: files, intended behavior, and acceptance check are known. Use for parallel independent edits or one large mechanical edit."
-config_file = "agents/impl-worker.toml"
-
-[agents.pr-runner]
-description = "PR mechanics: open or update a PR, watch CI until green, and apply minimal fixes for review comments. Not for designing or implementing the change."
-config_file = "agents/pr-runner.toml"
-
-[agents.reviewer]
-description = "Reviewer role for PR-style review focused on correctness, security, behavior regressions, and missing tests."
-config_file = "agents/reviewer.toml"
-
-[agents.architect]
-description = "Architect role for high-level architectural decisions and design."
-config_file = "agents/architect.toml"
-
-[agents.researcher]
-description = "Read-only researcher for bounded primary-source, repository, data, or source-conflict evidence lanes."
-config_file = "agents/researcher.toml"
-
-[agents.evidence-analyst]
-description = "Read-only analyst for causal decomposition, comparison, sensitivity analysis, and alternative hypotheses."
-config_file = "agents/evidence-analyst.toml"
-
-[agents.evidence-auditor]
-description = "Read-only auditor for evidence support, coverage, source quality, freshness, and scope."
-config_file = "agents/evidence-auditor.toml"
 
 # 以下は環境ごとに ~/.codex/config.toml で設定することを想定:
 # - [projects."..."] trust_level

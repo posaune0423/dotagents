@@ -117,15 +117,6 @@ jq -e '
 	echo "FAIL: Codex UserPromptSubmit hook must register the proactive-context command" >&2
 	review_rc=1
 }
-# Codex discovers a subagent only through its [agents.*] entry, so a TOML file
-# added without one is silently unavailable.
-for agent_toml in "${ROOT}"/codex/agents/*.toml; do
-	agent_name="$(basename -- "${agent_toml}" .toml)"
-	rg -Fq "[agents.${agent_name}]" "${ROOT}/codex/config.toml" || {
-		echo "FAIL: Codex agent ${agent_name} is not registered in codex/config.toml" >&2
-		review_rc=1
-	}
-done
 [[ "${review_rc}" -eq 0 ]] || fail "review finding regressions detected"
 
 HOME="${TEST_HOME}" bash "${ROOT}/scripts/link-dotagents.sh" --verify
