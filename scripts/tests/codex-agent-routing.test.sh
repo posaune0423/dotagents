@@ -21,9 +21,12 @@ expected_claude='docs-researcher impl-worker light-worker pr-runner researcher w
 [[ "$(names "${ROOT}/claude/agents" md)" == "${expected_claude}" ]] ||
 	fail "unexpected Claude agents: $(names "${ROOT}/claude/agents" md)"
 
-# Every Codex agent file is registered in config.toml, and nothing else is.
-registered="$(rg -o '^\[agents\.([a-z-]+)\]' -r '$1' "${ROOT}/codex/config.toml" | sort | tr '\n' ' ')"
-[[ "${registered}" == "${expected_codex}" ]] || fail "config.toml registers: ${registered}"
+# Codex discovers agent files from $CODEX_HOME/agents on its own. Registering them
+# again as [agents.*] in the same config layer makes Codex reject each role as a
+# duplicate ("duplicate agent role name ... declared in the same config layer").
+if rg -n '^\[agents\.[a-z-]+\]' "${ROOT}/codex/config.toml"; then
+	fail "codex/config.toml must not register agent files that Codex auto-discovers"
+fi
 
 # Codex ignores an agent file without these keys ("malformed agent role definition"),
 # and `personality` / `sandbox_mode` in an agent file have no effect.
@@ -37,7 +40,7 @@ for file in "${ROOT}"/codex/agents/*.toml; do
 done
 
 # Feature flags and keys the CLI has removed or deprecated must not come back.
-removed_keys='^(personality|js_repl|js_repl_tools_only|realtime_conversation|remote_control|shell_zsh_fork|skill_env_var_dependency_prompt|tool_search|tool_search_always_defer_mcp_tools|unavailable_dummy_tools|undo|workspace_owner_usage_nudge|child_agents_md) = '
+removed_keys='^(personality|js_repl|js_repl_tools_only|realtime_conversation|remote_control|shell_zsh_fork|skill_env_var_dependency_prompt|tool_search|tool_search_always_defer_mcp_tools|unavailable_dummy_tools|undo|workspace_owner_usage_nudge|child_agents_md|multi_agent) = '
 if rg -n "${removed_keys}" "${ROOT}/codex/config.toml"; then
 	fail "codex/config.toml sets removed or deprecated keys"
 fi

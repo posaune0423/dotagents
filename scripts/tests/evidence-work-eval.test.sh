@@ -5,7 +5,6 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 RUNNER="${ROOT}/skills/evidence-work/scripts/eval.ts"
 CASES="${ROOT}/skills/evidence-work/evals/cases.jsonl"
 HOOK="${ROOT}/codex/hooks/user_prompt_submit_proactive_context.sh"
-CODEX_CONFIG="${ROOT}/codex/config.toml"
 
 fail() {
 	echo "FAIL: $*" >&2
@@ -24,9 +23,7 @@ if rg -Fqi 'use skills.*subagents proactively' <<<"${HOOK_CONTEXT}"; then
 fi
 
 for agent in researcher evidence-analyst evidence-auditor; do
-	rg -Fq "[agents.${agent}]" "${CODEX_CONFIG}" || fail "missing Codex registration for ${agent}"
-	rg -Fq "config_file = \"agents/${agent}.toml\"" "${CODEX_CONFIG}" ||
-		fail "wrong Codex config path for ${agent}"
+	[[ -f "${ROOT}/codex/agents/${agent}.toml" ]] || fail "missing Codex agent file for ${agent}"
 done
 # Claude keeps only the researcher lane; analysis and audit lanes stay in the main thread there.
 rg -Fq 'permissionMode: plan' "${ROOT}/claude/agents/researcher.md" ||

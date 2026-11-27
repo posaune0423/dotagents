@@ -47,7 +47,7 @@
 - **scheduled task**: `schedules/` で共通のcadenceとskillをGit管理し、provider固有の保存先、権限、履歴、thread関連付けはhomeまたはcloud側に残す
 - **プロジェクト固有**: `<project>/.agents` はプロジェクト内で管理（ここは自由に追加/上書き）
 - **各エージェント**: `<project>/.cursor/.codex/.claude` は `<project>/.agents` を参照するように symlink
-- **Subagent**: 形式がツールごとに異なる（Claude Code は `claude/agents/*.md`、Codex は `codex/agents/*.toml` ＋ `config.toml` 登録）ため `~/.agents` では共有せず、それぞれのhome標準パスへlinkする
+- **Subagent**: 形式がツールごとに異なる（Claude Code は `claude/agents/*.md`、Codex は `codex/agents/*.toml`）ため `~/.agents` では共有せず、それぞれのhome標準パスへlinkする
 - **プロジェクト固有の subagent**: 必要な場合は `<project>/.claude/agents/` に直接置く（`<project>/.agents` 経由では配布しない）
 - **Hook**: hook scriptは `claude/hooks/` と `codex/hooks/` でGit管理し、`just link-global` で `~/.claude/hooks` と `~/.codex/hooks` へsymlinkする。hookの登録先（`~/.claude/settings.json` の `hooks`、`codex/hooks.json`）は起動側の設定なので、Claude側はhome固有設定として扱う
 - **Cursorのglobal rule**: file symlinkではなくCursorの Customize → Rules で管理する。root `AGENTS.md` はproject ruleとして利用できる
@@ -66,7 +66,7 @@ Git管理している外部由来のスキルは、[skills-lock.json](skills-loc
 
 ## Subagent
 
-Claude Code は `claude/agents/*.md`、Codex は `codex/agents/*.toml`（`codex/config.toml` の `[agents.*]` に登録）に定義し、`just link-global` でそれぞれ `~/.claude/agents` / `~/.codex/agents` に symlink されます。
+Claude Code は `claude/agents/*.md`、Codex は `codex/agents/*.toml` に定義し、`just link-global` でそれぞれ `~/.claude/agents` / `~/.codex/agents` に symlink されます。Codex は `~/.codex/agents/*.toml` を自動で読み込むため、`config.toml` の `[agents.*]` には登録しません（同じ層で二重に登録すると role 名の重複として無視されます）。
 共通の役割は同じ名前にそろえ、使われていない agent や役割が重なる agent は置きません（2026-11 時点で直近 30 日の spawn 実績を見て整理）。
 
 | agent              | 用途                                                                    | Claude Code       | Codex                 |
